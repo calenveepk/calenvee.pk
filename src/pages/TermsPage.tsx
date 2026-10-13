@@ -1,102 +1,170 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { FileText, HelpCircle, ChevronDown, ChevronUp, Shield, Truck, RotateCcw } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
 import { STORE_INFO } from '../utils/formatters';
 
 export const TermsPage: React.FC = () => {
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
+
+  const faqs = [
+    {
+      q: 'How long does nationwide delivery take?',
+      a: 'Deliveries across Pakistan typically take between 7 to 10 business days from the dispatch date. Orders placed in major metropolitan hubs like Karachi, Lahore, and Islamabad/Rawalpindi often arrive sooner.',
+    },
+    {
+      q: 'Is Cash on Delivery (COD) supported in my city?',
+      a: 'Yes! We provide Cash on Delivery (COD) to all major cities, towns, and reachable rural postal codes across Pakistan in partnership with TCS and Trax logistics.',
+    },
+    {
+      q: 'How can I pay using JazzCash, EasyPaisa, or Online Bank Transfer?',
+      a: 'During checkout, select "Bank Transfer / Mobile Accounts". You will receive our official account numbers. Once you transfer the payment, simply upload or send the transaction receipt screenshot to our WhatsApp (+92 300 1234567) to confirm your order.',
+    },
+    {
+      q: 'What is your exchange and return policy?',
+      a: 'We offer a 7-day exchange warranty. If you receive a damaged or incorrect product, contact our WhatsApp helpline within 7 days of receiving the parcel to get an immediate replacement.',
+    },
+    {
+      q: 'Are all products authentic and quality-checked?',
+      a: 'Absolutely. Every timepiece, handbag, and accessory is inspected for finish, movement, and packaging before dispatch to ensure 100% satisfaction.',
+    },
+    {
+      q: 'How do I cancel or modify my order?',
+      a: 'You can modify or cancel your order by messaging our customer support on WhatsApp before the parcel is dispatched to the courier hub. Once in transit, cancellation cannot be processed until delivery.',
+    },
+  ];
+
   return (
     <div className="min-h-screen py-10 sm:py-16 bg-white text-gray-900">
       <SEO
-        title="Terms & Conditions | Calenvee.pk"
-        description="Official Terms and Conditions, Cash on Delivery policy, and 7-day exchange rules for Calenvee Pakistan."
+        title="Terms & Conditions & FAQs | Calenvee.pk"
+        description="Official Terms of Service, user policies, and frequently asked questions for Calenvee Pakistan."
       />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-        {/* Standardized Page Header Banner */}
-        <div className="mb-8 text-left space-y-2 border-b border-gray-100 pb-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        {/* Page Header */}
+        <div className="text-left space-y-2 border-b border-gray-100 pb-6">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-xs font-semibold uppercase tracking-wider">
+            <FileText className="w-3.5 h-3.5 text-[#F97316]" />
+            <span>Store Agreement & FAQs</span>
+          </div>
           <h1 className="text-2xl sm:text-4xl font-extrabold text-[#0B132B] uppercase tracking-wider">
             TERMS & CONDITIONS
             <span className="block w-16 h-1 bg-[#F97316] mt-2 rounded-full" />
           </h1>
           <p className="text-xs sm:text-sm text-gray-500 max-w-2xl font-normal leading-relaxed pt-0.5">
-            Official store policies, Cash on Delivery guidelines, and 7-day exchange warranty for Calenvee Pakistan.
+            Official store guidelines, terms of service, customer commitments, and frequently asked questions for Calenvee Pakistan.
           </p>
         </div>
 
-        {/* Content */}
-        <div className="space-y-8 text-xs sm:text-sm text-gray-600 leading-relaxed">
-          <section className="space-y-3">
-            <h2 className="text-base sm:text-lg font-bold text-gray-900">
-              1. General Terms of Service
+        {/* Section 1: Frequently Asked Questions (FAQ) */}
+        <section id="faqs" className="space-y-4">
+          <div className="flex items-center space-x-2 pb-2 border-b border-gray-100">
+            <HelpCircle className="w-5 h-5 text-[#F97316]" />
+            <h2 className="text-lg sm:text-xl font-extrabold text-gray-900 uppercase tracking-wide">
+              FREQUENTLY ASKED QUESTIONS (FAQS)
             </h2>
-            <p>
-              By accessing or placing an order on <strong>Calenvee.pk</strong>, you agree to adhere to the terms and guidelines outlined on this page. Calenvee operates strictly as an independent online direct-to-consumer store delivering nationwide across Pakistan.
-            </p>
-          </section>
+          </div>
 
-          <section className="space-y-3">
-            <h2 className="text-base sm:text-lg font-bold text-gray-900">
-              2. Shipping & Delivery Timeline (7-10 Days)
-            </h2>
-            <p>
-              We provide <strong>Nationwide Cash on Delivery (COD)</strong> to all major cities and rural areas of Pakistan.
-            </p>
-            <ul className="list-disc pl-5 space-y-1.5 text-gray-700">
-              <li><strong>Expected Delivery Time:</strong> Deliveries typically take between <strong>7 to 10 business days</strong> from the date of dispatch.</li>
-              <li><strong>Courier Tracking:</strong> Once your parcel is dispatched, a tracking consignment number (TCS / Trax) is provided to monitor transit progress.</li>
-              <li><strong>Doorstep Delivery:</strong> Riders will call your provided contact number before arrival. Please ensure cash is ready for payment upon parcel receipt.</li>
-            </ul>
-          </section>
+          <div className="space-y-3">
+            {faqs.map((faq, index) => {
+              const isOpen = openFaq === index;
+              return (
+                <div
+                  key={index}
+                  className="border border-gray-200 rounded-xl overflow-hidden transition-all bg-gray-50/50 hover:bg-gray-50"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(isOpen ? null : index)}
+                    className="w-full px-5 py-4 text-left flex items-center justify-between text-xs sm:text-sm font-bold text-gray-900 focus:outline-hidden"
+                  >
+                    <span>{faq.q}</span>
+                    {isOpen ? (
+                      <ChevronUp className="w-4 h-4 text-[#F97316] flex-shrink-0 ml-2" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0 ml-2" />
+                    )}
+                  </button>
+                  {isOpen && (
+                    <div className="px-5 pb-4 text-xs sm:text-sm text-gray-600 border-t border-gray-100/80 pt-3 leading-relaxed">
+                      {faq.a}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
 
-          <section className="space-y-3">
-            <h2 className="text-base sm:text-lg font-bold text-gray-900">
-              3. Payment Methods & Receipt Verification
+        {/* Section 2: Terms of Service */}
+        <section className="space-y-8 text-xs sm:text-sm text-gray-600 leading-relaxed pt-4 border-t border-gray-100">
+          <div className="flex items-center space-x-2 pb-2">
+            <Shield className="w-5 h-5 text-[#F97316]" />
+            <h2 className="text-lg sm:text-xl font-extrabold text-gray-900 uppercase tracking-wide">
+              STORE POLICIES & TERMS OF USE
             </h2>
-            <p>
-              We offer flexible payment channels across Pakistan:
-            </p>
-            <ul className="list-disc pl-5 space-y-1.5 text-gray-700">
-              <li><strong>Cash on Delivery (COD):</strong> Pay cash directly to the courier rider upon delivery.</li>
-              <li><strong>JazzCash & EasyPaisa:</strong> For direct mobile account transfers, customers must send a screenshot of the transaction receipt slip to our official WhatsApp at <strong>{STORE_INFO.whatsappNumber}</strong> before the order can be processed and dispatched.</li>
-            </ul>
-          </section>
+          </div>
 
-          <section className="space-y-3">
-            <h2 className="text-base sm:text-lg font-bold text-gray-900">
-              4. 7-Day Exchange Policy
-            </h2>
+          <div className="space-y-3">
+            <h3 className="text-sm sm:text-base font-bold text-gray-900">
+              1. Acceptance of Terms
+            </h3>
             <p>
-              Your satisfaction is our priority. We offer a transparent 7-day exchange window:
+              By browsing, placing an order, or communicating with <strong>Calenvee.pk</strong>, you agree to comply with all applicable Pakistani commercial guidelines, our ordering procedures, and policies outlined herein.
             </p>
-            <ul className="list-disc pl-5 space-y-1.5 text-gray-700">
-              <li>Exchanges are valid within <strong>7 days</strong> from the delivery confirmation date.</li>
-              <li>Items must be unused, in their original packaging, with tags and protective films intact.</li>
-              <li>To initiate an exchange for size, color, or a different product, message our official WhatsApp support at <strong>{STORE_INFO.whatsappNumber}</strong> with your Order ID and photo of the item.</li>
-            </ul>
-          </section>
+          </div>
 
-          <section className="space-y-3">
-            <h2 className="text-base sm:text-lg font-bold text-gray-900">
-              5. Order Cancellation
-            </h2>
+          <div className="space-y-3">
+            <h3 className="text-sm sm:text-base font-bold text-gray-900">
+              2. Accuracy of Product Information & Pricing
+            </h3>
             <p>
-              You may cancel an order at any time before it has been handed over to the courier partner. Once the parcel is in transit with TCS or Trax, cancellations cannot be processed until the parcel arrives.
+              All prices shown on Calenvee are in Pakistani Rupees (PKR) and include all applicable store discounts. While we make every effort to display accurate imagery, slight variations in color tone may occur due to device display configurations and photographic studio lighting.
             </p>
-          </section>
+          </div>
 
-          <section className="space-y-3">
-            <h2 className="text-base sm:text-lg font-bold text-gray-900">
-              6. Customer Support
-            </h2>
+          <div className="space-y-3">
+            <h3 className="text-sm sm:text-base font-bold text-gray-900">
+              3. Order Confirmation & Fulfillment
+            </h3>
             <p>
-              For any questions regarding these terms, product specifications, or order inquiries:
+              An automated order reference number (e.g. CV-XXXXXXXX) is generated upon completing the checkout process. Calenvee reserves the right to verify high-value orders via phone or WhatsApp prior to dispatch to prevent fictitious bookings.
             </p>
-            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 text-gray-800 font-mono text-xs">
-              <strong>Official Customer Support (WhatsApp / Call):</strong> {STORE_INFO.whatsappNumber}
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-sm sm:text-base font-bold text-gray-900">
+              4. Payment Verifications for Prepaid Orders
+            </h3>
+            <p>
+              For payments via JazzCash, EasyPaisa, or direct bank transfer, orders are released for dispatch once the transaction reference or deposit screenshot is verified against our accounts.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-sm sm:text-base font-bold text-gray-900">
+              5. Intellectual Property
+            </h3>
+            <p>
+              The Calenvee logo, slogan "Shop Smart, Live Better", website graphics, promotional banners, and proprietary visual assets belong exclusively to Calenvee.pk.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-sm sm:text-base font-bold text-gray-900">
+              6. Official Support & Dispute Resolution
+            </h3>
+            <p>
+              If you have any questions or require assistance regarding our terms or an active order:
+            </p>
+            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 text-gray-800 font-mono text-xs space-y-1">
+              <div><strong>Helpline:</strong> {STORE_INFO.whatsappNumber}</div>
+              <div><strong>Email:</strong> {STORE_INFO.supportEmail}</div>
+              <div className="text-gray-500 font-sans text-[11px] pt-1">Calenvee Pakistan • Shop Smart, Live Better.</div>
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
       </div>
     </div>
   );
 };
-

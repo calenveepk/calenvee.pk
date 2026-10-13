@@ -59,6 +59,7 @@ export const PHYSICAL_STORE_LOCATION = {
   country: storeSettingsData.country || "Pakistan",
   whatsappNumber: storeSettingsData.whatsappNumber || "+923001234567",
   whatsappRaw: storeSettingsData.whatsappRaw || "923001234567",
+  supportEmail: "calenvee.pk@gmail.com",
   instagram: storeSettingsData.instagram || "@calenvee.pk",
   facebook: "calenvee.pk",
   expectedDeliveryDays: "7-10 Days",

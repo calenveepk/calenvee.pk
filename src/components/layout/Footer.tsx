@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 import {
   RealWhatsAppIcon,
   RealInstagramIcon,
@@ -94,11 +94,6 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <Link to="/contact" className="hover:text-[#F97316] transition-colors">
-                  Track Order
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="hover:text-[#F97316] transition-colors">
                   Contact Us
                 </Link>
               </li>
@@ -117,12 +112,12 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/terms-and-conditions" className="hover:text-[#F97316] transition-colors">
+                <Link to="/shipping-policy" className="hover:text-[#F97316] transition-colors">
                   Shipping Policy
                 </Link>
               </li>
               <li>
-                <Link to="/terms-and-conditions" className="hover:text-[#F97316] transition-colors">
+                <Link to="/returns-refunds" className="hover:text-[#F97316] transition-colors">
                   Returns &amp; Refunds
                 </Link>
               </li>
@@ -156,12 +151,6 @@ export const Footer: React.FC = () => {
                 <a href="https://wa.me/923001234567" target="_blank" rel="noopener noreferrer" className="hover:text-[#F97316] transition-colors font-mono">
                   +92 300 1234567
                 </a>
-              </li>
-              <li className="flex items-start space-x-2.5">
-                <MapPin className="w-4 h-4 text-[#F97316] flex-shrink-0 mt-0.5" />
-                <span>
-                  Calenvee Official Distribution Hub, Lahore / Karachi, Pakistan
-                </span>
               </li>
             </ul>
 
