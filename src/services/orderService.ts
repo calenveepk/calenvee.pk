@@ -12,8 +12,10 @@ export interface OrderSubmissionResult {
  * Sends order data to the Google Apps Script webhook (Google Sheets + Gmail)
  * with robust offline/network fallback.
  */
+const DEFAULT_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwCZvq-OqA4l18DK3ecPrRSclzRrNz2dINOiMY-qaNeyfjLvB-mSbJQH4cO_gWMWcBm/exec';
+
 export async function submitOrderToBackend(order: OrderDetails): Promise<OrderSubmissionResult> {
-  const webhookUrl = import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL;
+  const webhookUrl = (import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL || DEFAULT_WEBHOOK_URL)?.trim();
 
   // Always cache locally in localStorage first for resilience
   try {
