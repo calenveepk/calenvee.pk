@@ -19,6 +19,7 @@ import { formatPKR } from '../utils/formatters';
 import { OrderDetails } from '../types';
 import { submitOrderToBackend } from '../services/orderService';
 import { SEO } from '../components/common/SEO';
+import { OrderInvoice } from '../components/common/OrderInvoice';
 import {
   RealWhatsAppIcon,
   RealJazzCashIcon,
@@ -200,131 +201,106 @@ export const CheckoutPage: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* If Order is Confirmed, Show Digital Invoice Receipt */}
         {completedOrder ? (
-          <div className="max-w-2xl mx-auto bg-white rounded-2xl p-6 sm:p-10 border border-gray-200 shadow-xl text-center space-y-6">
-            <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-200">
-              <CheckCircle2 className="w-8 h-8" />
-            </div>
+          <div className="max-w-3xl mx-auto space-y-6">
+            {/* Top Thank You & Verification Card */}
+            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-lg text-center space-y-5">
+              <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-200">
+                <CheckCircle2 className="w-7 h-7" />
+              </div>
 
-            <div className="space-y-1">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0B132B]">
-                Thank You, {completedOrder.customerName}
-              </h1>
-              <p className="text-xs text-gray-600 max-w-md mx-auto">
-                Your order reference is <strong className="text-gray-900">{completedOrder.orderId}</strong>. Expected delivery across Pakistan is <strong className="text-[#F97316]">7-10 Days</strong>.
-              </p>
-            </div>
+              <div className="space-y-1">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0B132B]">
+                  Thank You, {completedOrder.customerName}
+                </h1>
+                <p className="text-xs text-gray-600 max-w-md mx-auto">
+                  Your order reference is <strong className="text-gray-900 font-mono">#{completedOrder.orderId}</strong>. Expected delivery across Pakistan is <strong className="text-[#F97316]">7-10 Days</strong>. A copy of your invoice has also been sent to your email.
+                </p>
+              </div>
 
-            {/* Crucial Receipt Instruction if non-COD */}
-            {completedOrder.paymentMethod !== 'cod' && (() => {
-              const acc = PAYMENT_ACCOUNTS[completedOrder.paymentMethod];
-              return (
-                <div className="p-4 sm:p-5 rounded-2xl bg-orange-50/80 border border-orange-200 text-left space-y-3.5">
-                  <div className="flex items-center space-x-2 text-orange-900 font-bold text-xs">
-                    <AlertCircle className="w-4 h-4 text-[#F97316] flex-shrink-0" />
-                    <span>Payment Verification ({acc?.providerName || completedOrder.paymentMethod.toUpperCase()})</span>
-                  </div>
-
-                  {completedOrder.receiptImage ? (
-                    <div className="p-3.5 bg-emerald-50 border border-emerald-300 rounded-xl space-y-2.5">
-                      <div className="flex items-center space-x-2 text-emerald-800 font-bold text-xs">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                        <span>Payment Screenshot Attached &amp; Received!</span>
-                      </div>
-                      <p className="text-[11px] text-emerald-700 leading-relaxed font-normal">
-                        Your transaction screenshot has been delivered to Calenvee's dispatch email. Our team will verify and prepare your package for courier shipping.
-                      </p>
-                      {completedOrder.receiptImage && !completedOrder.receiptFileName?.toLowerCase().endsWith('.pdf') && (
-                        <div className="pt-1">
-                          <img
-                            src={completedOrder.receiptImage}
-                            alt="Payment Receipt"
-                            className="max-h-36 rounded-lg border border-emerald-300 shadow-xs object-contain bg-white p-1"
-                          />
-                        </div>
-                      )}
+              {/* Crucial Receipt Instruction if non-COD */}
+              {completedOrder.paymentMethod !== 'cod' && (() => {
+                const acc = PAYMENT_ACCOUNTS[completedOrder.paymentMethod];
+                return (
+                  <div className="p-4 sm:p-5 rounded-2xl bg-orange-50/80 border border-orange-200 text-left space-y-3.5">
+                    <div className="flex items-center space-x-2 text-orange-900 font-bold text-xs">
+                      <AlertCircle className="w-4 h-4 text-[#F97316] flex-shrink-0" />
+                      <span>Payment Verification ({acc?.providerName || completedOrder.paymentMethod.toUpperCase()})</span>
                     </div>
-                  ) : (
-                    <>
-                      <p className="text-xs text-orange-800 leading-relaxed font-normal">
-                        Please transfer <strong>{formatPKR(completedOrder.total)}</strong> to our official account below and share the screenshot slip on WhatsApp:
-                      </p>
 
-                      {acc && (
-                        <div className="bg-white p-3 rounded-lg border border-orange-200 font-mono text-[11px] space-y-1 text-gray-800">
-                          {acc.bankName && <div><strong className="text-gray-500 font-sans">Bank:</strong> {acc.bankName}</div>}
-                          <div><strong className="text-gray-500 font-sans">Title:</strong> {acc.accountTitle}</div>
-                          <div className="flex justify-between items-center">
-                            <span><strong className="text-gray-500 font-sans">Account No:</strong> {acc.accountNumber}</span>
-                            <button
-                              type="button"
-                              onClick={() => handleCopy(acc.accountNumber, 'order-acc')}
-                              className="text-[#F97316] hover:underline flex items-center gap-1 font-bold font-sans text-xs"
-                            >
-                              {copiedAccount === 'order-acc' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                              <span>{copiedAccount === 'order-acc' ? 'Copied' : 'Copy'}</span>
-                            </button>
+                    {completedOrder.receiptImage ? (
+                      <div className="p-3.5 bg-emerald-50 border border-emerald-300 rounded-xl space-y-2.5">
+                        <div className="flex items-center space-x-2 text-emerald-800 font-bold text-xs">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                          <span>Payment Screenshot Attached &amp; Received!</span>
+                        </div>
+                        <p className="text-[11px] text-emerald-700 leading-relaxed font-normal">
+                          Your transaction screenshot has been delivered to Calenvee's dispatch email. Our team will verify and prepare your package for courier shipping.
+                        </p>
+                        {completedOrder.receiptImage && !completedOrder.receiptFileName?.toLowerCase().endsWith('.pdf') && (
+                          <div className="pt-1">
+                            <img
+                              src={completedOrder.receiptImage}
+                              alt="Payment Receipt"
+                              className="max-h-36 rounded-lg border border-emerald-300 shadow-xs object-contain bg-white p-1"
+                            />
                           </div>
-                          {acc.iban && (
-                            <div className="flex justify-between items-center pt-1 border-t border-gray-100">
-                              <span className="truncate mr-2"><strong className="text-gray-500 font-sans">IBAN:</strong> {acc.iban}</span>
+                        )}
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-xs text-orange-800 leading-relaxed font-normal">
+                          Please transfer <strong>{formatPKR(completedOrder.total)}</strong> to our official account below and share the screenshot slip on WhatsApp:
+                        </p>
+
+                        {acc && (
+                          <div className="bg-white p-3 rounded-lg border border-orange-200 font-mono text-[11px] space-y-1 text-gray-800">
+                            {acc.bankName && <div><strong className="text-gray-500 font-sans">Bank:</strong> {acc.bankName}</div>}
+                            <div><strong className="text-gray-500 font-sans">Title:</strong> {acc.accountTitle}</div>
+                            <div className="flex justify-between items-center">
+                              <span><strong className="text-gray-500 font-sans">Account No:</strong> {acc.accountNumber}</span>
                               <button
                                 type="button"
-                                onClick={() => handleCopy(acc.iban!, 'order-iban')}
-                                className="text-[#F97316] hover:underline flex items-center gap-1 font-bold font-sans text-xs flex-shrink-0"
+                                onClick={() => handleCopy(acc.accountNumber, 'order-acc')}
+                                className="text-[#F97316] hover:underline flex items-center gap-1 font-bold font-sans text-xs"
                               >
-                                {copiedAccount === 'order-iban' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                                <span>{copiedAccount === 'order-iban' ? 'Copied' : 'Copy'}</span>
+                                {copiedAccount === 'order-acc' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                                <span>{copiedAccount === 'order-acc' ? 'Copied' : 'Copy'}</span>
                               </button>
                             </div>
-                          )}
-                        </div>
-                      )}
+                            {acc.iban && (
+                              <div className="flex justify-between items-center pt-1 border-t border-gray-100">
+                                <span className="truncate mr-2"><strong className="text-gray-500 font-sans">IBAN:</strong> {acc.iban}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopy(acc.iban!, 'order-iban')}
+                                  className="text-[#F97316] hover:underline flex items-center gap-1 font-bold font-sans text-xs flex-shrink-0"
+                                >
+                                  {copiedAccount === 'order-iban' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                                  <span>{copiedAccount === 'order-iban' ? 'Copied' : 'Copy'}</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
 
-                      <a
-                        href={whatsappReceiptLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center space-x-2 py-2.5 px-5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs rounded-lg shadow-md transition-all"
-                      >
-                        <RealWhatsAppIcon size={20} />
-                        <span>Send Receipt Slip to WhatsApp ({PHYSICAL_STORE_LOCATION.whatsappNumber})</span>
-                      </a>
-                    </>
-                  )}
-                </div>
-              );
-            })()}
-
-            {/* Receipt Summary */}
-            <div className="rounded-xl bg-gray-50 border border-gray-200 p-5 text-left space-y-3">
-              <div className="flex justify-between items-center pb-3 border-b border-gray-200 text-xs">
-                <div>
-                  <span className="text-gray-500 block font-mono text-[10px] uppercase">Order Number</span>
-                  <span className="text-gray-900 font-bold font-mono text-sm">{completedOrder.orderId}</span>
-                </div>
-                <div className="text-right">
-                  <span className="text-gray-500 block font-mono text-[10px] uppercase">Tracking Consignment</span>
-                  <span className="text-[#F97316] font-bold font-mono text-sm">{completedOrder.trackingNumber}</span>
-                </div>
-              </div>
-
-              <div className="space-y-2 text-xs text-gray-700">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Destination Address:</span>
-                  <span className="text-right font-semibold text-gray-900 max-w-xs">{completedOrder.address}, {completedOrder.city}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Payment Option:</span>
-                  <span className="uppercase font-bold text-gray-900">
-                    {completedOrder.paymentMethod === 'cod' ? 'Cash On Delivery (7-10 Days)' : completedOrder.paymentMethod}
-                  </span>
-                </div>
-                <div className="flex justify-between pt-2 border-t border-gray-200 text-sm font-bold text-gray-900">
-                  <span>Total Amount:</span>
-                  <span className="text-[#0B132B] font-extrabold text-base">{formatPKR(completedOrder.total)}</span>
-                </div>
-              </div>
+                        <a
+                          href={whatsappReceiptLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-2 py-2.5 px-5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs rounded-lg shadow-md transition-all"
+                        >
+                          <RealWhatsAppIcon size={20} />
+                          <span>Send Receipt Slip to WhatsApp ({PHYSICAL_STORE_LOCATION.whatsappNumber})</span>
+                        </a>
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
+
+            {/* Official Calenvee Invoice Template (Rendered as in reference template) */}
+            <OrderInvoice order={completedOrder} />
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
@@ -336,7 +312,9 @@ export const CheckoutPage: React.FC = () => {
               </Link>
 
               <a
-                href="https://wa.me/923001234567"
+                href={`https://wa.me/${PHYSICAL_STORE_LOCATION.whatsappRaw}?text=${encodeURIComponent(
+                  `Hello Calenvee.pk! I have an inquiry about Order #${completedOrder.orderId}.`
+                )}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 py-3.5 bg-[#0B132B] hover:bg-[#1C2541] text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors text-center shadow-md flex items-center justify-center space-x-2"
