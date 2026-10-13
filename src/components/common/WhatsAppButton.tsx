@@ -10,12 +10,8 @@ export const WhatsAppButton: React.FC = () => {
   const whatsappUrl = `https://wa.me/${PHYSICAL_STORE_LOCATION.whatsappRaw}?text=${defaultMessage}`;
 
   return (
-    <motion.div
-      drag
-      dragMomentum={false}
-      dragElastic={0.1}
-      className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50 flex flex-col items-end cursor-grab active:cursor-grabbing select-none"
-      title="Drag to move anywhere"
+    <div
+      className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50 flex flex-col items-end select-none pointer-events-auto"
     >
       {/* Quick Chat Popup Card */}
       {isOpen && (
@@ -79,14 +75,8 @@ export const WhatsAppButton: React.FC = () => {
 
           {/* Real WhatsApp Icon as the entire toggle */}
           <RealWhatsAppIcon size={56} className="drop-shadow-xl" />
-
-          {/* Move handle hint tooltip */}
-          <span className="hidden md:group-hover:flex absolute -top-8 bg-gray-900/90 backdrop-blur-xs text-white text-[10px] font-medium py-1 px-2.5 rounded-full whitespace-nowrap shadow-md items-center gap-1 border border-gray-700">
-            <GripHorizontal className="w-3 h-3 text-[#F97316]" />
-            <span>Drag anywhere</span>
-          </span>
         </button>
       </div>
-    </motion.div>
+    </div>
   );
 };

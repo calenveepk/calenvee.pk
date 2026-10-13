@@ -64,6 +64,7 @@
   .animate-marquee {
     display: flex;
     width: max-content;
+    will-change: transform;
     animation: marquee 32s linear infinite;
   }
 
@@ -74,6 +75,7 @@
   .animate-marquee-slow {
     display: flex;
     width: max-content;
+    will-change: transform;
     animation: marquee 55s linear infinite;
   }
 

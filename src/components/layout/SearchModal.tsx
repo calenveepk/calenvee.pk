@@ -29,12 +29,15 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
 
   if (!isOpen) return null;
 
-  const filteredProducts = searchTerm.trim()
-    ? PRODUCTS.filter((p) =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.tags.some((t) => t.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        p.categoryLabel.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+  const normalizedQuery = searchTerm.trim().toLowerCase();
+  const filteredProducts = normalizedQuery
+    ? PRODUCTS.filter((p) => {
+        if (!p) return false;
+        const nameMatch = p.name ? p.name.toLowerCase().includes(normalizedQuery) : false;
+        const categoryMatch = p.categoryLabel ? p.categoryLabel.toLowerCase().includes(normalizedQuery) : false;
+        const tagsMatch = Array.isArray(p.tags) && p.tags.some((t) => typeof t === 'string' && t.toLowerCase().includes(normalizedQuery));
+        return nameMatch || categoryMatch || tagsMatch;
+      })
     : [];
 
   const popularTags = ['Obsidian Chrono', 'Cuban Link Chain', 'Signet Ring', 'Y2K Shades', 'Aroma Diffuser', 'Urban Backpack'];
@@ -48,7 +51,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
     <div className="fixed inset-0 z-50 overflow-y-auto p-4 sm:p-6 md:p-20">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-black/50 transition-opacity"
         onClick={onClose}
       />
 
@@ -59,7 +62,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
           <Search className="w-5 h-5 text-[#F97316] mr-3" />
           <input
             type="text"
-            autoFocus
             placeholder="Search watches, jewelry, eyewear, fragrances, bags..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -117,8 +119,8 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
                 >
                   <div className="flex items-center space-x-3.5">
                     <img
-                      src={p.images[0]}
-                      alt={p.name}
+                      src={p.images?.[0] || '/logo.png'}
+                      alt={p.name || 'Product'}
                       className="w-12 h-12 rounded-lg object-contain bg-gray-50 border border-gray-100"
                     />
                     <div>
