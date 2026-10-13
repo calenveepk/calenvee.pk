@@ -61,3 +61,4 @@ export async function submitOrderToBackend(order: OrderDetails): Promise<OrderSu
     message: 'Order saved locally. Ready for Google Sheets webhook sync.',
   };
 }
+

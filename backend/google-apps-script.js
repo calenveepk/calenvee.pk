@@ -509,3 +509,4 @@ function sendDispatchEmailForSelectedRow() {
   sheet.getRange(row, 16).setValue("Yes");
   SpreadsheetApp.getUi().alert(`Dispatch notification sent successfully to ${customerName} (${email})!`);
 }
+
