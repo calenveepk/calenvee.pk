@@ -24,8 +24,8 @@ export const NewsletterBanner: React.FC = () => {
     <section className="bg-white py-5 sm:py-7">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Banner matching reference design: Deep Forest Green container — Centered */}
-        <div className="rounded-2xl bg-gradient-to-r from-[#0A2619] via-[#0D2E1E] to-[#0A2619] p-6 sm:p-8 lg:p-9 shadow-xl border border-emerald-900/50 text-center">
+        {/* Banner matching announcement bar midnight color #081320 — Centered */}
+        <div className="rounded-2xl bg-gradient-to-r from-[#081320] via-[#0E1E32] to-[#081320] p-6 sm:p-8 lg:p-9 shadow-xl border border-slate-800 text-center">
           <div className="flex flex-col items-center justify-center text-center gap-5 max-w-2xl mx-auto">
             
             {/* Centered Icon & Text */}
@@ -37,7 +37,7 @@ export const NewsletterBanner: React.FC = () => {
                 <h3 className="text-lg sm:text-2xl font-bold text-white tracking-tight">
                   Get Exclusive Offers &amp; Updates
                 </h3>
-                <p className="text-xs sm:text-sm text-emerald-200/80 font-normal">
+                <p className="text-xs sm:text-sm text-slate-300 font-normal">
                   Sign up now and get <strong className="text-[#F97316]">10% OFF</strong> on your first order!
                 </p>
               </div>
@@ -46,8 +46,8 @@ export const NewsletterBanner: React.FC = () => {
             {/* Email Input & Subscribe Button — Centered */}
             <div className="w-full flex justify-center">
               {isSubscribed ? (
-                <div className="inline-flex items-center space-x-2 bg-emerald-900/80 border border-emerald-500 text-emerald-200 px-5 py-3 rounded-xl text-xs font-semibold">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <div className="inline-flex items-center space-x-2 bg-slate-900/90 border border-[#F97316] text-orange-200 px-5 py-3 rounded-xl text-xs font-semibold">
+                  <CheckCircle2 className="w-4 h-4 text-[#F97316]" />
                   <span>Welcome to Calenvee VIP! Your 10% coupon code is: <strong>CALENVEE10</strong></span>
                 </div>
               ) : (
