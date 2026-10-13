@@ -1,14 +1,14 @@
 {
+  "storeName": "Calenvee.pk",
   "storeSlogan": "SHOP SMART, LIVE BETTER",
-  "standardShippingFee": 199,
-  "instagram": "@calenvee.pk",
-  "freeShippingThreshold": 2999,
-  "city": "Pakistan",
-  "supportEmail": "calenvee.pk@gmail.com",
-  "whatsappRaw": "923001234567",
-  "address": "Online Store",
   "whatsappNumber": "+923001234567",
-  "country": "Pakistan",
+  "whatsappRaw": "923001234567",
+  "supportEmail": "calenvee.pk@gmail.com",
   "deliveryWindow": "Nationwide Cash on Delivery (7-10 Days)",
-  "storeName": "Calenvee.pk"
+  "freeShippingThreshold": 3999,
+  "standardShippingFee": 350,
+  "instagram": "@calenvee.pk",
+  "address": "Online E-Commerce Store -- Serving All Pakistan Cities",
+  "city": "Pakistan",
+  "country": "Pakistan"
 }

@@ -181,6 +181,11 @@ function getAdminHtml() {
         <span>Store Info & WhatsApp</span>
       </button>
 
+      <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn py-3.5 px-1 border-b-2 font-semibold text-xs tracking-wide border-transparent text-slate-500 hover:text-slate-900 flex items-center gap-1.5">
+        <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+        <span>Executive Dashboard</span>
+      </button>
+
       <button onclick="switchTab('publish')" id="tab-publish" class="tab-btn py-3.5 px-1 border-b-2 font-semibold text-xs tracking-wide border-transparent text-slate-500 hover:text-slate-900 flex items-center gap-1.5">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
         <span>Deploy & Git Sync</span>
@@ -541,6 +546,94 @@ function getAdminHtml() {
           <pre id="syncLog" class="bg-[#0B132B] text-emerald-400 p-4 rounded-xl font-mono text-xs overflow-x-auto max-h-64 border border-slate-700 custom-scroll">Calenvee Desktop Admin Portal initialized.
 Ready to commit and deploy changes.</pre>
         </div>
+      </div>
+    </div>
+
+    <!-- 8. EXECUTIVE DASHBOARD & GOOGLE SHEET TAB -->
+    <div id="content-dashboard" class="tab-content hidden space-y-6">
+      <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-xs max-w-4xl mx-auto space-y-6">
+        <div class="border-b border-slate-100 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wider">Store Executive Suite</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">Dynamic Month Filter</span>
+            </div>
+            <h2 class="text-xl font-bold text-[#0B132B] mt-1.5">Executive Dashboard (Google Sheets)</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Real-time KPI metrics, Month-by-month filters, Order pipeline status, Payment shares & Visual graphs.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="copyAppsScript()" class="bg-[#0B132B] hover:bg-[#1E293B] text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow transition flex items-center gap-1.5 active:scale-95">
+              <svg class="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+              <span>Copy Apps Script</span>
+            </button>
+            <a href="https://sheets.google.com" target="_blank" class="border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs py-2.5 px-4 rounded-xl shadow-xs transition flex items-center gap-1.5">
+              <span>Open Google Sheets ↗</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- KPI PREVIEW SHOWCASE -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center">
+          <div class="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200">
+            <span class="text-[10px] font-bold text-emerald-700 uppercase">Gross Revenue</span>
+            <div class="text-lg font-extrabold text-emerald-900 mt-0.5">Rs. 450,000+</div>
+            <span class="text-[9px] text-emerald-600">Month / All Time Filtered</span>
+          </div>
+          <div class="p-3.5 bg-blue-50 rounded-xl border border-blue-200">
+            <span class="text-[10px] font-bold text-blue-700 uppercase">Total Orders</span>
+            <div class="text-lg font-extrabold text-blue-900 mt-0.5">Live Count</div>
+            <span class="text-[9px] text-blue-600">Checkout Placed Orders</span>
+          </div>
+          <div class="p-3.5 bg-amber-50 rounded-xl border border-amber-200">
+            <span class="text-[10px] font-bold text-amber-700 uppercase">Avg Order Value</span>
+            <div class="text-lg font-extrabold text-amber-900 mt-0.5">Rs. 3,600+</div>
+            <span class="text-[9px] text-amber-600">Basket Size per Customer</span>
+          </div>
+          <div class="p-3.5 bg-indigo-50 rounded-xl border border-indigo-200">
+            <span class="text-[10px] font-bold text-indigo-700 uppercase">Fulfillment %</span>
+            <div class="text-lg font-extrabold text-indigo-900 mt-0.5">92.5%</div>
+            <span class="text-[9px] text-indigo-600">Delivered + Dispatched</span>
+          </div>
+          <div class="p-3.5 bg-rose-50 rounded-xl border border-rose-200">
+            <span class="text-[10px] font-bold text-rose-700 uppercase">Pending Action</span>
+            <div class="text-lg font-extrabold text-rose-900 mt-0.5">Real-time</div>
+            <span class="text-[9px] text-rose-600">Confirmed & Processing</span>
+          </div>
+          <div class="p-3.5 bg-teal-50 rounded-xl border border-teal-200">
+            <span class="text-[10px] font-bold text-teal-700 uppercase">COD Ratio</span>
+            <div class="text-lg font-extrabold text-teal-900 mt-0.5">85% COD</div>
+            <span class="text-[9px] text-teal-600">Doorstep Cash Collection</span>
+          </div>
+        </div>
+
+        <!-- 4-STEP SETUP GUIDE -->
+        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+          <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-[#0B132B] text-white flex items-center justify-center text-xs">🚀</span>
+            <span>How to Initialize Your Executive Dashboard in 60 Seconds:</span>
+          </h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+              <span class="font-bold text-[#F97316]">Step 1:</span> Open Google Sheets under your official email <code class="bg-slate-100 px-1 py-0.5 rounded text-[11px] font-mono font-bold">calenvee.pk@gmail.com</code>.
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+              <span class="font-bold text-[#F97316]">Step 2:</span> Click <span class="font-semibold">Extensions</span> &gt; <span class="font-semibold">Apps Script</span> in the top menu bar.
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+              <span class="font-bold text-[#F97316]">Step 3:</span> Click the <span class="font-bold text-[#0B132B]">"Copy Apps Script"</span> button above, replace everything in <code class="bg-slate-100 px-1 py-0.5 rounded text-[11px] font-mono">Code.gs</code>, and press <span class="font-semibold">Save (Ctrl + S)</span>.
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+              <span class="font-bold text-[#F97316]">Step 4:</span> Select <code class="bg-slate-100 px-1 py-0.5 rounded text-[11px] font-mono font-bold">setupSheet</code> in the function dropdown and click <span class="font-semibold text-emerald-600">▶ Run</span>.
+            </div>
+          </div>
+
+          <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-900 text-xs flex items-center gap-2">
+            <span class="text-base">🎉</span>
+            <span>The script automatically builds the <strong>Executive Dashboard</strong> tab as Tab #1 with live KPI cards, Month dropdown in Cell C4, pipeline tables, and 4 Google Charts!</span>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -909,6 +1002,19 @@ Ready to commit and deploy changes.</pre>
           ? 'Server disconnected. Please open Calenvee-Store-Manager.bat and keep the black window open!' 
           : e.message;
         showToast('Failed to save settings: ' + errMsg, true);
+      }
+    }
+
+    async function copyAppsScript() {
+      try {
+        const res = await fetch('/api/apps-script');
+        if (!res.ok) throw new Error('Failed to load script');
+        const code = await res.text();
+        await navigator.clipboard.writeText(code);
+        showToast('✓ Complete Google Apps Script copied to clipboard!');
+      } catch (err) {
+        console.error('Copy script err:', err);
+        showToast('Please copy script directly from backend/google-apps-script.js', true);
       }
     }
 
@@ -1913,6 +2019,22 @@ const server = http.createServer(async (req, res) => {
           sendJson(res, 200, { success: true, output });
         }
       });
+      return;
+    }
+
+    // 11. GOOGLE APPS SCRIPT SOURCE CODE
+    if (pathname === '/api/apps-script' && req.method === 'GET') {
+      const scriptPath = path.join(ROOT_DIR, 'backend', 'google-apps-script.js');
+      if (fs.existsSync(scriptPath)) {
+        const content = fs.readFileSync(scriptPath, 'utf8');
+        res.writeHead(200, {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Access-Control-Allow-Origin': '*'
+        });
+        res.end(content);
+      } else {
+        sendJson(res, 404, { error: 'Script file not found' });
+      }
       return;
     }
 

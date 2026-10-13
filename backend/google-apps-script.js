@@ -31,8 +31,8 @@ const STORE_CONFIG = {
 
 /**
  * 1. ONE-TIME SETUP FUNCTION (Run this once)
- * Creates "Orders" and "OrderItems" sheets with professional styling, 
- * frozen rows, auto-column widths, and status dropdowns.
+ * Creates "Executive Dashboard", "Orders", and "OrderItems" sheets with professional styling, 
+ * frozen rows, auto-column widths, sample starter data, KPI formulas, and visual charts.
  */
 function setupSheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -106,7 +106,467 @@ function setupSheet() {
   itemsSheet.setFrozenRows(1);
   itemsSheet.setRowHeight(1, 35);
 
-  SpreadsheetApp.getUi().alert("✅ Calenvee Orders & OrderItems configured successfully for calenvee.pk@gmail.com!");
+  // If brand new sheet with no orders, add 3 realistic starter orders so the dashboard is immediately alive!
+  if (ordersSheet.getLastRow() <= 1) {
+    const now = new Date();
+    const sampleOrders = [
+      [
+        "CV-100201", now, "Hamza Tariq", "+923001234567", "calenvee.pk@gmail.com",
+        "Lahore", "DHA Phase 5, Sector C", "COD", 3899, "Delivered",
+        "TCS Express", "TRK-982101", "Obsidian Chronograph Edition (x1) - Rs. 3899", "Deliver after 4 PM", "Yes", "Yes"
+      ],
+      [
+        "CV-100202", now, "Ayesha Malik", "+923219876543", "calenvee.pk@gmail.com",
+        "Karachi", "Clifton Block 4", "EASYPAISA", 4499, "Dispatched",
+        "Trax Logistics", "TRK-982102", "Royal Gold Dress Watch (x1) - Rs. 4499", "Call before arrival", "Yes", "Yes"
+      ],
+      [
+        "CV-100203", now, "Bilal Ahmed", "+923335551234", "calenvee.pk@gmail.com",
+        "Islamabad", "F-7/2, Street 14", "COD", 3499, "Confirmed",
+        "TCS Express", "N/A", "Azure Chronograph Edition (x1) - Rs. 3499", "Leave at reception", "Yes", "No"
+      ]
+    ];
+    ordersSheet.getRange(2, 1, sampleOrders.length, sampleOrders[0].length).setValues(sampleOrders);
+
+    const sampleItems = [
+      ["CV-100201", now, "Obsidian Chronograph Edition", 1, 3899, 3899, "Matte Stealth Black", "Standard"],
+      ["CV-100202", now, "Royal Gold Dress Watch", 1, 4499, 4499, "Royal Gold", "Standard"],
+      ["CV-100203", now, "Azure Chronograph Edition", 1, 3499, 3499, "Ocean Sunburst Blue", "Standard"]
+    ];
+    itemsSheet.getRange(2, 1, sampleItems.length, sampleItems[0].length).setValues(sampleItems);
+  }
+
+  // Auto-generate the Executive Dashboard tab!
+  createExecutiveDashboard();
+}
+
+/**
+ * 1B. EXECUTIVE DASHBOARD GENERATOR
+ * Creates/Refreshes the "Executive Dashboard" tab with KPI cards, Month Filter,
+ * Status Pipeline, Payment Flow, City Demand, 12-Month Trends, and Embedded Charts.
+ */
+function createExecutiveDashboard() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let dash = ss.getSheetByName("Executive Dashboard");
+
+  if (!dash) {
+    dash = ss.insertSheet("Executive Dashboard", 0);
+  } else {
+    // If it already exists, move to tab 1 and clear previous layout/charts
+    ss.setActiveSheet(dash);
+    ss.moveActiveSheet(1);
+    dash.clear();
+    const existingCharts = dash.getCharts();
+    for (let i = 0; i < existingCharts.length; i++) {
+      dash.removeChart(existingCharts[i]);
+    }
+  }
+
+  // Ensure gridlines are visible for clean card borders
+  dash.setHiddenGridlines(false);
+
+  // Professional Column Widths
+  dash.setColumnWidth(1, 20);   // A - margin
+  dash.setColumnWidth(2, 180);  // B - Metric / Status / City
+  dash.setColumnWidth(3, 110);  // C - Month dropdown / Count
+  dash.setColumnWidth(4, 110);  // D - Orders / Share %
+  dash.setColumnWidth(5, 120);  // E - Revenue / KPI
+  dash.setColumnWidth(6, 160);  // F - Action / Courier
+  dash.setColumnWidth(7, 25);   // G - Separator
+  dash.setColumnWidth(8, 180);  // H - Gateway / Month
+  dash.setColumnWidth(9, 120);  // I - Channel / Orders
+  dash.setColumnWidth(10, 100); // J - Count / Delivered
+  dash.setColumnWidth(11, 130); // K - Share / Revenue
+  dash.setColumnWidth(12, 130); // L - Total / AOV
+  dash.setColumnWidth(13, 110); // M - Risk / Fulfillment %
+
+  // Professional Row Heights
+  dash.setRowHeight(1, 12);
+  dash.setRowHeight(2, 40);
+  dash.setRowHeight(3, 24);
+  dash.setRowHeight(4, 34);
+  dash.setRowHeight(5, 12);
+  dash.setRowHeight(6, 22);
+  dash.setRowHeight(7, 32);
+  dash.setRowHeight(8, 20);
+  dash.setRowHeight(9, 14);
+  dash.setRowHeight(10, 10);
+  dash.setRowHeight(11, 28);
+  dash.setRowHeight(12, 24);
+
+  // Header Banner (Rows 2 & 3)
+  dash.getRange("B2:M2").merge()
+    .setValue("💼 CALENVEE.PK — EXECUTIVE REVENUE & OPERATIONS DASHBOARD")
+    .setBackground(STORE_CONFIG.brandNavy)
+    .setFontColor("#FFFFFF")
+    .setFontWeight("bold")
+    .setFontSize(13)
+    .setHorizontalAlignment("center")
+    .setVerticalAlignment("middle");
+
+  dash.getRange("B3:M3").merge()
+    .setValue("SHOP SMART, LIVE BETTER  |  Official Store: " + STORE_CONFIG.ownerEmail + "  |  Nationwide Cash on Delivery (7-10 Days)")
+    .setBackground("#1E293B")
+    .setFontColor(STORE_CONFIG.brandOrange)
+    .setFontWeight("bold")
+    .setFontSize(9)
+    .setHorizontalAlignment("center")
+    .setVerticalAlignment("middle");
+
+  // Controls / Month Selector Bar (Row 4)
+  dash.getRange("B4").setValue("📅 Select Month:")
+    .setFontWeight("bold")
+    .setFontColor(STORE_CONFIG.brandNavy)
+    .setFontSize(10)
+    .setHorizontalAlignment("right")
+    .setVerticalAlignment("middle");
+
+  const monthCell = dash.getRange("C4");
+  monthCell.setValue("All Time");
+  const monthRule = SpreadsheetApp.newDataValidation()
+    .requireValueInList([
+      "All Time", "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ], true)
+    .setAllowInvalid(false)
+    .build();
+  monthCell.setDataValidation(monthRule)
+    .setBackground("#FEF3C7")
+    .setFontWeight("bold")
+    .setFontColor("#92400E")
+    .setHorizontalAlignment("center")
+    .setVerticalAlignment("middle")
+    .setBorder(true, true, true, true, false, false, "#F59E0B", SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
+
+  dash.getRange("D4:G4").merge()
+    .setValue("💡 Live Filter: Select any month to update all KPI cards, revenue, and order metrics instantly.")
+    .setFontColor("#64748B")
+    .setFontStyle("italic")
+    .setFontSize(9)
+    .setVerticalAlignment("middle");
+
+  dash.getRange("L4:M4").merge()
+    .setFormula('="⏱ Live Sync: " & TEXT(NOW(), "dd-mmm-yyyy hh:mm AM/PM")')
+    .setFontColor("#94A3B8")
+    .setFontSize(8)
+    .setHorizontalAlignment("right")
+    .setVerticalAlignment("middle");
+
+  // Pin frozen rows up to filter bar
+  dash.setFrozenRows(4);
+
+  // Helper formatting for KPI Card
+  function formatKpiCard(rangeTitle, rangeVal, rangeSub, titleText, formulaVal, numFormat, subText, themeBg, accentColor) {
+    dash.getRange(rangeTitle).merge()
+      .setValue(titleText)
+      .setBackground(themeBg)
+      .setFontColor("#475569")
+      .setFontWeight("bold")
+      .setFontSize(8)
+      .setHorizontalAlignment("center")
+      .setVerticalAlignment("middle");
+
+    dash.getRange(rangeVal).merge()
+      .setFormula(formulaVal)
+      .setNumberFormat(numFormat)
+      .setBackground(themeBg)
+      .setFontColor(accentColor)
+      .setFontWeight("bold")
+      .setFontSize(15)
+      .setHorizontalAlignment("center")
+      .setVerticalAlignment("middle");
+
+    dash.getRange(rangeSub).merge()
+      .setValue(subText)
+      .setBackground(themeBg)
+      .setFontColor("#64748B")
+      .setFontSize(8)
+      .setHorizontalAlignment("center")
+      .setVerticalAlignment("middle");
+
+    const colStart = rangeTitle.split(":")[0].substring(0, 1);
+    const colEnd = rangeTitle.split(":")[1].substring(0, 1);
+    dash.getRange(`${colStart}6:${colEnd}8`)
+      .setBorder(true, true, true, true, false, false, "#CBD5E1", SpreadsheetApp.BorderStyle.SOLID);
+  }
+
+  // --- KPI CARDS (Rows 6-8) ---
+  // Card 1: Total Revenue (B6:C8)
+  formatKpiCard(
+    "B6:C6", "B7:C7", "B8:C8",
+    "TOTAL REVENUE",
+    '=IF(C4="All Time", IFERROR(SUM(Orders!I2:I), 0), IFERROR(SUM(FILTER(Orders!I2:I, Orders!B2:B<>"", TEXT(Orders!B2:B,"mmmm")=C4)), 0))',
+    '"Rs. " #,##0',
+    "Gross Sales (PKR)",
+    "#F0FDF4", "#059669"
+  );
+
+  // Card 2: Total Orders (D6:E8)
+  formatKpiCard(
+    "D6:E6", "D7:E7", "D8:E8",
+    "TOTAL ORDERS",
+    '=IF(C4="All Time", IFERROR(COUNTA(Orders!A2:A), 0), IFERROR(ROWS(FILTER(Orders!A2:A, Orders!B2:B<>"", TEXT(Orders!B2:B,"mmmm")=C4)), 0))',
+    '#,##0',
+    "Store Checkout Orders",
+    "#EFF6FF", "#1D4ED8"
+  );
+
+  // Card 3: Average Order Value (F6:G8)
+  formatKpiCard(
+    "F6:G6", "F7:G7", "F8:G8",
+    "AVG ORDER VALUE (AOV)",
+    '=IFERROR(B7/D7, 0)',
+    '"Rs. " #,##0',
+    "Basket Size per Customer",
+    "#FFFBEB", "#D97706"
+  );
+
+  // Card 4: Fulfillment Rate (H6:I8)
+  formatKpiCard(
+    "H6:I6", "H7:I7", "H8:I8",
+    "FULFILLMENT RATE",
+    '=IFERROR((IF(C4="All Time", COUNTIF(Orders!J2:J, "Delivered") + COUNTIF(Orders!J2:J, "Dispatched"), IFERROR(ROWS(FILTER(Orders!A2:A, Orders!B2:B<>"", TEXT(Orders!B2:B,"mmmm")=C4, (Orders!J2:J="Delivered") + (Orders!J2:J="Dispatched"))), 0))) / D7, 0)',
+    '0.0%',
+    "Delivered + Dispatched",
+    "#EEF2FF", "#4338CA"
+  );
+
+  // Card 5: Pending Orders (J6:K8)
+  formatKpiCard(
+    "J6:K6", "J7:K7", "J8:K8",
+    "PENDING ACTION",
+    '=IF(C4="All Time", COUNTIF(Orders!J2:J, "Confirmed") + COUNTIF(Orders!J2:J, "In Processing"), IFERROR(ROWS(FILTER(Orders!A2:A, Orders!B2:B<>"", TEXT(Orders!B2:B,"mmmm")=C4, (Orders!J2:J="Confirmed") + (Orders!J2:J="In Processing"))), 0))',
+    '#,##0',
+    "Confirmed & Processing",
+    "#FEF2F2", "#DC2626"
+  );
+
+  // Card 6: COD Share (L6:M8)
+  formatKpiCard(
+    "L6:M6", "L7:M7", "L8:M8",
+    "CASH ON DELIVERY (COD)",
+    '=IFERROR((IF(C4="All Time", COUNTIF(Orders!H2:H, "COD"), IFERROR(ROWS(FILTER(Orders!A2:A, Orders!B2:B<>"", TEXT(Orders!B2:B,"mmmm")=C4, Orders!H2:H="COD")), 0))) / D7, 0)',
+    '0.0%',
+    "Doorstep COD Ratio",
+    "#F0FDFA", "#0F766E"
+  );
+
+  // --- SECTION HEADERS (Row 11) ---
+  dash.getRange("B11:F11").merge()
+    .setValue("📦 ORDER PIPELINE & FULFILLMENT STATUS")
+    .setBackground(STORE_CONFIG.brandNavy)
+    .setFontColor("#FFFFFF")
+    .setFontWeight("bold")
+    .setFontSize(10)
+    .setVerticalAlignment("middle");
+
+  dash.getRange("H11:M11").merge()
+    .setValue("💳 PAYMENT GATEWAY PERFORMANCE")
+    .setBackground(STORE_CONFIG.brandNavy)
+    .setFontColor("#FFFFFF")
+    .setFontWeight("bold")
+    .setFontSize(10)
+    .setVerticalAlignment("middle");
+
+  // Table 1 Headers (Row 12)
+  dash.getRange("B12:F12").setValues([["Order Status", "Orders", "Share %", "Revenue (PKR)", "Action Needed"]])
+    .setBackground("#F1F5F9").setFontWeight("bold").setFontColor("#334155").setFontSize(9);
+
+  // Table 1 Rows (Rows 13 to 17)
+  const statuses = [
+    { name: "Confirmed", action: "Call customer & verify" },
+    { name: "In Processing", action: "Pack in premium box" },
+    { name: "Dispatched", action: "In transit with courier" },
+    { name: "Delivered", action: "Payment collected ✅" },
+    { name: "Cancelled", action: "Return to inventory" }
+  ];
+
+  for (let i = 0; i < statuses.length; i++) {
+    const row = 13 + i;
+    const st = statuses[i];
+    dash.getRange(row, 2).setValue(st.name).setFontWeight("bold").setFontColor("#1E293B");
+    dash.getRange(row, 3).setFormula(`=IF($C$4="All Time", COUNTIF(Orders!$J$2:$J, "${st.name}"), IFERROR(ROWS(FILTER(Orders!$A$2:$A, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=$C$4, Orders!$J$2:$J="${st.name}")), 0))`);
+    dash.getRange(row, 4).setFormula(`=IFERROR(C${row}/$D$7, 0)`).setNumberFormat("0.0%");
+    dash.getRange(row, 5).setFormula(`=IF($C$4="All Time", IFERROR(SUMIF(Orders!$J$2:$J, "${st.name}", Orders!$I$2:$I), 0), IFERROR(SUM(FILTER(Orders!$I$2:$I, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=$C$4, Orders!$J$2:$J="${st.name}")), 0))`).setNumberFormat('"Rs. " #,##0');
+    dash.getRange(row, 6).setValue(st.action).setFontColor("#64748B").setFontSize(8);
+  }
+
+  // Table 1 Total (Row 18)
+  dash.getRange("B18").setValue("Total Pipeline").setFontWeight("bold").setFontColor(STORE_CONFIG.brandNavy);
+  dash.getRange("C18").setFormula("=SUM(C13:C17)").setFontWeight("bold");
+  dash.getRange("D18").setFormula("=SUM(D13:D17)").setFontWeight("bold").setNumberFormat("0.0%");
+  dash.getRange("E18").setFormula("=SUM(E13:E17)").setFontWeight("bold").setNumberFormat('"Rs. " #,##0');
+  dash.getRange("F18").setValue("-").setFontColor("#94A3B8");
+  dash.getRange("B18:F18").setBackground("#F8FAFC").setBorder(true, false, true, false, false, false, "#94A3B8", SpreadsheetApp.BorderStyle.DOUBLE);
+
+  // Table 2 Headers (Row 12, Cols H to M)
+  dash.getRange("H12:M12").setValues([["Payment Method", "Channel", "Orders", "Share %", "Revenue (PKR)", "Settlement Risk"]])
+    .setBackground("#F1F5F9").setFontWeight("bold").setFontColor("#334155").setFontSize(9);
+
+  const payments = [
+    { key: "COD", label: "Cash on Delivery (COD)", channel: "Doorstep Cash", regex: "COD", risk: "Courier COD Cycle" },
+    { key: "EASYPAISA", label: "EasyPaisa Mobile Account", channel: "Direct Wallet", regex: "EASYPAISA", risk: "Zero Risk (Prepaid)" },
+    { key: "JAZZCASH", label: "JazzCash Mobile Account", channel: "Direct Wallet", regex: "JAZZ", risk: "Zero Risk (Prepaid)" },
+    { key: "BANK", label: "Online Bank Transfer / Raast", channel: "Direct IBFT", regex: "BANK", risk: "Zero Risk (Prepaid)" }
+  ];
+
+  for (let i = 0; i < payments.length; i++) {
+    const row = 13 + i;
+    const pm = payments[i];
+    dash.getRange(row, 8).setValue(pm.label).setFontWeight("bold").setFontColor("#1E293B");
+    dash.getRange(row, 9).setValue(pm.channel).setFontColor("#64748B").setFontSize(8);
+    dash.getRange(row, 10).setFormula(`=IF($C$4="All Time", COUNTIF(Orders!$H$2:$H, "${pm.key}"), IFERROR(ROWS(FILTER(Orders!$A$2:$A, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=$C$4, REGEXMATCH(Orders!$H$2:$H, "(?i)${pm.regex}"))), 0))`);
+    dash.getRange(row, 11).setFormula(`=IFERROR(J${row}/$D$7, 0)`).setNumberFormat("0.0%");
+    dash.getRange(row, 12).setFormula(`=IF($C$4="All Time", IFERROR(SUMIF(Orders!$H$2:$H, "${pm.key}", Orders!$I$2:$I), 0), IFERROR(SUM(FILTER(Orders!$I$2:$I, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=$C$4, REGEXMATCH(Orders!$H$2:$H, "(?i)${pm.regex}"))), 0))`).setNumberFormat('"Rs. " #,##0');
+    dash.getRange(row, 13).setValue(pm.risk).setFontColor("#059669").setFontSize(8);
+  }
+
+  // Table 2 Total (Row 17)
+  dash.getRange("H17").setValue("Total Payment Volume").setFontWeight("bold").setFontColor(STORE_CONFIG.brandNavy);
+  dash.getRange("I17").setValue("-").setFontColor("#94A3B8");
+  dash.getRange("J17").setFormula("=SUM(J13:J16)").setFontWeight("bold");
+  dash.getRange("K17").setFormula("=SUM(K13:K16)").setFontWeight("bold").setNumberFormat("0.0%");
+  dash.getRange("L17").setFormula("=SUM(L13:L16)").setFontWeight("bold").setNumberFormat('"Rs. " #,##0');
+  dash.getRange("M17").setValue("-").setFontColor("#94A3B8");
+  dash.getRange("H17:M17").setBackground("#F8FAFC").setBorder(true, false, true, false, false, false, "#94A3B8", SpreadsheetApp.BorderStyle.DOUBLE);
+
+  // --- SECTION HEADERS 2 (Row 20) ---
+  dash.getRange("B20:F20").merge()
+    .setValue("🏙️ TOP PAKISTAN CITIES BY DEMAND")
+    .setBackground(STORE_CONFIG.brandNavy)
+    .setFontColor("#FFFFFF")
+    .setFontWeight("bold")
+    .setFontSize(10)
+    .setVerticalAlignment("middle");
+
+  dash.getRange("H20:M20").merge()
+    .setValue("📅 12-MONTH REVENUE & PERFORMANCE TREND")
+    .setBackground(STORE_CONFIG.brandNavy)
+    .setFontColor("#FFFFFF")
+    .setFontWeight("bold")
+    .setFontSize(10)
+    .setVerticalAlignment("middle");
+
+  // Table 3 Headers (Row 21)
+  dash.getRange("B21:F21").setValues([["Destination City", "Orders", "Share %", "Revenue (PKR)", "Courier Service"]])
+    .setBackground("#F1F5F9").setFontWeight("bold").setFontColor("#334155").setFontSize(9);
+
+  const cities = ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar"];
+  for (let i = 0; i < cities.length; i++) {
+    const row = 22 + i;
+    const city = cities[i];
+    dash.getRange(row, 2).setValue(city).setFontWeight("bold").setFontColor("#1E293B");
+    dash.getRange(row, 3).setFormula(`=IF($C$4="All Time", COUNTIF(Orders!$F$2:$F, "*${city}*"), IFERROR(ROWS(FILTER(Orders!$A$2:$A, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=$C$4, REGEXMATCH(Orders!$F$2:$F, "(?i)${city}"))), 0))`);
+    dash.getRange(row, 4).setFormula(`=IFERROR(C${row}/$D$7, 0)`).setNumberFormat("0.0%");
+    dash.getRange(row, 5).setFormula(`=IF($C$4="All Time", IFERROR(SUMIF(Orders!$F$2:$F, "*${city}*", Orders!$I$2:$I), 0), IFERROR(SUM(FILTER(Orders!$I$2:$I, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=$C$4, REGEXMATCH(Orders!$F$2:$F, "(?i)${city}"))), 0))`).setNumberFormat('"Rs. " #,##0');
+    dash.getRange(row, 6).setValue("TCS Express (Nationwide)").setFontColor("#64748B").setFontSize(8);
+  }
+
+  // Row 29: Other Cities
+  dash.getRange("B29").setValue("Other Pakistan Cities").setFontWeight("bold").setFontColor("#64748B");
+  dash.getRange("C29").setFormula("=IFERROR(MAX(0, D7 - SUM(C22:C28)), 0)");
+  dash.getRange("D29").setFormula("=IFERROR(C29/$D$7, 0)").setNumberFormat("0.0%");
+  dash.getRange("E29").setFormula("=IFERROR(MAX(0, B7 - SUM(E22:E28)), 0)").setNumberFormat('"Rs. " #,##0');
+  dash.getRange("F29").setValue("Standard Postal / TCS").setFontColor("#64748B").setFontSize(8);
+
+  // Row 30: Total Regional Flow
+  dash.getRange("B30").setValue("Total Cities Flow").setFontWeight("bold").setFontColor(STORE_CONFIG.brandNavy);
+  dash.getRange("C30").setFormula("=SUM(C22:C29)").setFontWeight("bold");
+  dash.getRange("D30").setFormula("=SUM(D22:D29)").setFontWeight("bold").setNumberFormat("0.0%");
+  dash.getRange("E30").setFormula("=SUM(E22:E29)").setFontWeight("bold").setNumberFormat('"Rs. " #,##0');
+  dash.getRange("F30").setValue("-").setFontColor("#94A3B8");
+  dash.getRange("B30:F30").setBackground("#F8FAFC").setBorder(true, false, true, false, false, false, "#94A3B8", SpreadsheetApp.BorderStyle.DOUBLE);
+
+  // Table 4 Headers (Row 21, Cols H to M)
+  dash.getRange("H21:M21").setValues([["Month", "Orders", "Delivered", "Revenue (PKR)", "AOV (PKR)", "Delivery Rate"]])
+    .setBackground("#F1F5F9").setFontWeight("bold").setFontColor("#334155").setFontSize(9);
+
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  for (let i = 0; i < months.length; i++) {
+    const row = 22 + i;
+    const m = months[i];
+    dash.getRange(row, 8).setValue(m).setFontWeight("bold").setFontColor("#1E293B");
+    dash.getRange(row, 9).setFormula(`=IFERROR(ROWS(FILTER(Orders!$A$2:$A, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=$H${row})), 0)`);
+    dash.getRange(row, 10).setFormula(`=IFERROR(ROWS(FILTER(Orders!$A$2:$A, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=$H${row}, Orders!$J$2:$J="Delivered")), 0)`);
+    dash.getRange(row, 11).setFormula(`=IFERROR(SUM(FILTER(Orders!$I$2:$I, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=$H${row})), 0)`).setNumberFormat('"Rs. " #,##0');
+    dash.getRange(row, 12).setFormula(`=IFERROR(K${row}/I${row}, 0)`).setNumberFormat('"Rs. " #,##0');
+    dash.getRange(row, 13).setFormula(`=IFERROR(J${row}/I${row}, 0)`).setNumberFormat("0.0%");
+  }
+
+  // Row 34: Annual Total YTD
+  dash.getRange("H34").setValue("Annual Total YTD").setFontWeight("bold").setFontColor(STORE_CONFIG.brandNavy);
+  dash.getRange("I34").setFormula("=SUM(I22:I33)").setFontWeight("bold");
+  dash.getRange("J34").setFormula("=SUM(J22:J33)").setFontWeight("bold");
+  dash.getRange("K34").setFormula("=SUM(K22:K33)").setFontWeight("bold").setNumberFormat('"Rs. " #,##0');
+  dash.getRange("L34").setFormula("=IFERROR(K34/I34, 0)").setFontWeight("bold").setNumberFormat('"Rs. " #,##0');
+  dash.getRange("M34").setFormula("=IFERROR(J34/I34, 0)").setFontWeight("bold").setNumberFormat("0.0%");
+  dash.getRange("H34:M34").setBackground("#F8FAFC").setBorder(true, false, true, false, false, false, "#94A3B8", SpreadsheetApp.BorderStyle.DOUBLE);
+
+  // --- EMBEDDED VISUAL CHARTS ---
+  try {
+    // Chart 1: Order Pipeline Status Donut Chart (Placed at Row 36, Col B)
+    const chartStatus = dash.newChart()
+      .setChartType(Charts.ChartType.PIE)
+      .addRange(dash.getRange("B12:C17"))
+      .setPosition(36, 2, 5, 5)
+      .setOption('title', '📦 Order Pipeline Status Distribution')
+      .setOption('pieHole', 0.4)
+      .setOption('colors', ['#3B82F6', '#8B5CF6', '#F59E0B', '#10B981', '#EF4444'])
+      .setOption('legend', { position: 'right' })
+      .setOption('width', 490)
+      .setOption('height', 310)
+      .build();
+    dash.insertChart(chartStatus);
+
+    // Chart 2: 12-Month Performance Column Chart (Placed at Row 36, Col H)
+    const chartMonthly = dash.newChart()
+      .setChartType(Charts.ChartType.COLUMN)
+      .addRange(dash.getRange("H21:K33"))
+      .setPosition(36, 8, 5, 5)
+      .setOption('title', '📊 12-Month Orders & Delivered Volume')
+      .setOption('colors', ['#2563EB', '#10B981', '#F97316'])
+      .setOption('legend', { position: 'bottom' })
+      .setOption('width', 540)
+      .setOption('height', 310)
+      .build();
+    dash.insertChart(chartMonthly);
+
+    // Chart 3: Payment Method Share (Placed at Row 53, Col B)
+    const chartPayment = dash.newChart()
+      .setChartType(Charts.ChartType.PIE)
+      .addRange(dash.getRange("H12:J16"))
+      .setPosition(53, 2, 5, 5)
+      .setOption('title', '💳 Payment Method Split (COD vs Prepaid)')
+      .setOption('colors', ['#0D9488', '#10B981', '#EC4899', '#3B82F6'])
+      .setOption('legend', { position: 'right' })
+      .setOption('width', 490)
+      .setOption('height', 300)
+      .build();
+    dash.insertChart(chartPayment);
+
+    // Chart 4: Top Pakistan Cities Bar Chart (Placed at Row 53, Col H)
+    const chartCities = dash.newChart()
+      .setChartType(Charts.ChartType.BAR)
+      .addRange(dash.getRange("B21:C28"))
+      .setPosition(53, 8, 5, 5)
+      .setOption('title', '🏙️ Regional Demand by Pakistan City')
+      .setOption('colors', ['#0B132B'])
+      .setOption('legend', { position: 'none' })
+      .setOption('width', 540)
+      .setOption('height', 300)
+      .build();
+    dash.insertChart(chartCities);
+  } catch (chartErr) {
+    Logger.log("Chart generation note: " + chartErr.toString());
+  }
+
+  // Activate the Executive Dashboard
+  ss.setActiveSheet(dash);
+  SpreadsheetApp.getUi().alert("✅ Executive Dashboard ready!\n\nUse the 'Select Month' dropdown in Cell C4 to filter your store's live performance, or leave it as 'All Time'.");
 }
 
 /**
@@ -484,9 +944,12 @@ ${SpreadsheetApp.getActiveSpreadsheet().getUrl()}
  */
 function onOpen() {
   SpreadsheetApp.getUi()
-    .createMenu("Calenvee Store Manager")
-    .addItem("1. Setup Sheet Columns", "setupSheet")
-    .addItem("2. Send Dispatch Email for Selected Row", "sendDispatchEmailForSelectedRow")
+    .createMenu("Calenvee Store")
+    .addItem("📊 1. Build / Refresh Executive Dashboard", "createExecutiveDashboard")
+    .addItem("⚙️ 2. Setup All Sheets (Dashboard + Orders + OrderItems)", "setupSheet")
+    .addSeparator()
+    .addItem("✉️ 3. Send Dispatch Email for Selected Row", "sendDispatchEmailForSelectedRow")
+    .addItem("🧪 4. Send Test Email to Store Owner", "testOrderEmail")
     .addToUi();
 }
 
