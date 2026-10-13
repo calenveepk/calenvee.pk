@@ -59,7 +59,8 @@ function setupSheet() {
     "Items Summary",
     "Delivery Notes",
     "Confirmation Email Sent",
-    "Dispatch Email Sent"
+    "Dispatch Email Sent",
+    "Payment Receipt Proof"
   ];
 
   ordersSheet.getRange(1, 1, 1, orderHeaders.length).setValues([orderHeaders]);
@@ -113,17 +114,17 @@ function setupSheet() {
       [
         "CV-100201", now, "Hamza Tariq", "+923001234567", "calenvee.pk@gmail.com",
         "Lahore", "DHA Phase 5, Sector C", "COD", 3899, "Delivered",
-        "TCS Express", "TRK-982101", "Obsidian Chronograph Edition (x1) - Rs. 3899", "Deliver after 4 PM", "Yes", "Yes"
+        "TCS Express", "TRK-982101", "Obsidian Chronograph Edition (x1) - Rs. 3899", "Deliver after 4 PM", "Yes", "Yes", "N/A (Cash on Delivery)"
       ],
       [
         "CV-100202", now, "Ayesha Malik", "+923219876543", "calenvee.pk@gmail.com",
         "Karachi", "Clifton Block 4", "EASYPAISA", 4499, "Dispatched",
-        "Trax Logistics", "TRK-982102", "Royal Gold Dress Watch (x1) - Rs. 4499", "Call before arrival", "Yes", "Yes"
+        "Trax Logistics", "TRK-982102", "Royal Gold Dress Watch (x1) - Rs. 4499", "Call before arrival", "Yes", "Yes", "Attached in Drive & Email 🧾"
       ],
       [
         "CV-100203", now, "Bilal Ahmed", "+923335551234", "calenvee.pk@gmail.com",
         "Islamabad", "F-7/2, Street 14", "COD", 3499, "Confirmed",
-        "TCS Express", "N/A", "Azure Chronograph Edition (x1) - Rs. 3499", "Leave at reception", "Yes", "No"
+        "TCS Express", "N/A", "Azure Chronograph Edition (x1) - Rs. 3499", "Leave at reception", "Yes", "No", "N/A (Cash on Delivery)"
       ]
     ];
     ordersSheet.getRange(2, 1, sampleOrders.length, sampleOrders[0].length).setValues(sampleOrders);
@@ -587,6 +588,45 @@ function doPost(e) {
     const itemsSummary = itemsList.map(item => `${item.name} (x${item.quantity}) - Rs. ${item.price}`).join("; ");
     const timestamp = order.createdAt ? new Date(order.createdAt) : new Date();
 
+    // Process payment receipt attachment (if customer uploaded screenshot)
+    let receiptBlob = null;
+    let receiptUrl = "N/A";
+    const paymentMethodUpper = (order.paymentMethod || "cod").toUpperCase();
+
+    if (order.receiptImage && typeof order.receiptImage === "string" && order.receiptImage.includes("base64,")) {
+      try {
+        const parts = order.receiptImage.split(",");
+        const header = parts[0];
+        const base64Data = parts[1];
+        const mimeMatch = header.match(/:(.*?);/);
+        const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
+        const decodedBytes = Utilities.base64Decode(base64Data);
+        const safeExt = mimeType === "application/pdf" ? ".pdf" : ".jpg";
+        const fileName = order.receiptFileName || (`Receipt_${order.orderId || Date.now()}${safeExt}`);
+
+        receiptBlob = Utilities.newBlob(decodedBytes, mimeType, fileName);
+
+        // Store into dedicated Google Drive folder
+        let folder;
+        const folders = DriveApp.getFoldersByName("Calenvee Payment Receipts");
+        if (folders.hasNext()) {
+          folder = folders.next();
+        } else {
+          folder = DriveApp.createFolder("Calenvee Payment Receipts");
+        }
+        const driveFile = folder.createFile(receiptBlob);
+        driveFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        receiptUrl = driveFile.getUrl();
+      } catch (receiptErr) {
+        Logger.log("Receipt error: " + receiptErr.toString());
+        receiptUrl = "Error saving: " + receiptErr.toString();
+      }
+    }
+
+    const receiptProofCell = receiptUrl !== "N/A" && receiptUrl.startsWith("http")
+      ? `=HYPERLINK("${receiptUrl}", "View Receipt 🧾")`
+      : (paymentMethodUpper === "COD" ? "N/A (Cash on Delivery)" : "No Screenshot Uploaded");
+
     // Append to Orders tab
     ordersSheet.appendRow([
       order.orderId || "CV-" + Math.floor(100000 + Math.random() * 900000),
@@ -596,7 +636,7 @@ function doPost(e) {
       order.email || "N/A",
       order.city || "N/A",
       order.address || "N/A",
-      (order.paymentMethod || "cod").toUpperCase(),
+      paymentMethodUpper,
       order.total || 0,
       "Confirmed",
       order.courier || "TCS Express",
@@ -604,7 +644,8 @@ function doPost(e) {
       itemsSummary,
       order.notes || "None",
       order.email && order.email.includes("@") ? "Yes" : "No Email",
-      "No"
+      "No",
+      receiptProofCell
     ]);
 
     // Append items to OrderItems tab
@@ -628,8 +669,8 @@ function doPost(e) {
       sendCustomerOrderConfirmationEmail(order);
     }
 
-    // Send store owner instant notification to calenvee.pk@gmail.com
-    sendOwnerNewOrderAlertEmail(order);
+    // Send store owner instant notification with attached receipt to calenvee.pk@gmail.com
+    sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl);
 
     return ContentService.createTextOutput(JSON.stringify({
       success: true,
@@ -907,36 +948,171 @@ function sendCustomerDispatchEmail(dispatchData) {
 }
 
 /**
- * 7. STORE OWNER NOTIFICATION EMAIL
+ * 7. STORE OWNER NOTIFICATION EMAIL (WITH ATTACHED PAYMENT RECEIPT)
  */
-function sendOwnerNewOrderAlertEmail(order) {
-  const subject = `🔥 NEW ORDER #${order.orderId} — Rs. ${order.total.toLocaleString()} (${order.customerName}, ${order.city})`;
-  const itemsText = (order.items || []).map(i => `• ${i.name} x${i.quantity} (Rs. ${i.price})`).join("\n");
+function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
+  const isPrepaid = (order.paymentMethod || "cod").toLowerCase() !== "cod";
+  const hasReceipt = !!receiptBlob;
+  
+  let subjectPrefix = "📦 [NEW ORDER]";
+  if (hasReceipt) {
+    subjectPrefix = "🧾 [PAYMENT RECEIPT ATTACHED]";
+  } else if (isPrepaid) {
+    subjectPrefix = "⚠️ [UNVERIFIED PREPAID]";
+  } else {
+    subjectPrefix = "💵 [COD ORDER]";
+  }
 
-  const body = `
-New customer order received on Calenvee.pk!
+  const subject = `${subjectPrefix} Order #${order.orderId} — Rs. ${order.total.toLocaleString()} (${order.customerName}, ${order.city})`;
 
-Order ID: ${order.orderId}
-Customer: ${order.customerName}
-Phone: ${order.phone}
-Email: ${order.email}
-City: ${order.city}
-Address: ${order.address}
-Payment Method: ${(order.paymentMethod || "cod").toUpperCase()}
-Total Payable: Rs. ${order.total.toLocaleString()}
+  const itemsHtml = (order.items || []).map(item => `
+    <tr>
+      <td style="padding: 10px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px; color: #1E293B;">
+        <strong>${item.name}</strong>
+        ${item.selectedColor ? `<br><span style="font-size: 11px; color: #64748B;">Color: ${item.selectedColor.name}</span>` : ""}
+      </td>
+      <td style="padding: 10px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px; color: #475569; text-align: center;">x${item.quantity}</td>
+      <td style="padding: 10px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px; color: #0F172A; text-align: right; font-weight: bold;">Rs. ${(item.price * item.quantity).toLocaleString()}</td>
+    </tr>
+  `).join("");
 
-Items Ordered:
-${itemsText}
+  // Payment status card
+  let paymentVerificationCard = "";
+  if (hasReceipt) {
+    paymentVerificationCard = `
+      <div style="margin: 20px 0; padding: 16px; background-color: #ECFDF5; border: 1px solid #10B981; border-radius: 12px;">
+        <div style="margin-bottom: 6px;">
+          <strong style="color: #065F46; font-size: 13px;">🧾 PAYMENT PROOF ATTACHED (${order.receiptFileName || 'Slip'})</strong>
+        </div>
+        <p style="margin: 0 0 10px 0; font-size: 12px; color: #047857; line-height: 1.5;">
+          The customer uploaded a transaction screenshot during checkout. It is <strong>attached directly to this email</strong> and saved in your Google Drive.
+        </p>
+        ${receiptUrl && receiptUrl.startsWith("http") ? `
+          <a href="${receiptUrl}" target="_blank" style="display: inline-block; background-color: #0B132B; color: #FFFFFF; font-size: 11px; font-weight: bold; text-decoration: none; padding: 8px 14px; border-radius: 8px;">
+            Open High-Res Receipt in Google Drive ↗
+          </a>
+        ` : ""}
+      </div>
+    `;
+  } else if (isPrepaid) {
+    paymentVerificationCard = `
+      <div style="margin: 20px 0; padding: 16px; background-color: #FFFBEB; border: 1px solid #F59E0B; border-radius: 12px;">
+        <div style="margin-bottom: 6px;">
+          <strong style="color: #92400E; font-size: 13px;">⚠️ NO SCREENSHOT UPLOADED DURING CHECKOUT</strong>
+        </div>
+        <p style="margin: 0; font-size: 12px; color: #B45309; line-height: 1.5;">
+          Customer selected ${(order.paymentMethod || "").toUpperCase()} but did not attach a slip. Please verify payment on WhatsApp (${order.phone}) before dispatching.
+        </p>
+      </div>
+    `;
+  } else {
+    paymentVerificationCard = `
+      <div style="margin: 20px 0; padding: 14px; background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px;">
+        <strong style="color: #1E293B; font-size: 12px;">💵 CASH ON DELIVERY (COD)</strong>
+        <p style="margin: 4px 0 0 0; font-size: 11px; color: #64748B;">
+          Collect Rs. ${order.total.toLocaleString()} in cash at customer's doorstep via courier rider.
+        </p>
+      </div>
+    `;
+  }
 
-Delivery Notes: ${order.notes || "None"}
+  const htmlBody = `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F1F5F9; margin: 0; padding: 20px; color: #0F172A;">
+      <table align="center" width="100%" style="max-width: 600px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E2E8F0; overflow: hidden; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <!-- Top Banner -->
+        <tr>
+          <td style="background-color: ${STORE_CONFIG.brandNavy}; padding: 24px 20px; text-align: center;">
+            <img src="${STORE_CONFIG.logoUrl}" alt="Calenvee.pk" style="max-height: 38px; margin-bottom: 8px;" />
+            <div style="color: #FFFFFF; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">🔥 NEW ORDER RECEIVED</div>
+            <div style="color: ${STORE_CONFIG.brandOrange}; font-size: 10px; font-weight: bold; margin-top: 4px; letter-spacing: 1.5px;">${STORE_CONFIG.storeTagline}</div>
+          </td>
+        </tr>
 
-Manage all orders in your Google Sheet:
-${SpreadsheetApp.getActiveSpreadsheet().getUrl()}
+        <!-- Order Summary & Amount -->
+        <tr>
+          <td style="padding: 24px 24px 16px 24px;">
+            <table width="100%" style="margin-bottom: 16px;">
+              <tr>
+                <td>
+                  <span style="font-size: 11px; color: #64748B; text-transform: uppercase; font-family: monospace;">Order ID</span>
+                  <div style="font-size: 20px; font-weight: bold; color: #0B132B; font-family: monospace;">#${order.orderId}</div>
+                </td>
+                <td style="text-align: right;">
+                  <span style="font-size: 11px; color: #64748B; text-transform: uppercase;">Total Payable</span>
+                  <div style="font-size: 22px; font-weight: 800; color: ${STORE_CONFIG.brandOrange};">Rs. ${order.total.toLocaleString()}</div>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Payment Proof Alert / Status Card -->
+            ${paymentVerificationCard}
+
+            <!-- Customer Details Card -->
+            <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+              <div style="font-size: 11px; font-weight: bold; color: #64748B; text-transform: uppercase; margin-bottom: 8px;">Customer Information</div>
+              <table width="100%" style="font-size: 12px; line-height: 1.8;">
+                <tr><td width="30%" style="color: #64748B;">Name:</td><td style="font-weight: bold; color: #1E293B;">${order.customerName}</td></tr>
+                <tr><td style="color: #64748B;">Mobile (WhatsApp):</td><td><a href="https://wa.me/${(order.phone || '').replace(/[^0-9]/g, '')}" style="color: #2563EB; font-weight: bold; text-decoration: none;">${order.phone} 💬</a></td></tr>
+                <tr><td style="color: #64748B;">Email:</td><td style="color: #1E293B;">${order.email || 'N/A'}</td></tr>
+                <tr><td style="color: #64748B;">City:</td><td style="font-weight: bold; color: #1E293B;">${order.city}</td></tr>
+                <tr><td style="color: #64748B;">Address:</td><td style="color: #1E293B;">${order.address}</td></tr>
+                <tr><td style="color: #64748B;">Payment:</td><td style="font-weight: bold; color: #0B132B; text-transform: uppercase;">${order.paymentMethod || 'COD'}</td></tr>
+                ${order.notes && order.notes !== "None" && order.notes !== "N/A" ? `<tr><td style="color: #64748B;">Notes:</td><td style="color: #D97706; font-style: italic;">"${order.notes}"</td></tr>` : ""}
+              </table>
+            </div>
+
+            <!-- Ordered Items List -->
+            <div style="font-size: 11px; font-weight: bold; color: #64748B; text-transform: uppercase; margin-bottom: 8px;">Order Items</div>
+            <table width="100%" style="border-collapse: collapse; margin-bottom: 20px;">
+              <thead>
+                <tr style="border-bottom: 2px solid #E2E8F0;">
+                  <th align="left" style="padding-bottom: 8px; font-size: 11px; color: #64748B;">Product</th>
+                  <th align="center" style="padding-bottom: 8px; font-size: 11px; color: #64748B;">Qty</th>
+                  <th align="right" style="padding-bottom: 8px; font-size: 11px; color: #64748B;">Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+
+            <!-- Quick Action Buttons -->
+            <table width="100%" style="margin-top: 10px;">
+              <tr>
+                <td align="center">
+                  <a href="${SpreadsheetApp.getActiveSpreadsheet().getUrl()}" target="_blank" style="background-color: ${STORE_CONFIG.brandNavy}; color: #FFFFFF; font-size: 12px; font-weight: bold; padding: 12px 24px; border-radius: 10px; text-decoration: none; display: inline-block;">
+                    Open Orders in Google Sheets 📊
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background-color: #F8FAFC; padding: 16px; text-align: center; border-top: 1px solid #E2E8F0; font-size: 10px; color: #94A3B8;">
+            Calenvee Automated Bot &bull; Instant Store Notification &bull; ${new Date().toLocaleString()}
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
   `;
 
-  GmailApp.sendEmail(STORE_CONFIG.ownerEmail, subject, body, {
+  const mailOptions = {
+    htmlBody: htmlBody,
     name: "Calenvee Order Bot"
-  });
+  };
+
+  if (receiptBlob) {
+    mailOptions.attachments = [receiptBlob];
+  }
+
+  GmailApp.sendEmail(STORE_CONFIG.ownerEmail, subject, "", mailOptions);
 }
 
 /**
@@ -961,7 +1137,7 @@ function sendDispatchEmailForSelectedRow() {
     return;
   }
 
-  const values = sheet.getRange(row, 1, 1, 16).getValues()[0];
+  const values = sheet.getRange(row, 1, 1, 17).getValues()[0];
   const orderId = values[0];
   const customerName = values[2];
   const email = values[4];
@@ -1002,11 +1178,12 @@ function testOrderEmail() {
     phone: "+923001234567",
     city: "Lahore",
     address: "Model Town, Block C",
-    paymentMethod: "cod",
+    paymentMethod: "easypaisa",
     subtotal: 3899,
     discount: 0,
     shippingFee: 0,
     total: 3899,
+    receiptFileName: "easypaisa_proof_test.jpg",
     items: [
       {
         name: "Obsidian Chronograph Edition",
@@ -1017,7 +1194,10 @@ function testOrderEmail() {
     ]
   };
 
+  // Create a sample test receipt text blob to demonstrate attachment
+  const testBlob = Utilities.newBlob("CALENVEE TEST RECEIPT - EASYPAISA TRANSACTION ID: 882910405", "text/plain", "easypaisa_receipt_sample.txt");
+
   sendCustomerOrderConfirmationEmail(sampleOrder);
-  sendOwnerNewOrderAlertEmail(sampleOrder);
-  Logger.log("Test emails sent to " + STORE_CONFIG.ownerEmail);
+  sendOwnerNewOrderAlertEmail(sampleOrder, testBlob, "https://drive.google.com");
+  Logger.log("Test emails with sample receipt sent to " + STORE_CONFIG.ownerEmail);
 }

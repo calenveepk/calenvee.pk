@@ -101,6 +101,9 @@ export interface OrderDetails {
   trackingNumber: string;
   courier: 'TCS Express' | 'Trax Logistics' | 'Call Courier' | 'Leopard';
   createdAt: string;
+  receiptImage?: string;
+  receiptFileName?: string;
+  receiptFileSize?: string;
 }
 
 export interface ShopifyConfig {

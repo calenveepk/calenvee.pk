@@ -7,6 +7,10 @@ import {
   AlertCircle,
   Copy,
   Check,
+  UploadCloud,
+  FileText,
+  X,
+  Camera,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useCart } from '../context/CartContext';
@@ -39,9 +43,39 @@ export const CheckoutPage: React.FC = () => {
   const [address, setAddress] = useState('');
   const [deliveryNotes, setDeliveryNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'jazzcash' | 'easypaisa' | 'bank_transfer'>('cod');
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
+  const [receiptError, setReceiptError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedOrder, setCompletedOrder] = useState<OrderDetails | null>(null);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
+
+  const handleReceiptUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate size: 5MB maximum limit
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      setReceiptError('File exceeds 5MB limit. Please choose a screenshot or photo under 5MB.');
+      return;
+    }
+
+    setReceiptError(null);
+    setReceiptFile(file);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setReceiptPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveReceipt = () => {
+    setReceiptFile(null);
+    setReceiptPreview(null);
+    setReceiptError(null);
+  };
 
   const handleCopy = (text: string, label: string) => {
     if (navigator.clipboard) {
@@ -78,6 +112,9 @@ export const CheckoutPage: React.FC = () => {
       total: finalTotal,
       createdAt: new Date().toISOString(),
       status: 'confirmed',
+      receiptImage: receiptPreview || undefined,
+      receiptFileName: receiptFile?.name || undefined,
+      receiptFileSize: receiptFile ? `${(receiptFile.size / 1024).toFixed(0)} KB` : undefined,
     };
 
     try {
@@ -132,55 +169,79 @@ export const CheckoutPage: React.FC = () => {
             {completedOrder.paymentMethod !== 'cod' && (() => {
               const acc = PAYMENT_ACCOUNTS[completedOrder.paymentMethod];
               return (
-                <div className="p-4 rounded-xl bg-orange-50 border border-orange-200 text-left space-y-3">
+                <div className="p-4 sm:p-5 rounded-2xl bg-orange-50/80 border border-orange-200 text-left space-y-3.5">
                   <div className="flex items-center space-x-2 text-orange-900 font-bold text-xs">
                     <AlertCircle className="w-4 h-4 text-[#F97316] flex-shrink-0" />
-                    <span>Payment Verification Required ({acc?.providerName || completedOrder.paymentMethod.toUpperCase()})</span>
+                    <span>Payment Verification ({acc?.providerName || completedOrder.paymentMethod.toUpperCase()})</span>
                   </div>
-                  <p className="text-xs text-orange-800 leading-relaxed font-normal">
-                    Please transfer <strong>{formatPKR(completedOrder.total)}</strong> to our official account below and share the screenshot slip on WhatsApp:
-                  </p>
 
-                  {acc && (
-                    <div className="bg-white p-3 rounded-lg border border-orange-200 font-mono text-[11px] space-y-1 text-gray-800">
-                      {acc.bankName && <div><strong className="text-gray-500 font-sans">Bank:</strong> {acc.bankName}</div>}
-                      <div><strong className="text-gray-500 font-sans">Title:</strong> {acc.accountTitle}</div>
-                      <div className="flex justify-between items-center">
-                        <span><strong className="text-gray-500 font-sans">Account No:</strong> {acc.accountNumber}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleCopy(acc.accountNumber, 'order-acc')}
-                          className="text-[#F97316] hover:underline flex items-center gap-1 font-bold font-sans text-xs"
-                        >
-                          {copiedAccount === 'order-acc' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                          <span>{copiedAccount === 'order-acc' ? 'Copied' : 'Copy'}</span>
-                        </button>
+                  {completedOrder.receiptImage ? (
+                    <div className="p-3.5 bg-emerald-50 border border-emerald-300 rounded-xl space-y-2.5">
+                      <div className="flex items-center space-x-2 text-emerald-800 font-bold text-xs">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                        <span>Payment Screenshot Attached &amp; Received!</span>
                       </div>
-                      {acc.iban && (
-                        <div className="flex justify-between items-center pt-1 border-t border-gray-100">
-                          <span className="truncate mr-2"><strong className="text-gray-500 font-sans">IBAN:</strong> {acc.iban}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(acc.iban!, 'order-iban')}
-                            className="text-[#F97316] hover:underline flex items-center gap-1 font-bold font-sans text-xs flex-shrink-0"
-                          >
-                            {copiedAccount === 'order-iban' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                            <span>{copiedAccount === 'order-iban' ? 'Copied' : 'Copy'}</span>
-                          </button>
+                      <p className="text-[11px] text-emerald-700 leading-relaxed font-normal">
+                        Your transaction screenshot has been delivered to Calenvee's dispatch email. Our team will verify and prepare your package for courier shipping.
+                      </p>
+                      {completedOrder.receiptImage && !completedOrder.receiptFileName?.toLowerCase().endsWith('.pdf') && (
+                        <div className="pt-1">
+                          <img
+                            src={completedOrder.receiptImage}
+                            alt="Payment Receipt"
+                            className="max-h-36 rounded-lg border border-emerald-300 shadow-xs object-contain bg-white p-1"
+                          />
                         </div>
                       )}
                     </div>
-                  )}
+                  ) : (
+                    <>
+                      <p className="text-xs text-orange-800 leading-relaxed font-normal">
+                        Please transfer <strong>{formatPKR(completedOrder.total)}</strong> to our official account below and share the screenshot slip on WhatsApp:
+                      </p>
 
-                  <a
-                    href={whatsappReceiptLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center space-x-2 py-2.5 px-5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs rounded-lg shadow-md transition-all"
-                  >
-                    <RealWhatsAppIcon size={20} />
-                    <span>Send Receipt Slip to WhatsApp ({PHYSICAL_STORE_LOCATION.whatsappNumber})</span>
-                  </a>
+                      {acc && (
+                        <div className="bg-white p-3 rounded-lg border border-orange-200 font-mono text-[11px] space-y-1 text-gray-800">
+                          {acc.bankName && <div><strong className="text-gray-500 font-sans">Bank:</strong> {acc.bankName}</div>}
+                          <div><strong className="text-gray-500 font-sans">Title:</strong> {acc.accountTitle}</div>
+                          <div className="flex justify-between items-center">
+                            <span><strong className="text-gray-500 font-sans">Account No:</strong> {acc.accountNumber}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(acc.accountNumber, 'order-acc')}
+                              className="text-[#F97316] hover:underline flex items-center gap-1 font-bold font-sans text-xs"
+                            >
+                              {copiedAccount === 'order-acc' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                              <span>{copiedAccount === 'order-acc' ? 'Copied' : 'Copy'}</span>
+                            </button>
+                          </div>
+                          {acc.iban && (
+                            <div className="flex justify-between items-center pt-1 border-t border-gray-100">
+                              <span className="truncate mr-2"><strong className="text-gray-500 font-sans">IBAN:</strong> {acc.iban}</span>
+                              <button
+                                type="button"
+                                onClick={() => handleCopy(acc.iban!, 'order-iban')}
+                                className="text-[#F97316] hover:underline flex items-center gap-1 font-bold font-sans text-xs flex-shrink-0"
+                              >
+                                {copiedAccount === 'order-iban' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                                <span>{copiedAccount === 'order-iban' ? 'Copied' : 'Copy'}</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <a
+                        href={whatsappReceiptLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center space-x-2 py-2.5 px-5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs rounded-lg shadow-md transition-all"
+                      >
+                        <RealWhatsAppIcon size={20} />
+                        <span>Send Receipt Slip to WhatsApp ({PHYSICAL_STORE_LOCATION.whatsappNumber})</span>
+                      </a>
+                    </>
+                  )}
                 </div>
               );
             })()}
@@ -455,7 +516,7 @@ export const CheckoutPage: React.FC = () => {
                     {paymentMethod !== 'cod' && (() => {
                       const acc = PAYMENT_ACCOUNTS[paymentMethod];
                       return (
-                        <div className="p-3.5 rounded-xl bg-orange-50 border border-orange-200 text-xs text-orange-900 space-y-2.5">
+                        <div className="p-4 rounded-xl bg-orange-50/70 border border-orange-200 text-xs text-orange-900 space-y-3.5">
                           <div className="flex items-center space-x-2 font-bold text-[#F97316]">
                             <AlertCircle className="w-4 h-4 text-[#F97316] flex-shrink-0" />
                             <span>{acc.providerName} Details</span>
@@ -505,6 +566,84 @@ export const CheckoutPage: React.FC = () => {
                                 </button>
                               </div>
                             )}
+                          </div>
+
+                          {/* DIRECT RECEIPT SCREENSHOT UPLOAD (UP TO 5MB) */}
+                          <div className="bg-white p-3.5 rounded-xl border border-orange-300/80 space-y-2.5">
+                            <div className="flex items-center justify-between">
+                              <label className="font-bold text-xs text-gray-900 flex items-center gap-1.5">
+                                <Camera className="w-3.5 h-3.5 text-[#F97316]" />
+                                <span>Upload Payment Screenshot / Slip (Max 5MB)</span>
+                              </label>
+                              <span className="text-[10px] text-gray-500 font-medium">JPG, PNG, PDF</span>
+                            </div>
+
+                            <p className="text-[11px] text-gray-600 leading-normal">
+                              Attach your transaction screenshot here. It will be sent directly to the store owner's order email for rapid verification &amp; immediate dispatch!
+                            </p>
+
+                            {receiptError && (
+                              <div className="p-2 rounded-lg bg-red-50 border border-red-200 text-red-700 text-[11px] font-semibold flex items-center gap-1.5">
+                                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 text-red-500" />
+                                <span>{receiptError}</span>
+                              </div>
+                            )}
+
+                            {receiptPreview ? (
+                              <div className="flex items-center justify-between p-2.5 bg-emerald-50/70 border border-emerald-300 rounded-xl">
+                                <div className="flex items-center space-x-2.5 min-w-0">
+                                  {receiptFile?.type === 'application/pdf' ? (
+                                    <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
+                                      <FileText className="w-5 h-5" />
+                                    </div>
+                                  ) : (
+                                    <img
+                                      src={receiptPreview}
+                                      alt="Payment Proof"
+                                      className="w-10 h-10 object-cover rounded-lg border border-emerald-200 flex-shrink-0"
+                                    />
+                                  )}
+                                  <div className="min-w-0">
+                                    <div className="text-xs font-bold text-emerald-950 truncate">
+                                      {receiptFile?.name}
+                                    </div>
+                                    <div className="text-[10px] text-emerald-700 font-medium">
+                                      ✓ Ready to attach ({(receiptFile!.size / 1024).toFixed(0)} KB)
+                                    </div>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={handleRemoveReceipt}
+                                  className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                  title="Remove screenshot"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ) : (
+                              <div>
+                                <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-300 hover:border-[#F97316] bg-gray-50 hover:bg-orange-50/30 rounded-xl cursor-pointer transition group">
+                                  <UploadCloud className="w-6 h-6 text-gray-400 group-hover:text-[#F97316] transition mb-1" />
+                                  <span className="text-xs font-bold text-gray-700 group-hover:text-[#F97316] transition">
+                                    Click to Choose Receipt Screenshot
+                                  </span>
+                                  <span className="text-[10px] text-gray-500 mt-0.5">
+                                    Up to 5MB (Camera photo or screenshot)
+                                  </span>
+                                  <input
+                                    type="file"
+                                    accept="image/png, image/jpeg, image/jpg, image/webp, application/pdf"
+                                    onChange={handleReceiptUpload}
+                                    className="hidden"
+                                  />
+                                </label>
+                              </div>
+                            )}
+
+                            <div className="text-[10px] text-gray-500 italic pt-0.5">
+                              Prefer WhatsApp? You can also send the slip to our WhatsApp helpline after placing the order.
+                            </div>
                           </div>
                         </div>
                       );
