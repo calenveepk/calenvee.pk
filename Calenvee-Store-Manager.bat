@@ -20,3 +20,4 @@ echo.
 start http://localhost:4200
 node scripts/admin-server.cjs
 pause
+
