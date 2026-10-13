@@ -1,0 +1,36 @@
+{
+  "promos": {
+    "CAMPUS20": {
+      "code": "CAMPUS20",
+      "discountPercentage": 20,
+      "minOrderValue": 2000,
+      "description": "20% Student Discount for University Students"
+    },
+    "GENZ15": {
+      "code": "GENZ15",
+      "discountPercentage": 15,
+      "minOrderValue": 1500,
+      "description": "15% Off Your Entire Cart"
+    },
+    "CALENVEE10": {
+      "code": "CALENVEE10",
+      "discountPercentage": 10,
+      "minOrderValue": 1000,
+      "description": "10% Welcome Discount for New Shoppers"
+    },
+    "SAVE5": {
+      "code": "SAVE5",
+      "discountPercentage": 5,
+      "minOrderValue": 500,
+      "description": "5% Instant Cash on Delivery Savings"
+    }
+  },
+  "saleOffer": {
+    "active": true,
+    "badgeText": "%",
+    "headline": "UP TO 40% OFF",
+    "subheading": "Limited time offer on selected university & daily lifestyle items across Pakistan.",
+    "ctaText": "SHOP THE SALE",
+    "ctaLink": "/shop"
+  }
+}

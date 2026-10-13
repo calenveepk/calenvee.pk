@@ -1,0 +1,23 @@
+{
+  "jazzcash": {
+    "providerName": "JazzCash Mobile Account",
+    "accountTitle": "Calenvee Official",
+    "accountNumber": "03001234567",
+    "instructions": "Send payment via JazzCash App / *786# and share the transaction screenshot on WhatsApp."
+  },
+  "easypaisa": {
+    "providerName": "EasyPaisa Mobile Account",
+    "accountTitle": "Calenvee Official",
+    "accountNumber": "03001234567",
+    "instructions": "Send payment via EasyPaisa App / *786# and share the transaction screenshot on WhatsApp."
+  },
+  "bank_transfer": {
+    "providerName": "Bank Transfer / Raast Instant",
+    "bankName": "Meezan Bank Limited",
+    "accountTitle": "Calenvee Official",
+    "accountNumber": "01020304050607",
+    "iban": "PK00MEZN0001020304050607",
+    "raastId": "03001234567",
+    "instructions": "Transfer funds via Bank App or Raast Instant ID, then send the receipt slip on WhatsApp."
+  }
+}
