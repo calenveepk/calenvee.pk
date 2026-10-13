@@ -30,15 +30,15 @@ export const ValuePropsBar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {props.map((p, idx) => (
-            <div key={idx} className="flex items-center space-x-3.5 sm:space-x-4">
+            <div key={idx} className="flex flex-col items-center text-center space-y-2">
               <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0 border border-gray-100 shadow-2xs">
                 {p.icon}
               </div>
-              <div className="space-y-0.5 min-w-0">
+              <div className="space-y-0.5">
                 <h4 className="text-xs sm:text-sm font-bold text-gray-900 tracking-tight">
                   {p.title}
                 </h4>
-                <p className="text-[11px] text-gray-500 truncate">
+                <p className="text-[11px] text-gray-500">
                   {p.subtitle}
                 </p>
               </div>

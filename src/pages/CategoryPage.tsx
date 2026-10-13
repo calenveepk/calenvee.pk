@@ -73,8 +73,8 @@ export const CategoryPage: React.FC = () => {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-16">
-        {/* Breadcrumb */}
-        <div className="flex items-center space-x-2 text-xs text-gray-500 -mb-6 sm:-mb-8">
+        {/* Breadcrumb — Centered */}
+        <div className="flex items-center justify-center space-x-2 text-xs text-gray-500 -mb-6 sm:-mb-8">
           <Link to="/" className="hover:text-[#F97316] transition-colors">Home</Link>
           <span>/</span>
           <Link to="/shop" className="hover:text-[#F97316] transition-colors">Collections</Link>
@@ -82,26 +82,26 @@ export const CategoryPage: React.FC = () => {
           <span className="text-gray-900 font-semibold">{category.name}</span>
         </div>
 
-        {/* Category Hero Banner */}
-        <div className="relative rounded-2xl overflow-hidden bg-gray-900 text-white p-6 sm:p-10 lg:p-12 shadow-lg">
+        {/* Category Hero Banner — Centered */}
+        <div className="relative rounded-2xl overflow-hidden bg-gray-900 text-white p-6 sm:p-10 lg:p-12 shadow-lg text-center flex flex-col items-center">
           <div className="absolute inset-0 z-0">
             <img
               src={category.image}
               alt={category.name}
               className="w-full h-full object-cover object-center opacity-40 scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-black/90 via-black/70 to-black/90" />
           </div>
 
-          <div className="relative z-10 max-w-xl space-y-3">
+          <div className="relative z-10 max-w-xl mx-auto space-y-3 flex flex-col items-center text-center">
             <h1 className="text-2xl sm:text-4xl font-extrabold text-white uppercase tracking-wider">
               {category.name}
             </h1>
-            <p className="text-xs sm:text-sm text-gray-200 leading-relaxed font-normal">
+            <p className="text-xs sm:text-sm text-gray-200 leading-relaxed font-normal max-w-md mx-auto">
               {category.description}
             </p>
 
-            <div className="pt-2 flex items-center space-x-3 text-xs text-orange-200">
+            <div className="pt-2 flex items-center justify-center space-x-2 text-xs text-orange-200">
               <RealisticShieldIcon size={16} />
               <span>Direct-to-Consumer • Nationwide Cash on Delivery (7-10 Days)</span>
             </div>

@@ -19,13 +19,13 @@ export const NewArrivalsPage: React.FC = () => {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Banner */}
-        <div className="mb-8 text-left space-y-2 border-b border-gray-100 pb-6">
+        {/* Banner — Centered */}
+        <div className="mb-8 text-center space-y-2 border-b border-gray-100 pb-6 flex flex-col items-center">
           <h1 className="text-2xl sm:text-4xl font-extrabold text-[#0B132B] uppercase tracking-wider">
             NEW ARRIVALS
-            <span className="block w-16 h-1 bg-[#F97316] mt-2 rounded-full" />
+            <span className="block w-16 h-1 bg-[#F97316] mx-auto mt-2 rounded-full" />
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 max-w-2xl font-normal leading-relaxed pt-0.5">
+          <p className="text-xs sm:text-sm text-gray-500 max-w-2xl mx-auto font-normal leading-relaxed pt-0.5">
             Discover our newest contemporary pieces designed for modern daily styling. Delivered nationwide with Cash on Delivery in 7 to 10 days.
           </p>
         </div>

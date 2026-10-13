@@ -102,23 +102,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
         </Link>
       </div>
 
-      {/* Product Information */}
-      <div className="p-3.5 sm:p-4 flex-1 flex flex-col justify-between space-y-3 bg-white">
-        <div className="space-y-1">
+      {/* Product Information — Centered */}
+      <div className="p-3.5 sm:p-4 flex-1 flex flex-col justify-between space-y-3 bg-white text-center">
+        <div className="space-y-1 flex flex-col items-center">
           {/* Title */}
-          <Link to={`/product/${product.slug}`} className="block">
-            <h3 className="text-xs sm:text-sm font-semibold text-gray-900 group-hover:text-[#F97316] line-clamp-1 transition-colors">
+          <Link to={`/product/${product.slug}`} className="block w-full">
+            <h3 className="text-xs sm:text-sm font-semibold text-gray-900 group-hover:text-[#F97316] line-clamp-1 transition-colors text-center">
               {product.name}
             </h3>
           </Link>
 
           {/* Category Label */}
-          <div className="text-[11px] text-gray-500 font-medium">
+          <div className="text-[11px] text-gray-500 font-medium text-center">
             {product.categoryLabel}
           </div>
 
           {/* Price */}
-          <div className="flex items-baseline space-x-2 pt-0.5">
+          <div className="flex items-baseline justify-center space-x-2 pt-0.5">
             <span className="text-sm sm:text-base font-extrabold text-[#0B132B]">
               {formatPKR(product.price)}
             </span>

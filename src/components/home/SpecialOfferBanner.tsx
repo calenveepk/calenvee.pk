@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Flame, ShoppingBag } from 'lucide-react';
+import { ArrowRight, Flame } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { PRODUCTS } from '../../data/products';
 import { formatPKR } from '../../utils/formatters';
@@ -68,10 +67,10 @@ export const SpecialOfferBanner: React.FC = () => {
         {/* Deal of the Day Card matching reference design */}
         <div className="rounded-3xl bg-gradient-to-br from-[#FFF5ED] via-[#FFF8F2] to-[#FFEDE0] border border-[#FED7AA] p-6 sm:p-10 lg:p-12 shadow-sm overflow-hidden relative">
           
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center text-center">
             
-            {/* Left Column: Deal Heading & CTA (4 cols) */}
-            <div className="lg:col-span-4 space-y-4 sm:space-y-5 text-left">
+            {/* Left Column: Deal Heading & CTA (4 cols) — Centered */}
+            <div className="lg:col-span-4 space-y-4 sm:space-y-5 flex flex-col items-center text-center">
               
               <div className="inline-flex items-center space-x-1.5 text-xs font-bold uppercase tracking-wider text-[#EA580C]">
                 <Flame className="w-4 h-4 text-[#EA580C]" />
@@ -83,7 +82,7 @@ export const SpecialOfferBanner: React.FC = () => {
                   Grab It Before<br />
                   It's Gone!
                 </h3>
-                <p className="text-xs sm:text-sm text-gray-600 font-normal">
+                <p className="text-xs sm:text-sm text-gray-600 font-normal max-w-xs mx-auto">
                   Hurry! Limited stock available for today's flash drop.
                 </p>
               </div>
@@ -100,7 +99,7 @@ export const SpecialOfferBanner: React.FC = () => {
 
             </div>
 
-            {/* Center Column: Cutout Product Photo (4 cols) */}
+            {/* Center Column: Cutout Product Photo (4 cols) — Centered */}
             <div className="lg:col-span-4 flex justify-center items-center py-2">
               <div className="relative group max-w-[240px] sm:max-w-[280px]">
                 <div className="absolute inset-0 bg-orange-400/10 rounded-full blur-2xl transform scale-90" />
@@ -112,11 +111,11 @@ export const SpecialOfferBanner: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Column: Product Info, Scarcity Bar, and Live Timer (4 cols) */}
-            <div className="lg:col-span-4 space-y-5 text-left bg-white/70 backdrop-blur-xs p-6 rounded-2xl border border-orange-200/60 shadow-2xs">
+            {/* Right Column: Product Info, Scarcity Bar, and Live Timer (4 cols) — Centered */}
+            <div className="lg:col-span-4 space-y-5 flex flex-col items-center text-center bg-white/70 backdrop-blur-xs p-6 rounded-2xl border border-orange-200/60 shadow-2xs w-full">
               
-              {/* Product Info & Pricing */}
-              <div>
+              {/* Product Info & Pricing Centered */}
+              <div className="w-full">
                 <h4 className="text-base sm:text-lg font-bold text-gray-900 leading-snug">
                   Smart Watch Pro
                 </h4>
@@ -124,7 +123,7 @@ export const SpecialOfferBanner: React.FC = () => {
                   Fitness &amp; Health Tracking • Sapphire Crystal
                 </p>
 
-                <div className="mt-2.5 flex items-baseline space-x-2.5">
+                <div className="mt-2.5 flex items-baseline justify-center space-x-2.5">
                   <span className="text-xl sm:text-2xl font-black text-[#EA580C]">
                     {formatPKR(4999)}
                   </span>
@@ -138,7 +137,7 @@ export const SpecialOfferBanner: React.FC = () => {
               </div>
 
               {/* Scarcity Progress Bar */}
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 w-full max-w-xs">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-semibold text-gray-700">Only 23 items left!</span>
                   <span className="font-bold text-[#EA580C] text-[11px]">78% Claimed</span>
@@ -151,8 +150,8 @@ export const SpecialOfferBanner: React.FC = () => {
                 </div>
               </div>
 
-              {/* Real-Time Live Countdown Timer matching reference */}
-              <div className="pt-2 border-t border-orange-100">
+              {/* Real-Time Live Countdown Timer — Centered */}
+              <div className="pt-2 border-t border-orange-100 w-full max-w-xs">
                 <div className="grid grid-cols-4 gap-2 text-center">
                   <div className="bg-white rounded-xl py-2 px-1 border border-orange-200/80 shadow-2xs">
                     <span className="block text-sm sm:text-base font-black text-gray-900 font-mono">

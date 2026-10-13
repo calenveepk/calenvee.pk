@@ -6,7 +6,6 @@ import { Product } from '../types';
 import { ProductCard } from '../components/products/ProductCard';
 import { QuickViewModal } from '../components/common/QuickViewModal';
 import { SEO } from '../components/common/SEO';
-import { formatPKR } from '../utils/formatters';
 
 export const ShopPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -14,16 +13,12 @@ export const ShopPage: React.FC = () => {
 
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [sortBy, setSortBy] = useState<string>('featured');
-  const [priceRange, setPriceRange] = useState<number>(6000);
   const [inStockOnly, setInStockOnly] = useState<boolean>(false);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
   const filteredProducts = useMemo(() => {
     return PRODUCTS.filter((product) => {
       if (selectedCategory !== 'all' && product.category !== selectedCategory) {
-        return false;
-      }
-      if (product.price > priceRange) {
         return false;
       }
       if (inStockOnly && !product.inStock) {
@@ -37,7 +32,7 @@ export const ShopPage: React.FC = () => {
       if (sortBy === 'discount') return b.discountPercentage - a.discountPercentage;
       return 0;
     });
-  }, [selectedCategory, sortBy, priceRange, inStockOnly]);
+  }, [selectedCategory, sortBy, inStockOnly]);
 
   const handleCategoryChange = (catSlug: string) => {
     setSelectedCategory(catSlug);
@@ -57,21 +52,21 @@ export const ShopPage: React.FC = () => {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Editorial Page Banner */}
-        <div className="mb-8 text-left space-y-2 border-b border-gray-100 pb-6">
+        {/* Editorial Page Banner — Centered */}
+        <div className="mb-8 text-center space-y-2 border-b border-gray-100 pb-6 flex flex-col items-center">
           <h1 className="text-2xl sm:text-4xl font-extrabold text-[#0B132B] uppercase tracking-wider">
             ALL PRODUCTS
-            <span className="block w-16 h-1 bg-[#F97316] mt-2 rounded-full" />
+            <span className="block w-16 h-1 bg-[#F97316] mx-auto mt-2 rounded-full" />
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 max-w-2xl font-normal leading-relaxed pt-0.5">
+          <p className="text-xs sm:text-sm text-gray-500 max-w-2xl mx-auto font-normal leading-relaxed pt-0.5">
             Carefully curated contemporary accessories. Engineered with quality materials and delivered nationwide across Pakistan in 7 to 10 days on Cash on Delivery.
           </p>
         </div>
 
         {/* Filter Bar & Sort Controls */}
         <div className="bg-gray-50 p-4 rounded-xl mb-8 flex flex-col lg:flex-row items-center justify-between gap-4 border border-gray-200">
-          {/* Category Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0 scrollbar-none">
+          {/* Category Filter Pills — Centered / Scrollable */}
+          <div className="flex items-center justify-center gap-2 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0 scrollbar-none">
             <button
               onClick={() => handleCategoryChange('all')}
               className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
@@ -97,39 +92,19 @@ export const ShopPage: React.FC = () => {
             ))}
           </div>
 
-          {/* Sort & Price Controls */}
-          <div className="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-end flex-wrap text-xs">
-            {/* Price Slider */}
-            <div className="flex items-center space-x-2">
-              <span className="text-gray-500 whitespace-nowrap font-medium">Max Price:</span>
-              <input
-                type="range"
-                min="1500"
-                max="6000"
-                step="200"
-                value={priceRange}
-                onChange={(e) => setPriceRange(Number(e.target.value))}
-                className="w-24 sm:w-32 accent-[#F97316] cursor-pointer"
-              />
-              <span className="font-bold text-[#0B132B] whitespace-nowrap">
-                {formatPKR(priceRange)}
-              </span>
-            </div>
-
-            {/* Sort Select */}
-            <div className="flex items-center space-x-2">
-              <span className="text-gray-500 whitespace-nowrap font-medium">Sort:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-white border border-gray-300 rounded-lg px-3 py-1.5 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#F97316]"
-              >
-                <option value="featured">Featured</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="discount">Largest Discount</option>
-              </select>
-            </div>
+          {/* Sort Controls (No price range scroll slider) */}
+          <div className="flex items-center gap-3 w-full lg:w-auto justify-center lg:justify-end text-xs">
+            <span className="text-gray-500 whitespace-nowrap font-medium">Sort:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-white border border-gray-300 rounded-lg px-3 py-1.5 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#F97316]"
+            >
+              <option value="featured">Featured</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="discount">Largest Discount</option>
+            </select>
           </div>
         </div>
 
@@ -138,12 +113,11 @@ export const ShopPage: React.FC = () => {
           <div className="text-center py-20 space-y-4 bg-gray-50 rounded-2xl p-8 border border-gray-200">
             <h3 className="text-base font-semibold text-gray-900">No items found</h3>
             <p className="text-xs text-gray-500 max-w-sm mx-auto font-normal">
-              Try adjusting your price filter or selecting another collection.
+              Try selecting another collection.
             </p>
             <button
               onClick={() => {
                 setSelectedCategory('all');
-                setPriceRange(6000);
               }}
               className="px-6 py-2.5 bg-[#F97316] text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-md hover:bg-[#EA580C] transition-colors"
             >

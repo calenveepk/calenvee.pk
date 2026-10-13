@@ -145,6 +145,61 @@ export const RealEasyPaisaIcon: React.FC<{ className?: string; size?: number }> 
   </svg>
 );
 
+// 5b. Authentic Direct Bank Transfer & Raast Badge
+export const RealBankIcon: React.FC<{ className?: string; size?: number }> = ({
+  className = '',
+  size = 28,
+}) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 56 40"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={`inline-block flex-shrink-0 drop-shadow-sm ${className}`}
+  >
+    <rect width="56" height="40" rx="8" fill="#0A2540" />
+    <path d="M12 15L19 10L26 15H12Z" fill="#F97316" />
+    <rect x="13" y="16" width="2" height="7" fill="white" />
+    <rect x="18" y="16" width="2" height="7" fill="white" />
+    <rect x="23" y="16" width="2" height="7" fill="white" />
+    <rect x="11" y="24" width="16" height="2" fill="white" />
+    <text x="30" y="22" fill="white" fontSize="8.5" fontWeight="900" fontFamily="sans-serif">
+      BANK
+    </text>
+    <text x="30" y="31" fill="#F97316" fontSize="7" fontWeight="800" fontFamily="sans-serif">
+      RAAST
+    </text>
+  </svg>
+);
+
+// 5c. Authentic Cash on Delivery (COD) Badge
+export const RealCODBadge: React.FC<{ className?: string; size?: number }> = ({
+  className = '',
+  size = 28,
+}) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 56 40"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={`inline-block flex-shrink-0 drop-shadow-sm ${className}`}
+  >
+    <rect width="56" height="40" rx="8" fill="#1E293B" />
+    <path d="M11 16H20V24H11V16Z" fill="#F97316" />
+    <path d="M20 18H25L28 21V24H20V18Z" fill="#FB923C" />
+    <circle cx="15" cy="25" r="2" fill="white" />
+    <circle cx="25" cy="25" r="2" fill="white" />
+    <text x="31" y="23" fill="white" fontSize="9" fontWeight="900" fontFamily="sans-serif">
+      COD
+    </text>
+    <text x="31" y="31" fill="#38BDF8" fontSize="6.5" fontWeight="800" fontFamily="sans-serif">
+      PK POST
+    </text>
+  </svg>
+);
+
 // 6. Realistic 3D Express Courier Delivery Truck (TCS / Trax Style)
 export const RealisticTruckIcon: React.FC<{ className?: string; size?: number }> = ({
   className = '',
