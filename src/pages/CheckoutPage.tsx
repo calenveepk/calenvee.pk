@@ -11,6 +11,7 @@ import {
   FileText,
   X,
   Camera,
+  Trash2,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useCart } from '../context/CartContext';
@@ -34,7 +35,7 @@ import {
 import { PAYMENT_ACCOUNTS } from '../data/paymentAccounts';
 
 export const CheckoutPage: React.FC = () => {
-  const { items, subtotal, discount, shippingFee, finalTotal, clearCart } = useCart();
+  const { items, subtotal, discount, shippingFee, finalTotal, clearCart, removeItem } = useCart();
 
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
@@ -121,6 +122,11 @@ export const CheckoutPage: React.FC = () => {
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (items.length === 0) {
+      alert('Your cart is empty. Please add items before placing an order.');
+      return;
+    }
 
     // Security Honeypot check: reject bots silently
     if (botHoneypot) {
@@ -342,6 +348,23 @@ export const CheckoutPage: React.FC = () => {
         ) : (
           /* Checkout Form */
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+            {items.length === 0 && (
+              <div className="lg:col-span-12 p-4 rounded-2xl bg-orange-50/80 border border-orange-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+                <div className="flex items-center space-x-3">
+                  <AlertCircle className="w-5 h-5 text-[#F97316] flex-shrink-0" />
+                  <span className="text-xs text-orange-950 font-medium">
+                    Your cart is currently empty. Please add items to your cart to proceed with checkout.
+                  </span>
+                </div>
+                <Link
+                  to="/shop"
+                  className="px-4 py-2 bg-[#F97316] hover:bg-[#EA580C] text-white text-xs font-bold rounded-lg transition-colors whitespace-nowrap shadow-xs"
+                >
+                  Return to Shop
+                </Link>
+              </div>
+            )}
+
             {/* Left: Customer Info & Shipping (7 cols) */}
             <div className="lg:col-span-7 space-y-6">
               <div className="bg-white p-5 sm:p-7 rounded-2xl border border-gray-200 shadow-sm space-y-5">
@@ -718,27 +741,73 @@ export const CheckoutPage: React.FC = () => {
                   <span className="text-xs text-gray-500 font-mono">({items.length} items)</span>
                 </h3>
 
-                {/* Items list */}
-                <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
-                  {items.map((item) => (
-                    <div key={item.id} className="flex items-center space-x-3 text-xs">
-                      <img
-                        src={item.product.images[0]}
-                        alt={item.product.name}
-                        className="w-12 h-12 rounded-lg object-contain p-1 bg-gray-50 border border-gray-200 flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-gray-900 font-semibold truncate">{item.product.name}</h4>
-                        <div className="text-gray-500 text-[11px]">
-                          Qty: {item.quantity} • {item.selectedColor.name}
+                {/* Items list with remove option */}
+                {items.length === 0 ? (
+                  <div className="py-8 text-center space-y-3 bg-gray-50 rounded-xl border border-dashed border-gray-200 p-6">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mx-auto">
+                      <Trash2 className="w-5 h-5 text-gray-400" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs font-bold text-gray-700">Your cart is empty</p>
+                      <p className="text-[11px] text-gray-500">You have removed all items from your order.</p>
+                    </div>
+                    <Link
+                      to="/shop"
+                      className="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#F97316] hover:bg-[#EA580C] text-white text-xs font-bold rounded-lg shadow-sm transition"
+                    >
+                      <span>Explore Collection</span>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+                    {items.map((item) => (
+                      <div
+                        key={item.id}
+                        className="group relative flex items-center space-x-3 p-2.5 rounded-xl bg-gray-50/70 hover:bg-gray-50 border border-gray-200/80 transition-colors text-xs"
+                      >
+                        <img
+                          src={item.product.images[0]}
+                          alt={item.product.name}
+                          className="w-12 h-12 rounded-lg object-contain p-1 bg-white border border-gray-200 flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-gray-900 font-semibold truncate text-xs">{item.product.name}</h4>
+                          <div className="text-gray-500 text-[11px] flex items-center space-x-1.5 mt-0.5 flex-wrap">
+                            <span className="font-medium">Qty: {item.quantity}</span>
+                            <span>•</span>
+                            <span className="flex items-center gap-1">
+                              <span
+                                className="w-2 h-2 rounded-full inline-block border border-gray-300"
+                                style={{ backgroundColor: item.selectedColor.hex }}
+                              />
+                              {item.selectedColor.name}
+                            </span>
+                            {item.selectedSize && (
+                              <>
+                                <span>•</span>
+                                <span>{item.selectedSize.name}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 flex-shrink-0">
+                          <span className="font-extrabold text-[#0B132B] text-xs">
+                            {formatPKR(item.product.price * item.quantity)}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeItem(item.id)}
+                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Remove from cart"
+                            aria-label={`Remove ${item.product.name} from cart`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </div>
-                      <span className="font-extrabold text-[#0B132B]">
-                        {formatPKR(item.product.price * item.quantity)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Cost Breakdown */}
                 <div className="pt-3 border-t border-gray-100 space-y-2 text-xs text-gray-600">
@@ -771,13 +840,15 @@ export const CheckoutPage: React.FC = () => {
                 <button
                   type="submit"
                   form="checkout-form"
-                  disabled={isSubmitting}
-                  className="w-full py-3.5 bg-[#F97316] hover:bg-[#EA580C] text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-md transition-all flex items-center justify-center space-x-2 active:scale-98"
+                  disabled={isSubmitting || items.length === 0}
+                  className="w-full py-3.5 bg-[#F97316] hover:bg-[#EA580C] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-md transition-all flex items-center justify-center space-x-2 active:scale-98"
                 >
                   <Lock className="w-4 h-4 text-white" />
                   <span>
                     {isSubmitting
                       ? 'Confirming Order...'
+                      : items.length === 0
+                      ? 'Your Cart is Empty'
                       : paymentMethod === 'cod'
                       ? 'Confirm Cash On Delivery Order'
                       : 'Place Order & Send Slip on WhatsApp'}
