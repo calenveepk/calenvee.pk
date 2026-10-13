@@ -371,6 +371,10 @@ function getAdminHtml() {
               <input type="text" id="pay_bank_raast" class="w-full py-2 px-3 text-xs rounded-lg border border-slate-300 focus:outline-none focus:border-[#F97316]">
             </div>
           </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Customer Instructions</label>
+            <input type="text" id="pay_bank_inst" class="w-full py-2 px-3 text-xs rounded-lg border border-slate-300 focus:outline-none focus:border-[#F97316]">
+          </div>
         </div>
 
         <div class="pt-4 flex justify-end">
@@ -1641,6 +1645,7 @@ Ready to commit and deploy changes.</pre>
         document.getElementById('pay_bank_number').value = paymentAccounts.bank_transfer?.accountNumber || '';
         document.getElementById('pay_bank_iban').value = paymentAccounts.bank_transfer?.iban || '';
         document.getElementById('pay_bank_raast').value = paymentAccounts.bank_transfer?.raastId || '';
+        document.getElementById('pay_bank_inst').value = paymentAccounts.bank_transfer?.instructions || '';
       } catch (e) {
         console.error('Payments err:', e);
       }
@@ -1667,7 +1672,7 @@ Ready to commit and deploy changes.</pre>
           accountNumber: document.getElementById('pay_bank_number').value,
           iban: document.getElementById('pay_bank_iban').value,
           raastId: document.getElementById('pay_bank_raast').value,
-          instructions: 'Transfer funds via Bank App or Raast Instant ID, then send the receipt slip on WhatsApp.',
+          instructions: document.getElementById('pay_bank_inst').value || 'Transfer funds via Bank App or Raast Instant ID, then attach your transfer receipt slip below (or share on WhatsApp).',
         }
       };
 
@@ -2009,7 +2014,7 @@ const server = http.createServer(async (req, res) => {
     // 10. PUBLISH (GIT COMMIT & PUSH)
     if (pathname === '/api/publish' && req.method === 'POST') {
       const commitMsg = `Full store update via Calenvee Desktop Portal [${new Date().toLocaleString()}]`;
-      const cmd = `git add src/data/ public/products/ && git commit -m "${commitMsg}" && git push origin main`;
+      const cmd = `git add -A && git commit -m "${commitMsg}" && git push origin main`;
 
       exec(cmd, { cwd: ROOT_DIR }, (error, stdout, stderr) => {
         const output = stdout + (stderr ? '\n' + stderr : '');
