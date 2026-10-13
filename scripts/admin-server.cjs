@@ -53,6 +53,7 @@ function sendJson(res, statusCode, data) {
 
 function parseBody(req) {
   return new Promise((resolve, reject) => {
+    req.setEncoding('utf8');
     let body = '';
     // Allow up to 30MB for high-res photo uploads
     req.on('data', chunk => {
@@ -65,7 +66,7 @@ function parseBody(req) {
       try {
         resolve(body ? JSON.parse(body) : {});
       } catch (err) {
-        reject(err);
+        reject(new Error('Invalid JSON received: ' + err.message));
       }
     });
     req.on('error', reject);
@@ -129,6 +130,10 @@ function getAdminHtml() {
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
           <span>Preview Storefront</span>
         </a>
+        <div id="connBadge" class="hidden sm:flex items-center gap-1.5 py-1 px-3 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="connText">Connected</span>
+        </div>
         <button onclick="publishToLive()" id="publishHeaderBtn" class="flex items-center space-x-2 bg-[#F97316] hover:bg-[#EA580C] text-white font-bold text-xs py-2 px-4 rounded-xl shadow-lg transition active:scale-95">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
           <span>Publish to Live Store</span>
@@ -805,7 +810,27 @@ Ready to commit and deploy changes.</pre>
       loadReviews();
       loadPayments();
       loadPromotions();
+      checkConnection();
+      setInterval(checkConnection, 4000);
     });
+
+    async function checkConnection() {
+      const badge = document.getElementById('connBadge');
+      const text = document.getElementById('connText');
+      if (!badge || !text) return;
+      try {
+        const res = await fetch('/api/ping');
+        if (res.ok) {
+          badge.className = 'hidden sm:flex items-center gap-1.5 py-1 px-3 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+          text.innerText = 'Connected';
+          return true;
+        }
+      } catch (e) {
+        badge.className = 'hidden sm:flex items-center gap-1.5 py-1 px-3 rounded-full text-[11px] font-semibold bg-red-500/20 text-red-400 border border-red-500/30';
+        text.innerText = 'Server Offline (Keep launcher window open)';
+        return false;
+      }
+    }
 
     function showToast(msg, isError = false) {
       const toast = document.getElementById('toast');
@@ -815,7 +840,7 @@ Ready to commit and deploy changes.</pre>
       toastIcon.innerText = isError ? '✕' : '✓';
       toastIcon.className = isError ? 'text-red-500 text-lg font-bold' : 'text-[#F97316] text-lg font-bold';
       toast.classList.remove('translate-y-20', 'opacity-0');
-      setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 3000);
+      setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 4000);
     }
 
     function switchTab(tab) {
@@ -875,9 +900,15 @@ Ready to commit and deploy changes.</pre>
         if (result.success) {
           showToast('Store settings saved! Slogan & WhatsApp updated.');
           loadSettings();
+        } else {
+          showToast('Failed to save settings: ' + (result.error || 'Server rejected'), true);
         }
       } catch (e) {
-        showToast('Failed to save settings', true);
+        console.error('Save error:', e);
+        const errMsg = e.message.includes('fetch') 
+          ? 'Server disconnected. Please open Calenvee-Store-Manager.bat and keep the black window open!' 
+          : e.message;
+        showToast('Failed to save settings: ' + errMsg, true);
       }
     }
 
@@ -1740,6 +1771,12 @@ const server = http.createServer(async (req, res) => {
 
       const publicUrl = '/products/' + cleanName;
       sendJson(res, 200, { success: true, url: publicUrl, filename: cleanName });
+      return;
+    }
+
+    // PING HEARTBEAT
+    if (pathname === '/api/ping') {
+      sendJson(res, 200, { status: 'ok', server: 'Calenvee Admin Server', time: Date.now() });
       return;
     }
 
