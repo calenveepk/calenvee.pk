@@ -137,8 +137,111 @@ function setupSheet() {
     itemsSheet.getRange(2, 1, sampleItems.length, sampleItems[0].length).setValues(sampleItems);
   }
 
+  // Tab 3: Inventory (Real-Time Catalog Sync from Local Web App)
+  let invSheet = ss.getSheetByName("Inventory");
+  if (!invSheet) {
+    invSheet = ss.insertSheet("Inventory");
+  }
+  const invHeaders = [
+    "Product ID", "Product Name", "Category", "Price (PKR)", 
+    "Original Price (PKR)", "Stock", "Rating", "Badge", "Featured", 
+    "Variants Summary", "Primary Image", "Last Updated"
+  ];
+  invSheet.getRange(1, 1, 1, invHeaders.length).setValues([invHeaders]);
+  invSheet.getRange(1, 1, 1, invHeaders.length)
+    .setBackground(STORE_CONFIG.brandNavy)
+    .setFontColor("#FFFFFF")
+    .setFontWeight("bold")
+    .setFontFamily("Arial")
+    .setFontSize(10);
+  invSheet.setFrozenRows(1);
+  invSheet.setRowHeight(1, 35);
+
+  // Tab 4: Store Settings (Dynamic Store Configuration from Local Web App)
+  let settingsSheet = ss.getSheetByName("Store Settings");
+  if (!settingsSheet) {
+    settingsSheet = ss.insertSheet("Store Settings");
+  }
+  const settingsHeaders = ["Setting Key", "Setting Value", "Category", "Last Updated"];
+  settingsSheet.getRange(1, 1, 1, settingsHeaders.length).setValues([settingsHeaders]);
+  settingsSheet.getRange(1, 1, 1, settingsHeaders.length)
+    .setBackground(STORE_CONFIG.brandNavy)
+    .setFontColor("#FFFFFF")
+    .setFontWeight("bold")
+    .setFontFamily("Arial")
+    .setFontSize(10);
+  settingsSheet.setFrozenRows(1);
+  settingsSheet.setRowHeight(1, 35);
+
+  if (settingsSheet.getLastRow() <= 1) {
+    const now = new Date();
+    const defaultSettingsRows = [
+      ["storeName", STORE_CONFIG.storeName, "General", now],
+      ["storeTagline", STORE_CONFIG.storeTagline, "General", now],
+      ["helplinePhone", STORE_CONFIG.helplinePhone, "Contact", now],
+      ["helplineWhatsAppRaw", STORE_CONFIG.helplineWhatsAppRaw, "Contact", now],
+      ["deliveryWindow", STORE_CONFIG.deliveryWindow, "Shipping", now],
+      ["deliveryFee", 250, "Shipping", now],
+      ["freeShippingThreshold", 3500, "Shipping", now],
+      ["easypaisaTitle", "Muhammad Usman", "Payments", now],
+      ["easypaisaNumber", "03001234567", "Payments", now],
+      ["jazzcashTitle", "Muhammad Usman", "Payments", now],
+      ["jazzcashNumber", "03001234567", "Payments", now],
+      ["bankName", "Meezan Bank", "Payments", now],
+      ["bankTitle", "Calenvee Private Limited", "Payments", now],
+      ["bankIban", "PK12MEZN0001234567890123", "Payments", now]
+    ];
+    settingsSheet.getRange(2, 1, defaultSettingsRows.length, defaultSettingsRows[0].length).setValues(defaultSettingsRows);
+  }
+
   // Auto-generate the Executive Dashboard tab!
   createExecutiveDashboard();
+}
+
+/**
+ * Reads dynamic store configuration from "Store Settings" sheet,
+ * falling back to STORE_CONFIG defaults if not yet populated.
+ */
+function getDynamicStoreSettings() {
+  const cfg = {
+    storeName: STORE_CONFIG.storeName,
+    storeTagline: STORE_CONFIG.storeTagline,
+    logoUrl: STORE_CONFIG.logoUrl,
+    ownerEmail: STORE_CONFIG.ownerEmail,
+    helplinePhone: STORE_CONFIG.helplinePhone,
+    helplineWhatsAppRaw: STORE_CONFIG.helplineWhatsAppRaw,
+    deliveryWindow: STORE_CONFIG.deliveryWindow,
+    brandNavy: STORE_CONFIG.brandNavy,
+    brandOrange: STORE_CONFIG.brandOrange,
+    deliveryFee: 250,
+    freeShippingThreshold: 3500
+  };
+
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName("Store Settings");
+    if (sheet && sheet.getLastRow() > 1) {
+      const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 2).getValues();
+      data.forEach(r => {
+        const key = String(r[0]).trim();
+        const val = r[1];
+        if (key && val !== undefined && val !== "") {
+          if (key === "storeName") cfg.storeName = String(val);
+          if (key === "storeTagline") cfg.storeTagline = String(val);
+          if (key === "helplinePhone") cfg.helplinePhone = String(val);
+          if (key === "helplineWhatsAppRaw") cfg.helplineWhatsAppRaw = String(val).replace(/[^0-9]/g, '');
+          if (key === "email") cfg.ownerEmail = String(val);
+          if (key === "deliveryWindow") cfg.deliveryWindow = String(val);
+          if (key === "deliveryFee") cfg.deliveryFee = Number(val);
+          if (key === "freeShippingThreshold") cfg.freeShippingThreshold = Number(val);
+        }
+      });
+    }
+  } catch (err) {
+    Logger.log("getDynamicStoreSettings error: " + err.toString());
+  }
+
+  return cfg;
 }
 
 /**
@@ -571,111 +674,35 @@ function createExecutiveDashboard() {
 }
 
 /**
- * 2. WEBHOOK RECEIVER (doPost)
- * Receives order payloads from the Calenvee storefront checkout.
+ * 2. UNIFIED WEBHOOK RECEIVER (doPost)
+ * Receives multi-action payloads from Calenvee Storefront & Local Management App:
+ * - action: "create_order" (checkout placement)
+ * - action: "sync_catalog" (sync products to Inventory tab)
+ * - action: "sync_settings" (sync store settings to Store Settings tab)
+ * - action: "update_order_status" (order dispatch & tracking email)
+ * - action: "get_orders" (fetch all orders)
  */
 function doPost(e) {
   try {
-    const rawData = e.postData.contents;
+    const rawData = (e && e.postData && e.postData.contents) ? e.postData.contents : "{}";
     const payload = JSON.parse(rawData);
-    const order = payload.order || payload;
+    const action = payload.action || (payload.order ? 'create_order' : (payload.items && payload.customerName ? 'create_order' : 'create_order'));
 
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const ordersSheet = ss.getSheetByName("Orders") || ss.getActiveSheet();
-    const itemsSheet = ss.getSheetByName("OrderItems");
-
-    const itemsList = order.items || [];
-    const itemsSummary = itemsList.map(item => `${item.name} (x${item.quantity}) - Rs. ${item.price}`).join("; ");
-    const timestamp = order.createdAt ? new Date(order.createdAt) : new Date();
-
-    // Process payment receipt attachment (if customer uploaded screenshot)
-    let receiptBlob = null;
-    let receiptUrl = "N/A";
-    const paymentMethodUpper = (order.paymentMethod || "cod").toUpperCase();
-
-    if (order.receiptImage && typeof order.receiptImage === "string" && order.receiptImage.includes("base64,")) {
-      try {
-        const parts = order.receiptImage.split(",");
-        const header = parts[0];
-        const base64Data = parts[1];
-        const mimeMatch = header.match(/:(.*?);/);
-        const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
-        const decodedBytes = Utilities.base64Decode(base64Data);
-        const safeExt = mimeType === "application/pdf" ? ".pdf" : ".jpg";
-        const fileName = order.receiptFileName || (`Receipt_${order.orderId || Date.now()}${safeExt}`);
-
-        receiptBlob = Utilities.newBlob(decodedBytes, mimeType, fileName);
-
-        // Store into dedicated Google Drive folder
-        let folder;
-        const folders = DriveApp.getFoldersByName("Calenvee Payment Receipts");
-        if (folders.hasNext()) {
-          folder = folders.next();
-        } else {
-          folder = DriveApp.createFolder("Calenvee Payment Receipts");
-        }
-        const driveFile = folder.createFile(receiptBlob);
-        driveFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-        receiptUrl = driveFile.getUrl();
-      } catch (receiptErr) {
-        Logger.log("Receipt error: " + receiptErr.toString());
-        receiptUrl = "Error saving: " + receiptErr.toString();
-      }
+    if (action === 'sync_catalog') {
+      return handleSyncCatalog(payload);
+    } else if (action === 'sync_settings') {
+      return handleSyncSettings(payload);
+    } else if (action === 'update_order_status') {
+      return handleUpdateOrderStatus(payload);
+    } else if (action === 'get_orders') {
+      return handleGetOrders();
+    } else if (action === 'create_order' || payload.order || (payload.customerName && payload.items)) {
+      return handleCreateOrder(payload);
     }
-
-    const receiptProofCell = receiptUrl !== "N/A" && receiptUrl.startsWith("http")
-      ? `=HYPERLINK("${receiptUrl}", "View Receipt 🧾")`
-      : (paymentMethodUpper === "COD" ? "N/A (Cash on Delivery)" : "No Screenshot Uploaded");
-
-    // Append to Orders tab
-    ordersSheet.appendRow([
-      order.orderId || "CV-" + Math.floor(100000 + Math.random() * 900000),
-      timestamp,
-      order.customerName || "N/A",
-      order.phone || "N/A",
-      order.email || "N/A",
-      order.city || "N/A",
-      order.address || "N/A",
-      paymentMethodUpper,
-      order.total || 0,
-      "Confirmed",
-      order.courier || "TCS Express",
-      order.trackingNumber || "N/A",
-      itemsSummary,
-      order.notes || "None",
-      order.email && order.email.includes("@") ? "Yes" : "No Email",
-      "No",
-      receiptProofCell
-    ]);
-
-    // Append items to OrderItems tab
-    if (itemsSheet && itemsList.length > 0) {
-      itemsList.forEach(item => {
-        itemsSheet.appendRow([
-          order.orderId,
-          timestamp,
-          item.name,
-          item.quantity,
-          item.price,
-          item.price * item.quantity,
-          item.selectedColor?.name || "Standard",
-          item.selectedSize?.label || "Standard"
-        ]);
-      });
-    }
-
-    // Send customer order confirmation email (if email was provided)
-    if (order.email && order.email.includes("@") && order.email !== "N/A") {
-      sendCustomerOrderConfirmationEmail(order);
-    }
-
-    // Send store owner instant notification with attached receipt to calenvee.pk@gmail.com
-    sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl);
 
     return ContentService.createTextOutput(JSON.stringify({
-      success: true,
-      orderId: order.orderId,
-      message: "Order placed and recorded successfully in Calenvee database."
+      success: false,
+      message: "Unrecognized action: " + action
     })).setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
@@ -687,24 +714,452 @@ function doPost(e) {
 }
 
 /**
- * 3. HEALTH CHECK & ORDER LOOKUP (doGet)
+ * 2A. ORDER CREATION HANDLER
+ */
+function handleCreateOrder(payload) {
+  const order = payload.order || payload;
+
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ordersSheet = ss.getSheetByName("Orders") || ss.getActiveSheet();
+  const itemsSheet = ss.getSheetByName("OrderItems");
+
+  const itemsList = order.items || [];
+  const itemsSummary = itemsList.map(item => `${item.name} (x${item.quantity}) - Rs. ${item.price}`).join("; ");
+  const timestamp = order.createdAt ? new Date(order.createdAt) : new Date();
+
+  // Process payment receipt attachment (if customer uploaded screenshot)
+  let receiptBlob = null;
+  let receiptUrl = "N/A";
+  const paymentMethodUpper = (order.paymentMethod || "cod").toUpperCase();
+
+  if (order.receiptImage && typeof order.receiptImage === "string" && order.receiptImage.includes("base64,")) {
+    try {
+      const parts = order.receiptImage.split(",");
+      const header = parts[0];
+      const base64Data = parts[1];
+      const mimeMatch = header.match(/:(.*?);/);
+      const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
+      const decodedBytes = Utilities.base64Decode(base64Data);
+      const safeExt = mimeType === "application/pdf" ? ".pdf" : ".jpg";
+      const fileName = order.receiptFileName || (`Receipt_${order.orderId || Date.now()}${safeExt}`);
+
+      receiptBlob = Utilities.newBlob(decodedBytes, mimeType, fileName);
+
+      // Store into dedicated Google Drive folder
+      let folder;
+      const folders = DriveApp.getFoldersByName("Calenvee Payment Receipts");
+      if (folders.hasNext()) {
+        folder = folders.next();
+      } else {
+        folder = DriveApp.createFolder("Calenvee Payment Receipts");
+      }
+      const driveFile = folder.createFile(receiptBlob);
+      driveFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      receiptUrl = driveFile.getUrl();
+    } catch (receiptErr) {
+      Logger.log("Receipt error: " + receiptErr.toString());
+      receiptUrl = "Error saving: " + receiptErr.toString();
+    }
+  }
+
+  const receiptProofCell = receiptUrl !== "N/A" && receiptUrl.startsWith("http")
+    ? `=HYPERLINK("${receiptUrl}", "View Receipt 🧾")`
+    : (paymentMethodUpper === "COD" ? "N/A (Cash on Delivery)" : "No Screenshot Uploaded");
+
+  // Append to Orders tab
+  ordersSheet.appendRow([
+    order.orderId || "CV-" + Math.floor(100000 + Math.random() * 900000),
+    timestamp,
+    order.customerName || "N/A",
+    order.phone || "N/A",
+    order.email || "N/A",
+    order.city || "N/A",
+    order.address || "N/A",
+    paymentMethodUpper,
+    order.total || 0,
+    "Confirmed",
+    order.courier || "TCS Express",
+    order.trackingNumber || "N/A",
+    itemsSummary,
+    order.notes || "None",
+    order.email && order.email.includes("@") ? "Yes" : "No Email",
+    "No",
+    receiptProofCell
+  ]);
+
+  // Append items to OrderItems tab
+  if (itemsSheet && itemsList.length > 0) {
+    itemsList.forEach(item => {
+      itemsSheet.appendRow([
+        order.orderId,
+        timestamp,
+        item.name,
+        item.quantity,
+        item.price,
+        item.price * item.quantity,
+        item.selectedColor?.name || "Standard",
+        item.selectedSize?.label || "Standard"
+      ]);
+    });
+  }
+
+  // Send customer order confirmation email (if email was provided)
+  if (order.email && order.email.includes("@") && order.email !== "N/A") {
+    sendCustomerOrderConfirmationEmail(order);
+  }
+
+  // Send store owner instant notification with attached receipt to calenvee.pk@gmail.com
+  sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl);
+
+  return ContentService.createTextOutput(JSON.stringify({
+    success: true,
+    orderId: order.orderId,
+    message: "Order placed and recorded successfully in Calenvee database."
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * 2B. INVENTORY / CATALOG SYNC HANDLER
+ * Keeps Google Sheets "Inventory" tab 100% updated with products, stock, prices & variants
+ * saved in the Store Data and Management Local Web app.
+ */
+function handleSyncCatalog(payload) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName("Inventory");
+  if (!sheet) {
+    sheet = ss.insertSheet("Inventory");
+  }
+
+  const headers = [
+    "Product ID", "Product Name", "Category", "Price (PKR)", 
+    "Original Price (PKR)", "Stock", "Rating", "Badge", "Featured", 
+    "Variants Summary", "Primary Image", "Last Updated"
+  ];
+
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  sheet.getRange(1, 1, 1, headers.length)
+    .setBackground(STORE_CONFIG.brandNavy)
+    .setFontColor("#FFFFFF")
+    .setFontWeight("bold")
+    .setFontSize(10);
+  sheet.setFrozenRows(1);
+  sheet.setRowHeight(1, 35);
+
+  const products = payload.products || [];
+  if (Array.isArray(products) && products.length > 0) {
+    const lastRow = sheet.getLastRow();
+    if (lastRow > 1) {
+      sheet.getRange(2, 1, lastRow - 1, headers.length).clearContent();
+    }
+
+    const now = new Date();
+    const rows = products.map(p => {
+      const variantsSummary = [];
+      if (p.colors && p.colors.length) variantsSummary.push(`${p.colors.length} colors`);
+      if (p.sizes && p.sizes.length) variantsSummary.push(`${p.sizes.length} sizes`);
+      const primaryImg = (p.images && p.images[0]) || "";
+
+      return [
+        p.id || "",
+        p.name || "",
+        p.category || "",
+        p.price || 0,
+        p.originalPrice || p.price || 0,
+        (p.stock !== undefined && p.stock !== null) ? p.stock : 50,
+        p.rating || 4.9,
+        p.badge || "",
+        p.featured ? "Yes" : "No",
+        variantsSummary.join(", ") || "Standard",
+        primaryImg,
+        now
+      ];
+    });
+
+    sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
+    sheet.getRange(2, 4, rows.length, 2).setNumberFormat('"Rs. " #,##0');
+    sheet.getRange(2, 6, rows.length, 1).setNumberFormat('#,##0');
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({
+    success: true,
+    count: products.length,
+    message: `Synchronized ${products.length} products to Google Sheets Inventory tab successfully.`
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * 2C. STORE SETTINGS & PAYMENT GATEWAY SYNC HANDLER
+ * Keeps Google Sheets "Store Settings" tab synchronized with helpline, WhatsApp,
+ * shipping policies, and Easypaisa / Jazzcash / Bank account details.
+ */
+function handleSyncSettings(payload) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName("Store Settings");
+  if (!sheet) {
+    sheet = ss.insertSheet("Store Settings");
+  }
+
+  const headers = ["Setting Key", "Setting Value", "Category", "Last Updated"];
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  sheet.getRange(1, 1, 1, headers.length)
+    .setBackground(STORE_CONFIG.brandNavy)
+    .setFontColor("#FFFFFF")
+    .setFontWeight("bold")
+    .setFontSize(10);
+  sheet.setFrozenRows(1);
+  sheet.setRowHeight(1, 35);
+
+  const s = payload.settings || {};
+  const p = payload.paymentMethods || {};
+  const now = new Date();
+
+  const settingsRows = [
+    ["storeName", s.storeName || STORE_CONFIG.storeName, "General", now],
+    ["storeTagline", s.storeTagline || STORE_CONFIG.storeTagline, "General", now],
+    ["helplinePhone", s.phone || STORE_CONFIG.helplinePhone, "Contact", now],
+    ["helplineWhatsAppRaw", (s.phone || STORE_CONFIG.helplineWhatsAppRaw).replace(/[^0-9]/g, ''), "Contact", now],
+    ["email", s.email || STORE_CONFIG.ownerEmail, "Contact", now],
+    ["deliveryWindow", s.deliveryWindow || STORE_CONFIG.deliveryWindow, "Shipping", now],
+    ["deliveryFee", s.deliveryFee !== undefined ? s.deliveryFee : 250, "Shipping", now],
+    ["freeShippingThreshold", s.freeShippingThreshold !== undefined ? s.freeShippingThreshold : 3500, "Shipping", now],
+    ["storeNotice", s.storeNotice || "", "Announcement", now],
+    // Payments
+    ["easypaisaTitle", (p.easypaisa && p.easypaisa.accountTitle) || "", "Payments", now],
+    ["easypaisaNumber", (p.easypaisa && p.easypaisa.accountNumber) || "", "Payments", now],
+    ["jazzcashTitle", (p.jazzcash && p.jazzcash.accountTitle) || "", "Payments", now],
+    ["jazzcashNumber", (p.jazzcash && p.jazzcash.accountNumber) || "", "Payments", now],
+    ["bankName", (p.bank && p.bank.bankName) || "", "Payments", now],
+    ["bankTitle", (p.bank && p.bank.accountTitle) || "", "Payments", now],
+    ["bankNumber", (p.bank && p.bank.accountNumber) || "", "Payments", now],
+    ["bankIban", (p.bank && p.bank.iban) || "", "Payments", now]
+  ];
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    sheet.getRange(2, 1, lastRow - 1, headers.length).clearContent();
+  }
+  sheet.getRange(2, 1, settingsRows.length, headers.length).setValues(settingsRows);
+
+  return ContentService.createTextOutput(JSON.stringify({
+    success: true,
+    message: "Store settings and payment credentials synchronized with Google Sheets automations."
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * 2D. ORDERS FEED (GET LIVE ORDERS)
+ * Fetches all orders from Google Sheets so the Local Web App can display and manage them.
+ */
+function handleGetOrders() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("Orders");
+  if (!sheet) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      orders: []
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow <= 1) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      orders: []
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const values = sheet.getRange(2, 1, lastRow - 1, 17).getValues();
+  const orders = values.map((row, idx) => {
+    let receiptCell = String(row[16] || "");
+    let receiptLink = "";
+    if (receiptCell.includes("http")) {
+      const match = receiptCell.match(/https?:\/\/[^\s"\)]+/);
+      receiptLink = match ? match[0] : receiptCell;
+    }
+
+    return {
+      rowIndex: idx + 2,
+      orderId: String(row[0] || ""),
+      timestamp: row[1] ? new Date(row[1]).toISOString() : "",
+      customerName: String(row[2] || ""),
+      phone: String(row[3] || ""),
+      email: String(row[4] || ""),
+      city: String(row[5] || ""),
+      address: String(row[6] || ""),
+      paymentMethod: String(row[7] || "COD"),
+      total: Number(row[8] || 0),
+      status: String(row[9] || "Confirmed"),
+      courier: String(row[10] || "TCS Express"),
+      trackingNumber: String(row[11] || "N/A"),
+      itemsSummary: String(row[12] || ""),
+      notes: String(row[13] || ""),
+      confirmationEmailSent: String(row[14] || "No"),
+      dispatchEmailSent: String(row[15] || "No"),
+      receiptProof: receiptLink || receiptCell
+    };
+  });
+
+  return ContentService.createTextOutput(JSON.stringify({
+    success: true,
+    count: orders.length,
+    orders: orders.reverse() // latest orders first
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * 2E. ORDER STATUS & DISPATCH TRACKING UPDATE HANDLER
+ * Updates status in Google Sheets, saves courier & tracking ID,
+ * and automatically sends customer dispatch email.
+ */
+function handleUpdateOrderStatus(payload) {
+  const orderId = payload.orderId;
+  const newStatus = payload.status || "Dispatched";
+  const courier = payload.courier || "TCS Express";
+  const trackingNumber = payload.trackingNumber || ("TRK-" + Math.floor(10000000 + Math.random() * 90000000));
+  const sendEmail = payload.sendEmail !== false;
+
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("Orders");
+  if (!sheet) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      message: "Orders sheet not found"
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow <= 1) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      message: "No orders found in database"
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const values = sheet.getRange(2, 1, lastRow - 1, 17).getValues();
+  let foundRow = -1;
+  let orderData = null;
+
+  for (let i = 0; i < values.length; i++) {
+    if (String(values[i][0]).trim().toUpperCase() === String(orderId).trim().toUpperCase()) {
+      foundRow = i + 2;
+      orderData = values[i];
+      break;
+    }
+  }
+
+  if (foundRow === -1) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      message: `Order #${orderId} not found in database.`
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // Update Status (Col 10), Courier (Col 11), Tracking (Col 12)
+  sheet.getRange(foundRow, 10).setValue(newStatus);
+  if (courier) sheet.getRange(foundRow, 11).setValue(courier);
+  if (trackingNumber) sheet.getRange(foundRow, 12).setValue(trackingNumber);
+
+  let emailSent = false;
+  const customerEmail = String(orderData[4] || "");
+  const customerName = String(orderData[2] || "");
+
+  if (newStatus === "Dispatched" && sendEmail && customerEmail && customerEmail.includes("@")) {
+    try {
+      sendCustomerDispatchEmail({
+        orderId: orderId,
+        customerName: customerName,
+        email: customerEmail,
+        courier: courier,
+        trackingNumber: trackingNumber
+      });
+      sheet.getRange(foundRow, 16).setValue("Yes");
+      emailSent = true;
+    } catch (mailErr) {
+      Logger.log("Dispatch email error: " + mailErr.toString());
+    }
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({
+    success: true,
+    orderId: orderId,
+    status: newStatus,
+    courier: courier,
+    trackingNumber: trackingNumber,
+    emailSent: emailSent,
+    message: `Order #${orderId} status updated to ${newStatus}${emailSent ? ' & dispatch email sent to customer' : ''}.`
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * 2F. INVENTORY FEED (GET PRODUCTS)
+ */
+function handleGetInventory() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("Inventory");
+  if (!sheet || sheet.getLastRow() <= 1) {
+    return ContentService.createTextOutput(JSON.stringify({ success: true, products: [] })).setMimeType(ContentService.MimeType.JSON);
+  }
+  const values = sheet.getRange(2, 1, sheet.getLastRow() - 1, 12).getValues();
+  const products = values.map(r => ({
+    id: r[0],
+    name: r[1],
+    category: r[2],
+    price: r[3],
+    originalPrice: r[4],
+    stock: r[5],
+    rating: r[6],
+    badge: r[7],
+    featured: r[8] === "Yes",
+    variants: r[9],
+    image: r[10],
+    updatedAt: r[11]
+  }));
+  return ContentService.createTextOutput(JSON.stringify({ success: true, count: products.length, products })).setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * 2G. SETTINGS FEED (GET LIVE CONFIG)
+ */
+function handleGetSettings() {
+  const settings = getDynamicStoreSettings();
+  return ContentService.createTextOutput(JSON.stringify({ success: true, settings })).setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * 3. HEALTH CHECK & MULTI-ACTION QUERY (doGet)
  */
 function doGet(e) {
-  const orderId = e.parameter.orderId;
+  const action = (e && e.parameter && e.parameter.action) || "";
+  const orderId = e && e.parameter && e.parameter.orderId;
+
+  if (action === "get_orders") {
+    return handleGetOrders();
+  }
+
+  if (action === "get_inventory") {
+    return handleGetInventory();
+  }
+
+  if (action === "get_settings") {
+    return handleGetSettings();
+  }
+
   if (orderId) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName("Orders");
-    const data = sheet.getDataRange().getValues();
-    for (let i = 1; i < data.length; i++) {
-      if (data[i][0] == orderId) {
-        return ContentService.createTextOutput(JSON.stringify({
-          success: true,
-          orderId: data[i][0],
-          customer: data[i][2],
-          status: data[i][9],
-          courier: data[i][10],
-          trackingNumber: data[i][11]
-        })).setMimeType(ContentService.MimeType.JSON);
+    if (sheet) {
+      const data = sheet.getDataRange().getValues();
+      for (let i = 1; i < data.length; i++) {
+        if (String(data[i][0]).toUpperCase() == String(orderId).toUpperCase()) {
+          return ContentService.createTextOutput(JSON.stringify({
+            success: true,
+            orderId: data[i][0],
+            customer: data[i][2],
+            status: data[i][9],
+            courier: data[i][10],
+            trackingNumber: data[i][11]
+          })).setMimeType(ContentService.MimeType.JSON);
+        }
       }
     }
     return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Order not found" }))
@@ -715,7 +1170,8 @@ function doGet(e) {
     service: "Calenvee Official Backend API",
     account: STORE_CONFIG.ownerEmail,
     status: "online",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    supportedActions: ["create_order", "sync_catalog", "sync_settings", "update_order_status", "get_orders", "get_inventory", "get_settings"]
   })).setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -760,16 +1216,18 @@ function onEdit(e) {
  * Matches Calenvee's official high-resolution invoice template.
  */
 function sendCustomerOrderConfirmationEmail(order) {
-  const subject = `Invoice & Order Confirmation: #${order.orderId} | Calenvee`;
+  const cfg = getDynamicStoreSettings();
+  const subject = `Invoice & Order Confirmation: #${order.orderId} | ${cfg.storeName}`;
   const htmlBody = generateCustomerInvoiceEmailHtml(order);
 
   GmailApp.sendEmail(order.email, subject, "", {
     htmlBody: htmlBody,
-    name: STORE_CONFIG.storeName
+    name: cfg.storeName
   });
 }
 
 function generateCustomerInvoiceEmailHtml(order) {
+  const cfg = getDynamicStoreSettings();
   const dateStr = order.createdAt 
     ? Utilities.formatDate(new Date(order.createdAt), "Asia/Karachi", "dd MMM yyyy")
     : Utilities.formatDate(new Date(), "Asia/Karachi", "dd MMM yyyy");
@@ -1116,7 +1574,8 @@ function generateCustomerInvoiceEmailHtml(order) {
  * 6. LUXURY HTML EMAIL: DISPATCH NOTIFICATION
  */
 function sendCustomerDispatchEmail(dispatchData) {
-  const subject = `Your Order Has Been Dispatched! Tracking: ${dispatchData.trackingNumber} | Calenvee.pk`;
+  const cfg = getDynamicStoreSettings();
+  const subject = `Your Order Has Been Dispatched! Tracking: ${dispatchData.trackingNumber} | ${cfg.storeName}`;
 
   const htmlBody = `
     <!DOCTYPE html>
@@ -1126,12 +1585,12 @@ function sendCustomerDispatchEmail(dispatchData) {
       <table align="center" width="100%" style="max-width: 600px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E5E7EB; overflow: hidden; margin: 0 auto;">
         <!-- Header with Store Logo & Slogan -->
         <tr>
-          <td style="background-color: ${STORE_CONFIG.brandNavy}; padding: 32px 24px; text-align: center;">
+          <td style="background-color: ${cfg.brandNavy}; padding: 32px 24px; text-align: center;">
             <div style="margin-bottom: 10px;">
-              <img src="${STORE_CONFIG.logoUrl}" alt="${STORE_CONFIG.storeName}" style="max-height: 44px; width: auto; display: inline-block; border: 0;" />
+              <img src="${cfg.logoUrl}" alt="${cfg.storeName}" style="max-height: 44px; width: auto; display: inline-block; border: 0;" />
             </div>
             <h1 style="color: #FFFFFF; margin: 0; font-size: 24px; letter-spacing: 2px; font-weight: 800; font-family: 'Arial Black', Arial, sans-serif;">CALENVEE</h1>
-            <p style="color: ${STORE_CONFIG.brandOrange}; font-size: 11px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 2px; font-weight: bold;">${STORE_CONFIG.storeTagline} • ORDER DISPATCHED</p>
+            <p style="color: ${cfg.brandOrange}; font-size: 11px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 2px; font-weight: bold;">${cfg.storeTagline} • ORDER DISPATCHED</p>
           </td>
         </tr>
         <tr>
@@ -1149,7 +1608,7 @@ function sendCustomerDispatchEmail(dispatchData) {
             </div>
 
             <p style="font-size: 12px; color: #6B7280; margin-top: 20px;">
-              Need delivery status assistance? WhatsApp us at <a href="https://wa.me/${STORE_CONFIG.helplineWhatsAppRaw}" style="color: #F97316; font-weight: bold;">${STORE_CONFIG.helplinePhone}</a>.
+              Need delivery status assistance? WhatsApp us at <a href="https://wa.me/${cfg.helplineWhatsAppRaw}" style="color: #F97316; font-weight: bold;">${cfg.helplinePhone}</a>.
             </p>
           </td>
         </tr>
@@ -1160,7 +1619,7 @@ function sendCustomerDispatchEmail(dispatchData) {
 
   GmailApp.sendEmail(dispatchData.email, subject, "", {
     htmlBody: htmlBody,
-    name: STORE_CONFIG.storeName
+    name: cfg.storeName
   });
 }
 
@@ -1168,6 +1627,7 @@ function sendCustomerDispatchEmail(dispatchData) {
  * 7. STORE OWNER NOTIFICATION EMAIL (WITH ATTACHED PAYMENT RECEIPT)
  */
 function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
+  const cfg = getDynamicStoreSettings();
   const isPrepaid = (order.paymentMethod || "cod").toLowerCase() !== "cod";
   const hasReceipt = !!receiptBlob;
   
@@ -1241,10 +1701,10 @@ function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
       <table align="center" width="100%" style="max-width: 600px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E2E8F0; overflow: hidden; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
         <!-- Top Banner -->
         <tr>
-          <td style="background-color: ${STORE_CONFIG.brandNavy}; padding: 24px 20px; text-align: center;">
-            <img src="${STORE_CONFIG.logoUrl}" alt="Calenvee.pk" style="max-height: 38px; margin-bottom: 8px;" />
+          <td style="background-color: ${cfg.brandNavy}; padding: 24px 20px; text-align: center;">
+            <img src="${cfg.logoUrl}" alt="${cfg.storeName}" style="max-height: 38px; margin-bottom: 8px;" />
             <div style="color: #FFFFFF; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">🔥 NEW ORDER RECEIVED</div>
-            <div style="color: ${STORE_CONFIG.brandOrange}; font-size: 10px; font-weight: bold; margin-top: 4px; letter-spacing: 1.5px;">${STORE_CONFIG.storeTagline}</div>
+            <div style="color: ${cfg.brandOrange}; font-size: 10px; font-weight: bold; margin-top: 4px; letter-spacing: 1.5px;">${cfg.storeTagline}</div>
           </td>
         </tr>
 
@@ -1259,7 +1719,7 @@ function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
                 </td>
                 <td style="text-align: right;">
                   <span style="font-size: 11px; color: #64748B; text-transform: uppercase;">Total Payable</span>
-                  <div style="font-size: 22px; font-weight: 800; color: ${STORE_CONFIG.brandOrange};">Rs. ${order.total.toLocaleString()}</div>
+                  <div style="font-size: 22px; font-weight: 800; color: ${cfg.brandOrange};">Rs. ${order.total.toLocaleString()}</div>
                 </td>
               </tr>
             </table>
@@ -1300,7 +1760,7 @@ function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
             <table width="100%" style="margin-top: 10px;">
               <tr>
                 <td align="center">
-                  <a href="${SpreadsheetApp.getActiveSpreadsheet().getUrl()}" target="_blank" style="background-color: ${STORE_CONFIG.brandNavy}; color: #FFFFFF; font-size: 12px; font-weight: bold; padding: 12px 24px; border-radius: 10px; text-decoration: none; display: inline-block;">
+                  <a href="${SpreadsheetApp.getActiveSpreadsheet().getUrl()}" target="_blank" style="background-color: ${cfg.brandNavy}; color: #FFFFFF; font-size: 12px; font-weight: bold; padding: 12px 24px; border-radius: 10px; text-decoration: none; display: inline-block;">
                     Open Orders in Google Sheets 📊
                   </a>
                 </td>
@@ -1329,7 +1789,7 @@ function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
     mailOptions.attachments = [receiptBlob];
   }
 
-  GmailApp.sendEmail(STORE_CONFIG.ownerEmail, subject, "", mailOptions);
+  GmailApp.sendEmail(cfg.ownerEmail, subject, "", mailOptions);
 }
 
 /**
@@ -1339,7 +1799,7 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu("Calenvee Store")
     .addItem("📊 1. Build / Refresh Executive Dashboard", "createExecutiveDashboard")
-    .addItem("⚙️ 2. Setup All Sheets (Dashboard + Orders + OrderItems)", "setupSheet")
+    .addItem("⚙️ 2. Setup All Sheets (Dashboard + Orders + OrderItems + Inventory + Settings)", "setupSheet")
     .addSeparator()
     .addItem("✉️ 3. Send Dispatch Email for Selected Row", "sendDispatchEmailForSelectedRow")
     .addItem("🧪 4. Send Test Email to Store Owner", "testOrderEmail")

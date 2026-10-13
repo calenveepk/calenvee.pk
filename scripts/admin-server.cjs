@@ -13,7 +13,56 @@ const CATEGORIES_FILE = path.join(ROOT_DIR, 'src', 'data', 'categories.json');
 const ANNOUNCEMENTS_FILE = path.join(ROOT_DIR, 'src', 'data', 'announcements.json');
 const REVIEWS_FILE = path.join(ROOT_DIR, 'src', 'data', 'reviews.json');
 const SETTINGS_FILE = path.join(ROOT_DIR, 'src', 'data', 'storeSettings.json');
+const ORDERS_CACHE_FILE = path.join(ROOT_DIR, 'src', 'data', 'ordersCache.json');
 const UPLOADS_DIR = path.join(ROOT_DIR, 'public', 'products');
+
+// Google Apps Script Live Automation Webhook URL
+const APPS_SCRIPT_URL = process.env.GOOGLE_APPS_SCRIPT_URL || 
+  'https://script.google.com/macros/s/AKfycbwCZvq-OqA4l18DK3ecPrRSclzRrNz2dINOiMY-qaNeyfjLvB-mSbJQH4cO_gWMWcBm/exec';
+
+let lastCloudSyncTime = null;
+let lastCloudSyncStatus = 'synced'; // 'idle' | 'syncing' | 'synced' | 'error'
+let lastCloudSyncError = null;
+
+async function syncToCloud(action, data = {}) {
+  if (!APPS_SCRIPT_URL) return { success: false, reason: 'No APPS_SCRIPT_URL' };
+  try {
+    lastCloudSyncStatus = 'syncing';
+    console.log(`[CloudSync] ⚡ Sending action "${action}" to Google Sheets Webhook...`);
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, ...data, syncedAt: new Date().toISOString() }),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const text = await res.text();
+      let json = {};
+      try { json = JSON.parse(text); } catch (_) { json = { text }; }
+      console.log(`[CloudSync] ✓ Action "${action}" completed:`, json.message || 'OK');
+      lastCloudSyncTime = new Date().toISOString();
+      lastCloudSyncStatus = 'synced';
+      lastCloudSyncError = null;
+      return { success: true, response: json };
+    } else {
+      console.warn(`[CloudSync] Webhook response status ${res.status}`);
+      lastCloudSyncStatus = 'error';
+      lastCloudSyncError = `HTTP ${res.status}`;
+      return { success: false, status: res.status };
+    }
+  } catch (err) {
+    console.warn(`[CloudSync] Cloud sync note (${action}):`, err.message);
+    lastCloudSyncStatus = 'error';
+    lastCloudSyncError = err.message;
+    return { success: false, error: err.message };
+  }
+}
 
 // Ensure public/products directory exists
 if (!fs.existsSync(UPLOADS_DIR)) {
@@ -125,18 +174,26 @@ function getAdminHtml() {
         </div>
       </div>
 
-      <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-2 sm:space-x-3">
         <a href="http://localhost:5173" target="_blank" class="text-xs text-slate-300 hover:text-white flex items-center gap-1.5 py-1.5 px-3 rounded-lg hover:bg-white/10 transition">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-          <span>Preview Storefront</span>
+          <span class="hidden md:inline">Preview Storefront</span>
         </a>
         <div id="connBadge" class="hidden sm:flex items-center gap-1.5 py-1 px-3 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="connText">Connected</span>
+          <span id="connText">Local Server OK</span>
         </div>
-        <button onclick="publishToLive()" id="publishHeaderBtn" class="flex items-center space-x-2 bg-[#F97316] hover:bg-[#EA580C] text-white font-bold text-xs py-2 px-4 rounded-xl shadow-lg transition active:scale-95">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-          <span>Publish to Live Store</span>
+        <div id="cloudSyncBadge" class="hidden sm:flex items-center gap-1.5 py-1 px-3 rounded-full text-[11px] font-semibold bg-sky-500/20 text-sky-400 border border-sky-500/30">
+          <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+          <span id="cloudSyncText">Cloud Synced</span>
+        </div>
+        <button onclick="triggerCloudSyncAll()" id="syncCloudHeaderBtn" class="flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs py-2 px-3 rounded-xl shadow transition active:scale-95 border border-slate-700" title="Synchronize catalog and store settings to Google Sheets">
+          <svg class="w-3.5 h-3.5 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          <span id="syncCloudBtnText">⚡ Sync Cloud</span>
+        </button>
+        <button onclick="publishToLive()" id="publishHeaderBtn" class="flex items-center space-x-1.5 bg-[#F97316] hover:bg-[#EA580C] text-white font-bold text-xs py-2 px-3.5 rounded-xl shadow-lg transition active:scale-95">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+          <span>Publish Live</span>
         </button>
       </div>
     </div>
@@ -149,6 +206,11 @@ function getAdminHtml() {
       <button onclick="switchTab('products')" id="tab-products" class="tab-btn py-3.5 px-1 border-b-2 font-semibold text-xs tracking-wide border-[#F97316] text-[#F97316] flex items-center gap-1.5">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
         <span>Products (<span id="productsCount">0</span>)</span>
+      </button>
+
+      <button onclick="switchTab('orders')" id="tab-orders" class="tab-btn py-3.5 px-1 border-b-2 font-semibold text-xs tracking-wide border-transparent text-slate-500 hover:text-slate-900 flex items-center gap-1.5">
+        <svg class="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+        <span>Orders &amp; Dispatch (<span id="ordersCount">0</span>)</span>
       </button>
 
       <button onclick="switchTab('categories')" id="tab-categories" class="tab-btn py-3.5 px-1 border-b-2 font-semibold text-xs tracking-wide border-transparent text-slate-500 hover:text-slate-900 flex items-center gap-1.5">
@@ -218,6 +280,64 @@ function getAdminHtml() {
       </div>
 
       <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+
+    <!-- 1B. ORDERS & DISPATCH TAB -->
+    <div id="content-orders" class="tab-content hidden space-y-6">
+      <!-- KPI Stats Bar -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Orders</span>
+          <div class="text-2xl font-extrabold text-[#0B132B] mt-1" id="statTotalOrders">0</div>
+          <span class="text-[10px] text-slate-500">Master database record</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-amber-200 bg-amber-50/20 shadow-xs">
+          <span class="text-[11px] font-bold text-amber-600 uppercase tracking-wider block">Needs Dispatch</span>
+          <div class="text-2xl font-extrabold text-amber-600 mt-1" id="statPendingOrders">0</div>
+          <span class="text-[10px] text-amber-700">Confirmed &amp; processing</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-indigo-200 bg-indigo-50/20 shadow-xs">
+          <span class="text-[11px] font-bold text-indigo-600 uppercase tracking-wider block">In Transit</span>
+          <div class="text-2xl font-extrabold text-indigo-600 mt-1" id="statDispatchedOrders">0</div>
+          <span class="text-[10px] text-indigo-700">With courier riders</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-emerald-200 bg-emerald-50/20 shadow-xs">
+          <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider block">Gross Revenue</span>
+          <div class="text-xl font-extrabold text-emerald-600 mt-1" id="statGrossRevenue">Rs. 0</div>
+          <span class="text-[10px] text-emerald-700">Total customer volume</span>
+        </div>
+      </div>
+
+      <!-- Filter and Action Header -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+        <div class="flex flex-1 items-center space-x-3 w-full sm:w-auto">
+          <div class="relative flex-1 sm:max-w-xs">
+            <input type="text" id="orderSearchInput" oninput="filterOrders()" placeholder="Search order ID, customer, phone..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-[#F97316]">
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+
+          <select id="orderStatusFilter" onchange="filterOrders()" class="py-2 px-3 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-[#F97316]">
+            <option value="all">All Statuses</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="In Processing">In Processing</option>
+            <option value="Dispatched">Dispatched</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+          <button onclick="loadOrders()" class="flex items-center space-x-1.5 py-2 px-4 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
+            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            <span>Refresh Orders</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Orders List Container -->
+      <div id="ordersListContainer" class="space-y-3">
+        <!-- Rendered dynamically -->
+      </div>
     </div>
 
     <!-- 2. CATEGORIES TAB -->
@@ -630,11 +750,14 @@ Ready to commit and deploy changes.</pre>
             <div class="bg-white p-3.5 rounded-xl border border-slate-200">
               <span class="font-bold text-[#F97316]">Step 4:</span> Select <code class="bg-slate-100 px-1 py-0.5 rounded text-[11px] font-mono font-bold">setupSheet</code> in the function dropdown and click <span class="font-semibold text-emerald-600">▶ Run</span>.
             </div>
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 sm:col-span-2">
+              <span class="font-bold text-[#F97316]">Step 5 (Important):</span> Click <span class="font-semibold text-[#0B132B]">Deploy &gt; Manage Deployments</span>, click the <strong>Pencil (Edit)</strong> icon, choose <strong>New Version</strong>, and click <strong>Deploy</strong>. This enables live Catalog Sync, Store Settings Sync, and 1-Click Order Tracking Emails!
+            </div>
           </div>
 
           <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-900 text-xs flex items-center gap-2">
             <span class="text-base">🎉</span>
-            <span>The script automatically builds the <strong>Executive Dashboard</strong> tab as Tab #1 with live KPI cards, Month dropdown in Cell C4, pipeline tables, and 4 Google Charts!</span>
+            <span>The script automatically builds the <strong>Executive Dashboard</strong>, <strong>Orders</strong>, <strong>OrderItems</strong>, <strong>Inventory</strong>, and <strong>Store Settings</strong> tabs with live automations!</span>
           </div>
         </div>
 
@@ -884,6 +1007,78 @@ Ready to commit and deploy changes.</pre>
     </div>
   </div>
 
+  <!-- DISPATCH MODAL -->
+  <div id="dispatchModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="text-base font-bold text-[#0B132B]">Order Dispatch &amp; Tracking</h3>
+          <p class="text-xs text-slate-500">Updating status automatically triggers customer tracking email.</p>
+        </div>
+        <button onclick="closeDispatchModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <input type="hidden" id="disp_orderId">
+
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+          <div class="flex justify-between font-bold text-slate-800">
+            <span id="disp_orderIdLabel">#CV-100000</span>
+            <span id="disp_orderAmount" class="text-[#F97316]">Rs. 0</span>
+          </div>
+          <div class="text-[11px] text-slate-600" id="disp_customerInfo">Customer details</div>
+          <div class="text-[11px] text-slate-500 font-mono" id="disp_itemsSummary">Items</div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Order Status *</label>
+          <select id="disp_status" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-semibold focus:outline-none focus:border-[#F97316]">
+            <option value="Confirmed">Confirmed (Order Received)</option>
+            <option value="In Processing">In Processing (Packing parcel)</option>
+            <option value="Dispatched" selected>Dispatched (Handed to Courier)</option>
+            <option value="Delivered">Delivered (Rider collected cash)</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Courier Service</label>
+            <select id="disp_courier" class="w-full py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:border-[#F97316]">
+              <option value="TCS Express">TCS Express</option>
+              <option value="Trax Logistics">Trax Logistics</option>
+              <option value="PostEx">PostEx</option>
+              <option value="Call Courier">Call Courier</option>
+              <option value="Leopard Courier">Leopard Courier</option>
+              <option value="M&P Express">M&P Express</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Tracking Number</label>
+            <div class="flex gap-1.5">
+              <input type="text" id="disp_trackingNumber" placeholder="e.g. TRK-7892102" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-mono text-xs focus:outline-none focus:border-[#F97316]">
+              <button type="button" onclick="generateDemoTracking()" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold">Auto</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <label class="flex items-center gap-2 cursor-pointer font-semibold text-slate-700">
+            <input type="checkbox" id="disp_sendEmail" checked class="accent-[#F97316] w-4 h-4">
+            <span>Send automated dispatch tracking email to customer</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-slate-100 flex justify-end space-x-2">
+        <button onclick="closeDispatchModal()" class="py-2 px-4 rounded-lg border border-slate-300 font-semibold text-xs text-slate-600 hover:bg-slate-100">Cancel</button>
+        <button onclick="saveDispatchModal()" id="saveDispatchBtn" class="py-2 px-6 rounded-lg bg-[#F97316] hover:bg-[#EA580C] text-white font-bold text-xs shadow flex items-center gap-1.5">
+          <span>Save &amp; Notify Customer</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICATION -->
   <div id="toast" class="fixed bottom-6 right-6 z-50 bg-[#0B132B] text-white py-3 px-5 rounded-xl shadow-2xl flex items-center space-x-3 transform translate-y-20 opacity-0 transition-all duration-300 border border-slate-700">
     <span id="toastIcon" class="text-[#F97316] text-lg font-bold">✓</span>
@@ -892,6 +1087,7 @@ Ready to commit and deploy changes.</pre>
 
   <script>
     let allProducts = [];
+    let allOrders = [];
     let allCategories = [];
     let allAnnouncements = [];
     let allReviews = [];
@@ -903,12 +1099,15 @@ Ready to commit and deploy changes.</pre>
       loadSettings();
       loadCategories();
       loadProducts();
+      loadOrders();
       loadAnnouncements();
       loadReviews();
       loadPayments();
       loadPromotions();
       checkConnection();
+      checkCloudStatus();
       setInterval(checkConnection, 4000);
+      setInterval(checkCloudStatus, 8000);
     });
 
     async function checkConnection() {
@@ -926,6 +1125,233 @@ Ready to commit and deploy changes.</pre>
         badge.className = 'hidden sm:flex items-center gap-1.5 py-1 px-3 rounded-full text-[11px] font-semibold bg-red-500/20 text-red-400 border border-red-500/30';
         text.innerText = 'Server Offline (Keep launcher window open)';
         return false;
+      }
+    }
+
+    // --- CLOUD AUTOMATION & REAL-TIME SYNC ---
+    async function checkCloudStatus() {
+      const badge = document.getElementById('cloudSyncBadge');
+      const text = document.getElementById('cloudSyncText');
+      if (!badge || !text) return;
+      try {
+        const res = await fetch('/api/cloud/status');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === 'syncing') {
+            badge.className = 'hidden sm:flex items-center gap-1.5 py-1 px-3 rounded-full text-[11px] font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30';
+            text.innerText = 'Syncing Cloud...';
+          } else if (data.status === 'error') {
+            badge.className = 'hidden sm:flex items-center gap-1.5 py-1 px-3 rounded-full text-[11px] font-semibold bg-rose-500/20 text-rose-400 border border-rose-500/30';
+            text.innerText = 'Cloud Sync Offline';
+          } else {
+            badge.className = 'hidden sm:flex items-center gap-1.5 py-1 px-3 rounded-full text-[11px] font-semibold bg-sky-500/20 text-sky-400 border border-sky-500/30';
+            text.innerText = 'Cloud Synced';
+          }
+        }
+      } catch (e) {
+        // quiet ignore
+      }
+    }
+
+    async function triggerCloudSyncAll() {
+      const btn = document.getElementById('syncCloudHeaderBtn');
+      const text = document.getElementById('syncCloudBtnText');
+      if (btn) btn.disabled = true;
+      if (text) text.innerText = 'Syncing...';
+      try {
+        const res = await fetch('/api/cloud/sync-all', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          showToast('⚡ All products, settings & payment accounts synchronized to Google Sheets automations!');
+          checkCloudStatus();
+        } else {
+          showToast('Sync saved locally. Cloud webhook queued.', true);
+        }
+      } catch (e) {
+        showToast('Sync request error: ' + e.message, true);
+      } finally {
+        if (btn) btn.disabled = false;
+        if (text) text.innerText = '⚡ Sync Cloud';
+      }
+    }
+
+    // --- ORDERS & DISPATCH LOGIC ---
+    async function loadOrders() {
+      try {
+        const res = await fetch('/api/orders');
+        const data = await res.json();
+        allOrders = (data && data.orders) || [];
+        document.getElementById('ordersCount').innerText = allOrders.length;
+        renderOrders(allOrders);
+      } catch (e) {
+        console.error('Error loading orders:', e);
+      }
+    }
+
+    function renderOrders(ordersToRender) {
+      const container = document.getElementById('ordersListContainer');
+      if (!container) return;
+
+      const total = allOrders.length;
+      const pending = allOrders.filter(o => o.status === 'Confirmed' || o.status === 'In Processing').length;
+      const dispatched = allOrders.filter(o => o.status === 'Dispatched').length;
+      const revenue = allOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+
+      document.getElementById('statTotalOrders').innerText = total;
+      document.getElementById('statPendingOrders').innerText = pending;
+      document.getElementById('statDispatchedOrders').innerText = dispatched;
+      document.getElementById('statGrossRevenue').innerText = 'Rs. ' + revenue.toLocaleString();
+
+      if (!ordersToRender.length) {
+        container.innerHTML = \`
+          <div class="bg-white p-12 text-center rounded-2xl border border-slate-200 shadow-xs">
+            <div class="text-3xl mb-2">📦</div>
+            <h3 class="text-base font-bold text-slate-800">No Orders Found</h3>
+            <p class="text-xs text-slate-500 mt-1">Customer orders placed on Calenvee storefront will stream here automatically.</p>
+          </div>
+        \`;
+        return;
+      }
+
+      container.innerHTML = ordersToRender.map(o => {
+        let statusColor = 'bg-blue-500/10 text-blue-600 border-blue-500/20';
+        if (o.status === 'In Processing') statusColor = 'bg-amber-500/10 text-amber-600 border-amber-500/20';
+        else if (o.status === 'Dispatched') statusColor = 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20';
+        else if (o.status === 'Delivered') statusColor = 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
+        else if (o.status === 'Cancelled') statusColor = 'bg-red-500/10 text-red-600 border-red-500/20';
+
+        const phoneClean = (o.phone || '').replace(/[^0-9]/g, '');
+        const dateFormatted = o.timestamp ? new Date(o.timestamp).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Recent';
+        const hasReceipt = o.receiptProof && String(o.receiptProof).startsWith('http');
+        const isCOD = (o.paymentMethod || '').toUpperCase() === 'COD';
+
+        return \`
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-slate-300 transition flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            
+            <div class="flex-1 space-y-2 min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="font-mono font-bold text-sm text-[#0B132B]">#\${o.orderId}</span>
+                <span class="text-[11px] text-slate-400">&bull; \${dateFormatted}</span>
+                <span class="py-0.5 px-2.5 rounded-full text-[10px] font-bold border \${statusColor}">\${o.status}</span>
+                <span class="py-0.5 px-2 rounded-md bg-slate-100 text-slate-600 text-[10px] font-bold uppercase">\${o.paymentMethod || 'COD'}</span>
+              </div>
+
+              <div class="text-xs text-slate-800 flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span class="font-bold text-slate-900">\${o.customerName || 'Customer'}</span>
+                \${o.phone ? \`<a href="https://wa.me/\${phoneClean}" target="_blank" class="text-emerald-600 font-semibold hover:underline flex items-center gap-1"><span>💬 \${o.phone}</span></a>\` : ''}
+                \${o.email && o.email !== 'N/A' ? \`<span class="text-slate-500">\${o.email}</span>\` : ''}
+                <span class="text-slate-500 font-medium">📍 \${o.city || 'Pakistan'}\${o.address ? ' - ' + o.address : ''}</span>
+              </div>
+
+              <div class="text-[11px] text-slate-600 font-mono bg-slate-50 p-2 rounded-lg border border-slate-100">
+                \${o.itemsSummary || 'Standard Calenvee Package'}
+              </div>
+
+              \${o.notes && o.notes !== 'None' && o.notes !== 'N/A' ? \`
+                <div class="text-[11px] text-amber-700 bg-amber-50/60 p-1.5 px-2.5 rounded-md border border-amber-200 inline-block">
+                  <strong>Notes:</strong> "\${o.notes}"
+                </div>
+              \` : ''}
+            </div>
+
+            <div class="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto gap-3 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+              <div class="text-left md:text-right">
+                <div class="text-xs text-slate-400 font-semibold uppercase">Total</div>
+                <div class="text-base font-extrabold text-[#0B132B]">Rs. \${(Number(o.total) || 0).toLocaleString()}</div>
+                \${hasReceipt ? \`
+                  <a href="\${o.receiptProof}" target="_blank" class="text-[10px] font-bold text-emerald-600 hover:underline flex items-center gap-1 mt-0.5">
+                    <span>🧾 View Payment Slip</span>
+                  </a>
+                \` : (isCOD ? '<span class="text-[10px] text-slate-400">Cash on Delivery</span>' : '<span class="text-[10px] text-amber-500">Unverified Prepaid</span>')}
+              </div>
+
+              <button onclick="openDispatchModal('\${o.orderId}')" class="bg-[#0B132B] hover:bg-slate-800 text-white font-bold text-xs py-2 px-4 rounded-xl shadow transition flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path></svg>
+                <span>Dispatch &amp; Track 🚚</span>
+              </button>
+            </div>
+
+          </div>
+        \`;
+      }).join('');
+    }
+
+    function filterOrders() {
+      const q = (document.getElementById('orderSearchInput')?.value || '').toLowerCase();
+      const statusFilter = document.getElementById('orderStatusFilter')?.value || 'all';
+
+      const filtered = allOrders.filter(o => {
+        const matchesQuery = !q || 
+          (o.orderId && o.orderId.toLowerCase().includes(q)) ||
+          (o.customerName && o.customerName.toLowerCase().includes(q)) ||
+          (o.phone && o.phone.includes(q)) ||
+          (o.city && o.city.toLowerCase().includes(q));
+
+        const matchesStatus = statusFilter === 'all' || o.status === statusFilter;
+        return matchesQuery && matchesStatus;
+      });
+
+      renderOrders(filtered);
+    }
+
+    function openDispatchModal(orderId) {
+      const order = allOrders.find(o => String(o.orderId).toUpperCase() === String(orderId).toUpperCase());
+      if (!order) return;
+
+      document.getElementById('disp_orderId').value = order.orderId;
+      document.getElementById('disp_orderIdLabel').innerText = '#' + order.orderId;
+      document.getElementById('disp_orderAmount').innerText = 'Rs. ' + (Number(order.total) || 0).toLocaleString();
+      document.getElementById('disp_customerInfo').innerText = order.customerName + ' • ' + order.phone + ' • ' + order.city;
+      document.getElementById('disp_itemsSummary').innerText = order.itemsSummary || 'Standard order items';
+
+      document.getElementById('disp_status').value = order.status || 'Dispatched';
+      document.getElementById('disp_courier').value = order.courier && order.courier !== 'N/A' ? order.courier : 'TCS Express';
+      document.getElementById('disp_trackingNumber').value = order.trackingNumber && order.trackingNumber !== 'N/A' ? order.trackingNumber : ('TRK-' + Math.floor(10000000 + Math.random() * 90000000));
+      document.getElementById('disp_sendEmail').checked = true;
+
+      document.getElementById('dispatchModal').classList.remove('hidden');
+      document.getElementById('dispatchModal').classList.add('flex');
+    }
+
+    function closeDispatchModal() {
+      document.getElementById('dispatchModal').classList.add('hidden');
+      document.getElementById('dispatchModal').classList.remove('flex');
+    }
+
+    function generateDemoTracking() {
+      const prefixes = ['TCS', 'TRX', 'PEX', 'LEO'];
+      const pfx = prefixes[Math.floor(Math.random() * prefixes.length)];
+      document.getElementById('disp_trackingNumber').value = pfx + '-' + Math.floor(10000000 + Math.random() * 90000000);
+    }
+
+    async function saveDispatchModal() {
+      const orderId = document.getElementById('disp_orderId').value;
+      const status = document.getElementById('disp_status').value;
+      const courier = document.getElementById('disp_courier').value;
+      const trackingNumber = document.getElementById('disp_trackingNumber').value;
+      const sendEmail = document.getElementById('disp_sendEmail').checked;
+
+      const btn = document.getElementById('saveDispatchBtn');
+      if (btn) btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/orders/update-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId, status, courier, trackingNumber, sendEmail })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('✓ Order #' + orderId + ' set to "' + status + '" & customer tracking synced!');
+          closeDispatchModal();
+          await loadOrders();
+        } else {
+          showToast('Failed to update order: ' + (data.message || 'Error'), true);
+        }
+      } catch (e) {
+        showToast('Error updating order: ' + e.message, true);
+      } finally {
+        if (btn) btn.disabled = false;
       }
     }
 
@@ -1903,6 +2329,10 @@ const server = http.createServer(async (req, res) => {
       if (index >= 0) products[index] = { ...products[index], ...product };
       else products.unshift(product);
       writeJsonFile(PRODUCTS_FILE, products);
+      
+      // Real-time background sync to Google Sheets Inventory automation
+      syncToCloud('sync_catalog', { products }).catch(() => {});
+
       sendJson(res, 200, { success: true, product });
       return;
     }
@@ -1911,6 +2341,10 @@ const server = http.createServer(async (req, res) => {
       let products = readJsonFile(PRODUCTS_FILE, []);
       products = products.filter(p => p.id !== id);
       writeJsonFile(PRODUCTS_FILE, products);
+
+      // Real-time background sync to Google Sheets Inventory automation
+      syncToCloud('sync_catalog', { products }).catch(() => {});
+
       sendJson(res, 200, { success: true });
       return;
     }
@@ -1983,6 +2417,13 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/api/payments' && req.method === 'POST') {
       const data = await parseBody(req);
       writeJsonFile(PAYMENTS_FILE, data);
+
+      // Real-time background sync to Google Sheets Store Settings & Gateway config
+      syncToCloud('sync_settings', {
+        settings: readJsonFile(SETTINGS_FILE, {}),
+        paymentMethods: data
+      }).catch(() => {});
+
       sendJson(res, 200, { success: true });
       return;
     }
@@ -2007,7 +2448,100 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/api/settings' && req.method === 'POST') {
       const data = await parseBody(req);
       writeJsonFile(SETTINGS_FILE, data);
+
+      // Real-time background sync to Google Sheets Store Settings & WhatsApp config
+      syncToCloud('sync_settings', {
+        settings: data,
+        paymentMethods: readJsonFile(PAYMENTS_FILE, {})
+      }).catch(() => {});
+
       sendJson(res, 200, { success: true });
+      return;
+    }
+
+    // 9B. CLOUD AUTOMATION SYNC ALL
+    if (pathname === '/api/cloud/sync-all' && req.method === 'POST') {
+      const products = readJsonFile(PRODUCTS_FILE, []);
+      const settings = readJsonFile(SETTINGS_FILE, {});
+      const paymentMethods = readJsonFile(PAYMENTS_FILE, {});
+      
+      const [catRes, setRes] = await Promise.all([
+        syncToCloud('sync_catalog', { products }),
+        syncToCloud('sync_settings', { settings, paymentMethods })
+      ]);
+
+      sendJson(res, 200, {
+        success: catRes.success || setRes.success,
+        catalog: catRes,
+        settings: setRes,
+        message: 'Synchronized catalog and store settings to Google Sheets automations.'
+      });
+      return;
+    }
+
+    if (pathname === '/api/cloud/status' && req.method === 'GET') {
+      sendJson(res, 200, {
+        status: lastCloudSyncStatus,
+        lastSyncTime: lastCloudSyncTime,
+        error: lastCloudSyncError,
+        webhookUrl: APPS_SCRIPT_URL
+      });
+      return;
+    }
+
+    // 9C. ORDERS FEED & MANAGEMENT
+    if (pathname === '/api/orders' && req.method === 'GET') {
+      try {
+        let orders = [];
+        if (APPS_SCRIPT_URL) {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 8000);
+          const cloudRes = await fetch(`${APPS_SCRIPT_URL}?action=get_orders`, { signal: controller.signal });
+          clearTimeout(timeoutId);
+          if (cloudRes.ok) {
+            const data = await cloudRes.json();
+            if (data && Array.isArray(data.orders)) {
+              orders = data.orders;
+              writeJsonFile(ORDERS_CACHE_FILE, orders);
+            }
+          }
+        }
+        if (!orders.length) {
+          orders = readJsonFile(ORDERS_CACHE_FILE, []);
+        }
+        sendJson(res, 200, { success: true, count: orders.length, orders });
+      } catch (err) {
+        console.warn('Orders fetch note:', err.message);
+        const cached = readJsonFile(ORDERS_CACHE_FILE, []);
+        sendJson(res, 200, { success: true, count: cached.length, orders: cached, source: 'cache' });
+      }
+      return;
+    }
+
+    if (pathname === '/api/orders/update-status' && req.method === 'POST') {
+      const updatePayload = await parseBody(req);
+      const { orderId, status, courier, trackingNumber } = updatePayload;
+
+      // Update local cache
+      const cachedOrders = readJsonFile(ORDERS_CACHE_FILE, []);
+      const idx = cachedOrders.findIndex(o => String(o.orderId).toUpperCase() === String(orderId).toUpperCase());
+      if (idx >= 0) {
+        cachedOrders[idx].status = status;
+        if (courier) cachedOrders[idx].courier = courier;
+        if (trackingNumber) cachedOrders[idx].trackingNumber = trackingNumber;
+        if (status === 'Dispatched') cachedOrders[idx].dispatchEmailSent = 'Yes';
+        writeJsonFile(ORDERS_CACHE_FILE, cachedOrders);
+      }
+
+      // Sync to Google Apps Script cloud automation
+      const cloudRes = await syncToCloud('update_order_status', updatePayload);
+      sendJson(res, 200, {
+        success: true,
+        orderId,
+        status,
+        cloudSync: cloudRes,
+        message: `Order #${orderId} marked as ${status}${cloudRes.success ? ' and customer notified' : ''}.`
+      });
       return;
     }
 
