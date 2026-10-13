@@ -1,44 +1,47 @@
 /**
  * ==============================================================================
- * CALENVEE.PK — PRODUCTION GOOGLE APPS SCRIPT BACKEND
+ * CALENVEE.PK — OFFICIAL BACKEND AUTOMATION SCRIPT
  * ==============================================================================
+ * Official Store Account: calenvee.pk@gmail.com
+ * Website: https://calenvee.pk
+ * Helpline: +923001234567 (Nationwide Cash on Delivery 7-10 Days)
  * 
- * Capabilities:
- * 1. Webhook API: Receives orders from frontend checkout & logs into Google Sheets
- * 2. Automated Emails: Sends luxury HTML Order Confirmation, Dispatch, and Delivery emails
- * 3. Store Owner Alerts: Notifies the owner whenever an order arrives
- * 4. Tracking & Status: onEdit trigger automatically sends Dispatch Email when status is changed to "Dispatched"
- * 5. Custom Menu: Adds "Calenvee Manager" menu in Google Sheets for 1-click actions
- * 
- * Cost: $0 / Month (Uses Google Free Tier: 100 emails/day, unlimited Sheets storage)
+ * Features:
+ * 1. Webhook API (doPost): Logs orders from the checkout page directly to Google Sheets.
+ * 2. Customer Order Confirmation Email: Sends luxury HTML receipt with order summary.
+ * 3. Store Owner Instant Alert: Sends notification to calenvee.pk@gmail.com.
+ * 4. Dispatch Tracking Email (onEdit / Menu): Automatically sends courier tracking details.
+ * 5. One-Click Setup (setupSheet): Auto-creates tabs, headers, dropdowns & colors.
+ * 6. Test Suite: Click "testOrderEmail" in the editor to test instantly!
  * ==============================================================================
  */
 
-// CONFIGURATION: Set your store owner email address here
+// OFFICIAL STORE CONFIGURATION
 const STORE_CONFIG = {
   storeName: "Calenvee.pk",
   storeTagline: "Engineered for Modern Presence",
-  ownerEmail: "mrvirkjutt106@gmail.com", // <-- Replace with your email to receive order alerts
+  ownerEmail: "calenvee.pk@gmail.com", // Official Store Gmail
   helplinePhone: "+923001234567",
   helplineWhatsAppRaw: "923001234567",
   deliveryWindow: "Nationwide Cash on Delivery (7-10 Days)",
-  brandColorNavy: "#0B132B",
-  brandColorOrange: "#F97316"
+  brandNavy: "#0B132B",
+  brandOrange: "#F97316"
 };
 
 /**
- * 1. SETUP SPREADSHEET HEADERS & TABS
- * Run this function once from the script editor or from the custom menu.
+ * 1. ONE-TIME SETUP FUNCTION (Run this once)
+ * Creates "Orders" and "OrderItems" sheets with professional styling, 
+ * frozen rows, auto-column widths, and status dropdowns.
  */
 function setupSheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  
-  // Sheet 1: Orders (Master Record)
+
+  // Tab 1: Orders (Master Record)
   let ordersSheet = ss.getSheetByName("Orders");
   if (!ordersSheet) {
     ordersSheet = ss.insertSheet("Orders");
   }
-  
+
   const orderHeaders = [
     "Order ID",
     "Timestamp",
@@ -48,7 +51,7 @@ function setupSheet() {
     "City",
     "Delivery Address",
     "Payment Method",
-    "Total (PKR)",
+    "Total Payable (PKR)",
     "Order Status",
     "Courier",
     "Tracking Number",
@@ -57,46 +60,57 @@ function setupSheet() {
     "Confirmation Email Sent",
     "Dispatch Email Sent"
   ];
-  
+
   ordersSheet.getRange(1, 1, 1, orderHeaders.length).setValues([orderHeaders]);
   ordersSheet.getRange(1, 1, 1, orderHeaders.length)
-    .setBackground("#0B132B")
+    .setBackground(STORE_CONFIG.brandNavy)
     .setFontColor("#FFFFFF")
     .setFontWeight("bold")
-    .setFontFamily("Arial");
+    .setFontFamily("Arial")
+    .setFontSize(10);
   ordersSheet.setFrozenRows(1);
+  ordersSheet.setRowHeight(1, 35);
 
-  // Sheet 2: OrderItems (Item-level detail for inventory & packing)
+  // Status Dropdown validation for Column J (Order Status)
+  const statusRule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(["Confirmed", "In Processing", "Dispatched", "Delivered", "Cancelled"], true)
+    .setAllowInvalid(false)
+    .build();
+  ordersSheet.getRange("J2:J5000").setDataValidation(statusRule);
+
+  // Tab 2: OrderItems (Line-item detail for packing & inventory)
   let itemsSheet = ss.getSheetByName("OrderItems");
   if (!itemsSheet) {
     itemsSheet = ss.insertSheet("OrderItems");
   }
-  
+
   const itemHeaders = [
     "Order ID",
     "Timestamp",
     "Product Name",
     "Quantity",
     "Unit Price (PKR)",
-    "Total (PKR)",
-    "Selected Color",
-    "Selected Size"
+    "Line Total (PKR)",
+    "Color",
+    "Size"
   ];
-  
+
   itemsSheet.getRange(1, 1, 1, itemHeaders.length).setValues([itemHeaders]);
   itemsSheet.getRange(1, 1, 1, itemHeaders.length)
-    .setBackground("#F97316")
+    .setBackground(STORE_CONFIG.brandOrange)
     .setFontColor("#FFFFFF")
     .setFontWeight("bold")
-    .setFontFamily("Arial");
+    .setFontFamily("Arial")
+    .setFontSize(10);
   itemsSheet.setFrozenRows(1);
+  itemsSheet.setRowHeight(1, 35);
 
-  SpreadsheetApp.getUi().alert("Calenvee Orders & OrderItems sheets configured successfully!");
+  SpreadsheetApp.getUi().alert("✅ Calenvee Orders & OrderItems configured successfully for calenvee.pk@gmail.com!");
 }
 
 /**
- * 2. WEBHOOK ENDPOINT (doPost)
- * Receives JSON payloads sent from the Calenvee checkout page.
+ * 2. WEBHOOK RECEIVER (doPost)
+ * Receives order payloads from the Calenvee storefront checkout.
  */
 function doPost(e) {
   try {
@@ -108,13 +122,11 @@ function doPost(e) {
     const ordersSheet = ss.getSheetByName("Orders") || ss.getActiveSheet();
     const itemsSheet = ss.getSheetByName("OrderItems");
 
-    // Format items summary string
     const itemsList = order.items || [];
     const itemsSummary = itemsList.map(item => `${item.name} (x${item.quantity}) - Rs. ${item.price}`).join("; ");
-
     const timestamp = order.createdAt ? new Date(order.createdAt) : new Date();
 
-    // Append to Orders Sheet
+    // Append to Orders tab
     ordersSheet.appendRow([
       order.orderId || "CV-" + Math.floor(100000 + Math.random() * 900000),
       timestamp,
@@ -129,12 +141,12 @@ function doPost(e) {
       order.courier || "TCS Express",
       order.trackingNumber || "N/A",
       itemsSummary,
-      order.deliveryNotes || "N/A",
+      order.notes || "None",
       order.email && order.email.includes("@") ? "Yes" : "No Email",
       "No"
     ]);
 
-    // Append individual line items to OrderItems Sheet
+    // Append items to OrderItems tab
     if (itemsSheet && itemsList.length > 0) {
       itemsList.forEach(item => {
         itemsSheet.appendRow([
@@ -150,15 +162,13 @@ function doPost(e) {
       });
     }
 
-    // Send Customer Order Confirmation Email (if valid email provided)
+    // Send customer order confirmation email (if email was provided)
     if (order.email && order.email.includes("@") && order.email !== "N/A") {
       sendCustomerOrderConfirmationEmail(order);
     }
 
-    // Send Store Owner New Order Alert Email
-    if (STORE_CONFIG.ownerEmail && STORE_CONFIG.ownerEmail.includes("@")) {
-      sendOwnerNewOrderAlertEmail(order);
-    }
+    // Send store owner instant notification to calenvee.pk@gmail.com
+    sendOwnerNewOrderAlertEmail(order);
 
     return ContentService.createTextOutput(JSON.stringify({
       success: true,
@@ -175,7 +185,7 @@ function doPost(e) {
 }
 
 /**
- * 3. HEALTH CHECK & LOOKUP (doGet)
+ * 3. HEALTH CHECK & ORDER LOOKUP (doGet)
  */
 function doGet(e) {
   const orderId = e.parameter.orderId;
@@ -200,15 +210,16 @@ function doGet(e) {
   }
 
   return ContentService.createTextOutput(JSON.stringify({
-    service: "Calenvee Storefront Order API",
+    service: "Calenvee Official Backend API",
+    account: STORE_CONFIG.ownerEmail,
     status: "online",
     timestamp: new Date().toISOString()
   })).setMimeType(ContentService.MimeType.JSON);
 }
 
 /**
- * 4. AUTOMATED ON-EDIT TRIGGER
- * When you change the status in Column J to "Dispatched", it automatically sends tracking details!
+ * 4. ON-EDIT TRIGGER (Automated Dispatch Email)
+ * When you change the status in Column J to "Dispatched", this sends the tracking email!
  */
 function onEdit(e) {
   const sheet = e.range.getSheet();
@@ -237,14 +248,13 @@ function onEdit(e) {
         courier: courier,
         trackingNumber: trackingNumber
       });
-      // Mark as sent in Column 16
       sheet.getRange(row, 16).setValue("Yes");
     }
   }
 }
 
 /**
- * 5. EMAIL GENERATOR: CUSTOMER ORDER CONFIRMATION
+ * 5. LUXURY HTML EMAIL: CUSTOMER ORDER CONFIRMATION
  */
 function sendCustomerOrderConfirmationEmail(order) {
   const subject = `Order Confirmed: ${order.orderId} | Calenvee.pk`;
@@ -273,15 +283,16 @@ function sendCustomerOrderConfirmationEmail(order) {
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9FAFB; margin: 0; padding: 24px; color: #111827;">
       <table align="center" width="100%" max-width="600" style="max-width: 600px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E5E7EB; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin: 0 auto;">
-        <!-- Header Banner -->
+        
+        <!-- Header -->
         <tr>
-          <td style="background-color: ${STORE_CONFIG.brandColorNavy}; padding: 32px 24px; text-align: center;">
+          <td style="background-color: ${STORE_CONFIG.brandNavy}; padding: 32px 24px; text-align: center;">
             <h1 style="color: #FFFFFF; margin: 0; font-size: 26px; letter-spacing: 2px; font-weight: 800;">CALENVEE</h1>
-            <p style="color: ${STORE_CONFIG.brandColorOrange}; font-size: 11px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold;">${STORE_CONFIG.storeTagline}</p>
+            <p style="color: ${STORE_CONFIG.brandOrange}; font-size: 11px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold;">${STORE_CONFIG.storeTagline}</p>
           </td>
         </tr>
         
-        <!-- Confirmation Hero -->
+        <!-- Hero Confirmation -->
         <tr>
           <td style="padding: 32px 24px 20px 24px; text-align: center;">
             <div style="display: inline-block; width: 48px; height: 48px; line-height: 48px; border-radius: 50%; background-color: #ECFDF5; color: #059669; font-size: 24px; margin-bottom: 12px;">✓</div>
@@ -299,7 +310,7 @@ function sendCustomerOrderConfirmationEmail(order) {
         <!-- Order Items Table -->
         <tr>
           <td style="padding: 0 24px 24px 24px;">
-            <h3 style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #374151; margin-bottom: 12px; border-bottom: 2px solid ${STORE_CONFIG.brandColorOrange}; padding-bottom: 6px;">Order Summary</h3>
+            <h3 style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #374151; margin-bottom: 12px; border-bottom: 2px solid ${STORE_CONFIG.brandOrange}; padding-bottom: 6px;">Order Summary</h3>
             <table width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
               <thead>
                 <tr style="background-color: #F3F4F6;">
@@ -313,7 +324,7 @@ function sendCustomerOrderConfirmationEmail(order) {
               </tbody>
             </table>
 
-            <!-- Financial Totals -->
+            <!-- Totals -->
             <table width="100%" style="margin-top: 16px; font-size: 13px;">
               <tr>
                 <td style="color: #6B7280; padding: 4px 0;">Subtotal:</td>
@@ -329,14 +340,14 @@ function sendCustomerOrderConfirmationEmail(order) {
                 <td style="text-align: right; font-weight: 600; color: #111827;">${order.shippingFee === 0 ? "FREE" : "Rs. " + order.shippingFee}</td>
               </tr>
               <tr style="border-top: 2px solid #E5E7EB; font-size: 16px;">
-                <td style="padding-top: 10px; font-weight: 800; color: ${STORE_CONFIG.brandColorNavy};">Total Payable (COD):</td>
-                <td style="padding-top: 10px; text-align: right; font-weight: 800; color: ${STORE_CONFIG.brandColorOrange};">Rs. ${(order.total).toLocaleString()}</td>
+                <td style="padding-top: 10px; font-weight: 800; color: ${STORE_CONFIG.brandNavy};">Total Payable (COD):</td>
+                <td style="padding-top: 10px; text-align: right; font-weight: 800; color: ${STORE_CONFIG.brandOrange};">Rs. ${(order.total).toLocaleString()}</td>
               </tr>
             </table>
           </td>
         </tr>
 
-        <!-- Delivery & Payment Info -->
+        <!-- Shipping Address Details -->
         <tr>
           <td style="padding: 0 24px 24px 24px;">
             <div style="background-color: #F9FAFB; border-radius: 12px; padding: 16px; border: 1px solid #E5E7EB;">
@@ -352,7 +363,7 @@ function sendCustomerOrderConfirmationEmail(order) {
           </td>
         </tr>
 
-        <!-- Footer Assistance -->
+        <!-- Footer -->
         <tr>
           <td style="background-color: #F3F4F6; padding: 20px 24px; text-align: center; border-top: 1px solid #E5E7EB;">
             <p style="margin: 0; font-size: 12px; color: #4B5563;">
@@ -364,7 +375,7 @@ function sendCustomerOrderConfirmationEmail(order) {
               </a>
             </p>
             <p style="margin: 14px 0 0 0; font-size: 10px; color: #9CA3AF;">
-              &copy; 2026 Calenvee.pk. All rights reserved. Operating 100% online across Pakistan.
+              &copy; 2026 Calenvee.pk (${STORE_CONFIG.ownerEmail}). 100% Online Store Serving All Pakistan Cities.
             </p>
           </td>
         </tr>
@@ -380,7 +391,7 @@ function sendCustomerOrderConfirmationEmail(order) {
 }
 
 /**
- * 6. EMAIL GENERATOR: DISPATCH NOTIFICATION WITH TRACKING
+ * 6. LUXURY HTML EMAIL: DISPATCH NOTIFICATION
  */
 function sendCustomerDispatchEmail(dispatchData) {
   const subject = `Your Order Has Been Dispatched! Tracking: ${dispatchData.trackingNumber} | Calenvee.pk`;
@@ -392,9 +403,9 @@ function sendCustomerDispatchEmail(dispatchData) {
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9FAFB; margin: 0; padding: 24px; color: #111827;">
       <table align="center" width="100%" style="max-width: 600px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E5E7EB; overflow: hidden; margin: 0 auto;">
         <tr>
-          <td style="background-color: ${STORE_CONFIG.brandColorNavy}; padding: 28px 24px; text-align: center;">
+          <td style="background-color: ${STORE_CONFIG.brandNavy}; padding: 28px 24px; text-align: center;">
             <h1 style="color: #FFFFFF; margin: 0; font-size: 24px; letter-spacing: 2px;">CALENVEE</h1>
-            <p style="color: ${STORE_CONFIG.brandColorOrange}; font-size: 10px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: bold;">Order Dispatched</p>
+            <p style="color: ${STORE_CONFIG.brandOrange}; font-size: 10px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: bold;">Order Dispatched</p>
           </td>
         </tr>
         <tr>
@@ -402,13 +413,13 @@ function sendCustomerDispatchEmail(dispatchData) {
             <div style="font-size: 32px; margin-bottom: 8px;">📦</div>
             <h2 style="margin: 0; font-size: 20px; color: #111827;">Your Package is on the Way!</h2>
             <p style="margin: 8px 0 16px 0; font-size: 13px; color: #6B7280;">
-              Dear <strong>${dispatchData.customerName}</strong>, your Calenvee parcel for Order <strong>${dispatchData.orderId}</strong> has been handed over to the courier.
+              Dear <strong>${dispatchData.customerName}</strong>, your Calenvee parcel for Order <strong>${dispatchData.orderId}</strong> has been handed over to ${dispatchData.courier}.
             </p>
             
             <div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 18px; margin: 16px 0; text-align: left;">
               <div style="font-size: 12px; color: #1E40AF; margin-bottom: 6px;"><strong>Courier Service:</strong> ${dispatchData.courier}</div>
               <div style="font-size: 14px; color: #1E3A8A; font-weight: 800;"><strong>Tracking Number:</strong> ${dispatchData.trackingNumber}</div>
-              <div style="font-size: 11px; color: #3B82F6; margin-top: 6px;">Please keep the exact amount ready upon courier delivery (Nationwide COD).</div>
+              <div style="font-size: 11px; color: #3B82F6; margin-top: 6px;">Please keep the exact amount ready upon courier delivery (Nationwide Cash on Delivery).</div>
             </div>
 
             <p style="font-size: 12px; color: #6B7280; margin-top: 20px;">
@@ -428,15 +439,14 @@ function sendCustomerDispatchEmail(dispatchData) {
 }
 
 /**
- * 7. EMAIL GENERATOR: STORE OWNER NEW ORDER ALERT
+ * 7. STORE OWNER NOTIFICATION EMAIL
  */
 function sendOwnerNewOrderAlertEmail(order) {
   const subject = `🔥 NEW ORDER #${order.orderId} — Rs. ${order.total.toLocaleString()} (${order.customerName}, ${order.city})`;
-
   const itemsText = (order.items || []).map(i => `• ${i.name} x${i.quantity} (Rs. ${i.price})`).join("\n");
 
   const body = `
-New order received on Calenvee.pk!
+New customer order received on Calenvee.pk!
 
 Order ID: ${order.orderId}
 Customer: ${order.customerName}
@@ -444,15 +454,15 @@ Phone: ${order.phone}
 Email: ${order.email}
 City: ${order.city}
 Address: ${order.address}
-Payment Method: ${order.paymentMethod ? order.paymentMethod.toUpperCase() : "COD"}
+Payment Method: ${(order.paymentMethod || "cod").toUpperCase()}
 Total Payable: Rs. ${order.total.toLocaleString()}
 
 Items Ordered:
 ${itemsText}
 
-Delivery Notes: ${order.deliveryNotes || "None"}
+Delivery Notes: ${order.notes || "None"}
 
-View and manage all orders directly in your Google Sheet:
+Manage all orders in your Google Sheet:
 ${SpreadsheetApp.getActiveSpreadsheet().getUrl()}
   `;
 
@@ -462,7 +472,7 @@ ${SpreadsheetApp.getActiveSpreadsheet().getUrl()}
 }
 
 /**
- * 8. CUSTOM SPREADSHEET MENU (UI)
+ * 8. CUSTOM SPREADSHEET MENU
  */
 function onOpen() {
   SpreadsheetApp.getUi()
@@ -507,6 +517,36 @@ function sendDispatchEmailForSelectedRow() {
 
   sheet.getRange(row, 10).setValue("Dispatched");
   sheet.getRange(row, 16).setValue("Yes");
-  SpreadsheetApp.getUi().alert(`Dispatch notification sent successfully to ${customerName} (${email})!`);
+  SpreadsheetApp.getUi().alert(`✅ Dispatch email sent to ${customerName} (${email})!`);
 }
 
+/**
+ * 9. TEST FUNCTION (Run this in script editor to test right now!)
+ */
+function testOrderEmail() {
+  const sampleOrder = {
+    orderId: "CV-999001",
+    customerName: "Zohaib Saleem",
+    email: STORE_CONFIG.ownerEmail, // Sends test to calenvee.pk@gmail.com
+    phone: "+923001234567",
+    city: "Lahore",
+    address: "Model Town, Block C",
+    paymentMethod: "cod",
+    subtotal: 3899,
+    discount: 0,
+    shippingFee: 0,
+    total: 3899,
+    items: [
+      {
+        name: "Obsidian Chronograph Edition",
+        quantity: 1,
+        price: 3899,
+        selectedColor: { name: "Matte Stealth Black" }
+      }
+    ]
+  };
+
+  sendCustomerOrderConfirmationEmail(sampleOrder);
+  sendOwnerNewOrderAlertEmail(sampleOrder);
+  Logger.log("Test emails sent to " + STORE_CONFIG.ownerEmail);
+}
