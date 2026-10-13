@@ -26,24 +26,24 @@ export const ValuePropsBar: React.FC = () => {
   ];
 
   return (
-    <section className="bg-white border-b border-gray-100 py-6 sm:py-7">
+    <section className="bg-white border-b border-gray-100 py-6 sm:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
           {props.map((p, idx) => (
             <div
               key={idx}
-              className={`flex items-center space-x-3 ${idx !== 0 ? 'sm:pl-6' : ''} ${
-                idx > 1 ? 'pt-4 sm:pt-0' : ''
-              }`}
+              className={`flex flex-col items-center text-center space-y-2 p-2 ${
+                idx !== 0 ? 'sm:pl-4' : ''
+              } ${idx > 1 ? 'pt-4 sm:pt-0' : ''}`}
             >
-              <div className="p-2.5 rounded-full bg-orange-50/80 flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center flex-shrink-0 mx-auto">
                 {p.icon}
               </div>
-              <div>
+              <div className="space-y-0.5">
                 <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">
                   {p.title}
                 </h3>
-                <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
+                <p className="text-[11px] text-gray-500 leading-snug">
                   {p.subtitle}
                 </p>
               </div>

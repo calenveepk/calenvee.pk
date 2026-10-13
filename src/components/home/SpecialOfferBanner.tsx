@@ -6,39 +6,33 @@ export const SpecialOfferBanner: React.FC = () => {
   return (
     <section className="bg-white py-8 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative rounded-2xl bg-[#0A192F] overflow-hidden text-white p-6 sm:p-10 lg:p-12 shadow-xl">
+        <div className="relative rounded-2xl bg-[#0A192F] overflow-hidden text-white p-7 sm:p-10 lg:p-12 shadow-xl text-center">
           
-          {/* Subtle background radial glow */}
-          <div className="absolute -left-20 -bottom-20 w-80 h-80 rounded-full bg-[#F97316]/10 blur-3xl pointer-events-none" />
-          <div className="absolute right-0 top-0 w-96 h-96 rounded-full bg-blue-600/10 blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="relative z-10 flex flex-col items-center justify-center max-w-2xl mx-auto space-y-4">
             
-            {/* Left: 3D Gift Box / Visual (Matching Reference Image) */}
-            <div className="flex items-center space-x-6">
-              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-gradient-to-tr from-[#0F274E] to-[#1E3A8A] border border-blue-400/20 shadow-2xl flex items-center justify-center relative flex-shrink-0">
-                <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-[#F97316] flex items-center justify-center text-white text-xs font-bold shadow-lg">
-                  %
-                </div>
-                <Gift className="w-12 h-12 sm:w-16 sm:h-16 text-[#F97316]" />
+            {/* Centered Gift Box Icon */}
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-[#0F274E] to-[#1E3A8A] border border-blue-400/20 shadow-xl flex items-center justify-center relative flex-shrink-0">
+              <div className="absolute -top-2.5 -right-2.5 w-7 h-7 rounded-full bg-[#F97316] flex items-center justify-center text-white text-xs font-bold shadow-md">
+                %
               </div>
-
-              {/* Center Content: Headline & Subtitle */}
-              <div className="space-y-1.5 text-center md:text-left">
-                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight">
-                  UP TO 40% OFF
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-300 font-light">
-                  Limited time offer on selected university & daily lifestyle items across Pakistan.
-                </p>
-              </div>
+              <Gift className="w-10 h-10 sm:w-12 sm:h-12 text-[#F97316]" />
             </div>
 
-            {/* Right: CTA Button */}
-            <div className="flex-shrink-0">
+            {/* Centered Headline & Subtitle */}
+            <div className="space-y-1.5 text-center">
+              <h3 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight">
+                UP TO 40% OFF
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-300 font-light max-w-lg mx-auto leading-relaxed">
+                Limited time offer on selected university & daily lifestyle items across Pakistan.
+              </p>
+            </div>
+
+            {/* Centered CTA Button */}
+            <div className="pt-2">
               <Link
                 to="/shop"
-                className="inline-flex items-center px-6 sm:px-8 py-3.5 bg-[#F97316] hover:bg-[#EA580C] text-white text-xs sm:text-sm font-bold uppercase tracking-wider rounded-lg shadow-lg hover:shadow-orange-500/20 transition-all duration-200 group"
+                className="inline-flex items-center px-7 sm:px-8 py-3.5 bg-[#F97316] hover:bg-[#EA580C] text-white text-xs sm:text-sm font-bold uppercase tracking-wider rounded-lg shadow-lg hover:shadow-orange-500/20 transition-all duration-200 group active:scale-98"
               >
                 <span>SHOP THE SALE</span>
                 <ChevronRight className="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1" />
@@ -51,4 +45,3 @@ export const SpecialOfferBanner: React.FC = () => {
     </section>
   );
 };
-

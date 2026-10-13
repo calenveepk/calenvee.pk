@@ -65,7 +65,7 @@
     display: flex;
     width: max-content;
     will-change: transform;
-    animation: marquee 32s linear infinite;
+    animation: marquee 50s linear infinite;
   }
 
   .animate-marquee:hover {
@@ -76,7 +76,7 @@
     display: flex;
     width: max-content;
     will-change: transform;
-    animation: marquee 55s linear infinite;
+    animation: marquee 85s linear infinite;
   }
 
   .animate-marquee-slow:hover {
