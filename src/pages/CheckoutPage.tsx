@@ -453,8 +453,9 @@ export const CheckoutPage: React.FC = () => {
                             <span className="text-xs font-bold text-gray-900">JazzCash</span>
                             <RealJazzCashIcon size={30} />
                           </div>
-                          <div className="text-[11px] text-gray-500 mt-0.5">
-                            Send receipt on WhatsApp
+                          <div className="text-[11px] text-emerald-600 font-semibold mt-0.5 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span>Upload Receipt (Max 5MB)</span>
                           </div>
                         </div>
                       </label>
@@ -479,8 +480,9 @@ export const CheckoutPage: React.FC = () => {
                             <span className="text-xs font-bold text-gray-900">EasyPaisa</span>
                             <RealEasyPaisaIcon size={30} />
                           </div>
-                          <div className="text-[11px] text-gray-500 mt-0.5">
-                            Send receipt on WhatsApp
+                          <div className="text-[11px] text-emerald-600 font-semibold mt-0.5 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span>Upload Receipt (Max 5MB)</span>
                           </div>
                         </div>
                       </label>
@@ -505,8 +507,9 @@ export const CheckoutPage: React.FC = () => {
                             <span className="text-xs font-bold text-gray-900">Bank Transfer</span>
                             <Building className="w-5 h-5 text-[#F97316]" />
                           </div>
-                          <div className="text-[11px] text-gray-500 mt-0.5">
-                            Raast instant transfer
+                          <div className="text-[11px] text-emerald-600 font-semibold mt-0.5 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span>Raast / Upload Slip (Max 5MB)</span>
                           </div>
                         </div>
                       </label>
