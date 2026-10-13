@@ -1,102 +1,87 @@
 [
   {
-    "id": "watches",
-    "name": "Watches & Timepieces",
-    "slug": "watches",
-    "description": "Precision Japanese quartz movements, sapphire-coated mineral crystal, and breathable Milanese mesh straps designed for understated elegance.",
-    "shortDescription": "Minimalist chronographs & classic timepieces",
-    "image": "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80",
-    "badge": "Bestseller",
-    "itemCount": 8,
+    "id": "women",
+    "name": "Women",
+    "slug": "women",
+    "description": "Luxury leather handbags, structured tote bags, elegant jewelry, and refined accessories tailored for the modern woman.",
+    "shortDescription": "Designer handbags, jewelry & fashion accessories",
+    "image": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80",
+    "badge": "Trending",
+    "itemCount": 18,
     "featured": true,
     "seoKeywords": [
-      "watches Pakistan",
-      "affordable luxury watches Karachi",
-      "minimalist black watch Lahore",
-      "men watches Pakistan COD",
-      "aesthetic watches Islamabad"
+      "women fashion Pakistan",
+      "handbags online Pakistan",
+      "ladies jewelry Lahore",
+      "women watches Pakistan"
     ]
   },
   {
-    "id": "jewelry",
-    "name": "Jewelry & Chains",
-    "slug": "jewelry",
-    "description": "Modern Cuban chains, signet rings, and layered bracelets crafted in durable alloy and polished stainless steel for daily style.",
-    "shortDescription": "Classic chains, signet rings & daily bracelets",
-    "image": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    "badge": "Signature Collection",
+    "id": "men",
+    "name": "Men",
+    "slug": "men",
+    "description": "Precision chronographs, stainless steel Cuban link chains, architectural sunglasses, and minimalist genuine leather cardholders.",
+    "shortDescription": "Luxury chronographs, chains & leather wallets",
+    "image": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80",
+    "badge": "Signature",
+    "itemCount": 24,
+    "featured": true,
+    "seoKeywords": [
+      "men watches Pakistan",
+      "cuban chains men Lahore",
+      "minimalist wallets Karachi",
+      "sunglasses for men Pakistan"
+    ]
+  },
+  {
+    "id": "home-living",
+    "name": "Home & Living",
+    "slug": "home-living",
+    "description": "Minimalist architectural decor, ceramic display vases, ambient studio accents, and modern lifestyle essentials for refined spaces.",
+    "shortDescription": "Modern decor, ceramic vases & lifestyle accents",
+    "image": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80",
+    "badge": "New Drop",
+    "itemCount": 14,
+    "featured": true,
+    "seoKeywords": [
+      "home decor Pakistan",
+      "ceramic vases online",
+      "minimalist interior Lahore",
+      "modern home essentials Islamabad"
+    ]
+  },
+  {
+    "id": "beauty",
+    "name": "Beauty",
+    "slug": "beauty",
+    "description": "High-projection long-wear Extrait de Parfum and premium personal care formulated with imported French fragrance essences.",
+    "shortDescription": "Extrait de Parfum, French oils & self-care",
+    "image": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80",
+    "badge": "Top Rated",
     "itemCount": 12,
     "featured": true,
     "seoKeywords": [
-      "cuban link chain Pakistan",
-      "stainless steel rings Lahore",
-      "anti tarnish jewelry Islamabad",
-      "waterproof jewelry Pakistan"
+      "perfumes online Pakistan",
+      "extrait de parfum Karachi",
+      "long lasting fragrances Lahore",
+      "luxury scents Pakistan"
     ]
   },
   {
-    "id": "eyewear",
-    "name": "Eyewear & Shades",
-    "slug": "eyewear",
-    "description": "Architectural acetate frames, UV400 polarized shades, and anti-glare blue-light protection glasses for screen sessions.",
-    "shortDescription": "Acetate frames & polarized UV400 shades",
-    "image": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80",
-    "badge": "New Season",
-    "itemCount": 6,
+    "id": "electronics",
+    "name": "Electronics",
+    "slug": "electronics",
+    "description": "Smart Watch Pro series, ergonomic high-fidelity studio headphones, magnetic charging docks, and modern tech accessories.",
+    "shortDescription": "Smart Watch Pro, studio audio & smart gadgets",
+    "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
+    "badge": "Best Seller",
+    "itemCount": 16,
     "featured": true,
     "seoKeywords": [
-      "sunglasses online Pakistan",
-      "acetate sunglasses Pakistan",
-      "blue light glasses Pakistan",
-      "retro sunglasses Karachi Lahore"
-    ]
-  },
-  {
-    "id": "fragrances",
-    "name": "Fragrances & Scents",
-    "slug": "fragrances",
-    "description": "High-projection long-wear Extrait de Parfum formulated with imported French fragrance oils. Formulated for longevity and subtle sillage.",
-    "shortDescription": "High-projection long-wear Extrait de Parfum",
-    "image": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80",
-    "badge": "Limited Batch",
-    "itemCount": 6,
-    "featured": true,
-    "seoKeywords": [
-      "extrait de parfum Pakistan",
-      "long lasting perfumes Pakistan",
-      "amber vanilla perfume Lahore"
-    ]
-  },
-  {
-    "id": "streetwear-bags",
-    "name": "Bags & Everyday Carry",
-    "slug": "streetwear-bags",
-    "description": "Heavyweight 16oz cotton canvas totes and weatherproof Cordura crossbody bags designed with dedicated laptop and tech sleeves.",
-    "shortDescription": "Structured canvas totes & crossbody messengers",
-    "image": "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80",
-    "badge": "Essential",
-    "itemCount": 8,
-    "featured": true,
-    "seoKeywords": [
-      "canvas tote bags Pakistan",
-      "crossbody bag Pakistan",
-      "laptop messenger bags Pakistan"
-    ]
-  },
-  {
-    "id": "tech-everyday",
-    "name": "Everyday Essentials",
-    "slug": "tech-everyday",
-    "description": "Aerospace aluminum RFID-blocking cardholders, vegan leather cases, and modular key organizers for minimalist daily carry.",
-    "shortDescription": "RFID wallets, leather cases & key organizers",
-    "image": "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=800&q=80",
-    "badge": "Minimalist",
-    "itemCount": 6,
-    "featured": true,
-    "seoKeywords": [
-      "minimalist wallet Pakistan",
-      "rfid cardholder Lahore Karachi",
-      "everyday carry accessories Pakistan"
+      "smart watch Pakistan",
+      "wireless headphones Lahore",
+      "fitness tracker Pakistan COD",
+      "gadgets online Karachi"
     ]
   }
 ]

@@ -25,14 +25,14 @@ export const HomePage: React.FC = () => {
       {/* 2. 4-Column Value Propositions Bar below hero */}
       <ValuePropsBar />
 
-      {/* 3. Shop By Category with circular items & orange underline */}
+      {/* 3. Shop By Category (5 Cards) */}
       <TrendingCategories />
 
-      {/* 4. Best Sellers 5-column product grid with orange Add To Cart buttons */}
-      <FeaturedDrops />
-
-      {/* 5. Special Offer Banner "UP TO 40% OFF" with Gift box */}
+      {/* 4. Deal of the Day (Flash Countdown Banner) */}
       <SpecialOfferBanner />
+
+      {/* 5. New Arrivals (4-Column Grid) */}
+      <FeaturedDrops />
 
       {/* 6. About Calenvee Brief Brand Intro */}
       <AboutBriefSection />

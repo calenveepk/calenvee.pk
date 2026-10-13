@@ -1,49 +1,44 @@
 import React from 'react';
-import { Truck, RotateCcw, ShieldCheck, Phone } from 'lucide-react';
+import { Truck, RotateCcw, Award, Headphones } from 'lucide-react';
 
 export const ValuePropsBar: React.FC = () => {
   const props = [
     {
-      icon: <Truck className="w-5 h-5 text-[#F97316]" />,
-      title: 'CASH ON DELIVERY',
-      subtitle: 'Nationwide Cash on Delivery (7-10 Days)',
+      icon: <Truck className="w-6 h-6 text-gray-800" />,
+      title: 'Free Shipping',
+      subtitle: 'On orders over Rs. 2,999',
     },
     {
-      icon: <RotateCcw className="w-5 h-5 text-[#F97316]" />,
-      title: '7 DAYS RETURNS',
-      subtitle: 'Hassle-free exchange & replacement',
+      icon: <RotateCcw className="w-6 h-6 text-gray-800" />,
+      title: 'Easy Returns',
+      subtitle: '7-day replacement warranty',
     },
     {
-      icon: <ShieldCheck className="w-5 h-5 text-[#F97316]" />,
-      title: 'QUALITY INSPECTED',
-      subtitle: 'Hand-checked before packaging',
+      icon: <Award className="w-6 h-6 text-gray-800" />,
+      title: 'Premium Quality',
+      subtitle: '100% original inspected products',
     },
     {
-      icon: <Phone className="w-5 h-5 text-[#F97316]" />,
-      title: '24/7 SUPPORT',
-      subtitle: 'Call / WhatsApp: +923001234567',
+      icon: <Headphones className="w-6 h-6 text-gray-800" />,
+      title: '24/7 Support',
+      subtitle: "We're here to help on WhatsApp",
     },
   ];
 
   return (
-    <section className="bg-white border-b border-gray-100 py-6 sm:py-8">
+    <section className="bg-white border-y border-gray-100 py-6 sm:py-8 my-2">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {props.map((p, idx) => (
-            <div
-              key={idx}
-              className={`flex flex-col items-center text-center space-y-2 p-2 ${
-                idx !== 0 ? 'sm:pl-4' : ''
-              } ${idx > 1 ? 'pt-4 sm:pt-0' : ''}`}
-            >
-              <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center flex-shrink-0 mx-auto">
+            <div key={idx} className="flex items-center space-x-3.5 sm:space-x-4">
+              <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0 border border-gray-100 shadow-2xs">
                 {p.icon}
               </div>
-              <div className="space-y-0.5">
-                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">
+              <div className="space-y-0.5 min-w-0">
+                <h4 className="text-xs sm:text-sm font-bold text-gray-900 tracking-tight">
                   {p.title}
-                </h3>
-                <p className="text-[11px] text-gray-500 leading-snug">
+                </h4>
+                <p className="text-[11px] text-gray-500 truncate">
                   {p.subtitle}
                 </p>
               </div>

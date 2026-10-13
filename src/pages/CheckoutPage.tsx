@@ -49,6 +49,7 @@ export const CheckoutPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedOrder, setCompletedOrder] = useState<OrderDetails | null>(null);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
+  const [botHoneypot, setBotHoneypot] = useState('');
 
   const handleReceiptUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -66,7 +67,40 @@ export const CheckoutPage: React.FC = () => {
 
     const reader = new FileReader();
     reader.onload = () => {
-      setReceiptPreview(reader.result as string);
+      const rawBase64 = reader.result as string;
+      if (file.type.startsWith('image/')) {
+        // High-Scale Optimization: Compress image on client via Canvas to ensure fast mobile upload
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 1600;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressed = canvas.toDataURL('image/jpeg', 0.82);
+            setReceiptPreview(compressed);
+          } else {
+            setReceiptPreview(rawBase64);
+          }
+        };
+        img.onerror = () => setReceiptPreview(rawBase64);
+        img.src = rawBase64;
+      } else {
+        setReceiptPreview(rawBase64);
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -87,11 +121,20 @@ export const CheckoutPage: React.FC = () => {
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Security Honeypot check: reject bots silently
+    if (botHoneypot) {
+      console.warn('Bot submission blocked');
+      return;
+    }
+
     if (!fullName.trim() || !phone.trim() || !address.trim()) {
       alert('Please fill in your name, mobile number, and complete delivery address.');
       return;
     }
 
+    // Double-submit prevention
+    if (isSubmitting) return;
     setIsSubmitting(true);
 
     const newOrder: OrderDetails = {
@@ -309,6 +352,17 @@ export const CheckoutPage: React.FC = () => {
                 </div>
 
                 <form id="checkout-form" onSubmit={handlePlaceOrder} className="space-y-3.5">
+                  {/* Invisible Honeypot field for bot protection */}
+                  <input
+                    type="text"
+                    name="hp_validation"
+                    value={botHoneypot}
+                    onChange={(e) => setBotHoneypot(e.target.value)}
+                    className="hidden"
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+
                   {/* Full Name & Phone */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div>

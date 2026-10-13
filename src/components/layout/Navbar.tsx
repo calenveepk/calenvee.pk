@@ -106,107 +106,53 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Middle: Clean Desktop Navigation matching reference image */}
             <div className="hidden lg:flex items-center space-x-7">
-              {/* Home */}
-              <Link
-                to="/"
-                className={`text-xs font-bold uppercase tracking-wider py-2 transition-colors ${
-                  location.pathname === '/' ? 'text-[#F97316]' : 'text-gray-800 hover:text-[#F97316]'
-                }`}
-              >
-                HOME
-              </Link>
-
-              {/* Shop / Categories Dropdown */}
-              <div
-                className="relative"
-                onMouseEnter={() => setIsCategoryDropdownOpen(true)}
-                onMouseLeave={() => setIsCategoryDropdownOpen(false)}
-              >
-                <Link
-                  to="/shop"
-                  className={`flex items-center space-x-1 text-xs font-bold uppercase tracking-wider py-2 transition-colors ${
-                    location.pathname.startsWith('/category') || location.pathname === '/shop'
-                      ? 'text-[#F97316]'
-                      : 'text-gray-800 hover:text-[#F97316]'
-                  }`}
-                >
-                  <span>SHOP</span>
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                      isCategoryDropdownOpen ? 'rotate-180 text-[#F97316]' : ''
-                    }`}
-                  />
-                </Link>
-
-                {/* Dropdown Menu (Audit 2 Requirement: Horizontal row of 3 categories per row, no item count) */}
-                {isCategoryDropdownOpen && (
-                  <div className="absolute top-full -left-24 w-[640px] pt-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                    <div className="bg-white rounded-2xl p-5 shadow-2xl border border-gray-100">
-                      <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
-                          Shop By Department
-                        </span>
-                        <Link
-                          to="/shop"
-                          className="text-xs font-bold text-[#F97316] hover:underline flex items-center gap-1"
-                        >
-                          <span>Explore All</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </Link>
-                      </div>
-
-                      {/* 3 Categories per row in clean simple grid: Only category name as requested */}
-                      <div className="grid grid-cols-3 gap-2.5">
-                        {CATEGORIES.map((cat) => (
-                          <Link
-                            key={cat.id}
-                            to={`/category/${cat.slug}`}
-                            className="group px-4 py-3.5 rounded-xl bg-gray-50 hover:bg-orange-50/70 border border-gray-100 hover:border-orange-200 transition-all duration-150 flex items-center justify-between"
-                          >
-                            <span className="text-xs font-bold text-gray-800 group-hover:text-[#F97316] transition-colors">
-                              {cat.name}
-                            </span>
-                            <ArrowRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#F97316] group-hover:translate-x-0.5 transition-all" />
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Best Sellers */}
-              <Link
-                to="/best-sellers"
-                className={`text-xs font-bold uppercase tracking-wider py-2 transition-colors ${
-                  location.pathname === '/best-sellers' ? 'text-[#F97316]' : 'text-gray-800 hover:text-[#F97316]'
-                }`}
-              >
-                BEST SELLERS
-              </Link>
-
-              {/* New Arrivals */}
               <Link
                 to="/new-arrivals"
                 className={`text-xs font-bold uppercase tracking-wider py-2 transition-colors ${
                   location.pathname === '/new-arrivals' ? 'text-[#F97316]' : 'text-gray-800 hover:text-[#F97316]'
                 }`}
               >
-                NEW ARRIVALS
+                New In
               </Link>
 
-              {/* Contact Us */}
               <Link
-                to="/contact"
+                to="/category/women"
                 className={`text-xs font-bold uppercase tracking-wider py-2 transition-colors ${
-                  location.pathname === '/contact' ? 'text-[#F97316]' : 'text-gray-800 hover:text-[#F97316]'
+                  location.pathname === '/category/women' ? 'text-[#F97316]' : 'text-gray-800 hover:text-[#F97316]'
                 }`}
               >
-                CONTACT US
+                Women
+              </Link>
+
+              <Link
+                to="/category/men"
+                className={`text-xs font-bold uppercase tracking-wider py-2 transition-colors ${
+                  location.pathname === '/category/men' ? 'text-[#F97316]' : 'text-gray-800 hover:text-[#F97316]'
+                }`}
+              >
+                Men
+              </Link>
+
+              <Link
+                to="/category/home-living"
+                className={`text-xs font-bold uppercase tracking-wider py-2 transition-colors ${
+                  location.pathname === '/category/home-living' ? 'text-[#F97316]' : 'text-gray-800 hover:text-[#F97316]'
+                }`}
+              >
+                Home &amp; Living
+              </Link>
+
+              <Link
+                to="/best-sellers"
+                className={`text-xs font-bold uppercase tracking-wider py-2 transition-colors ${
+                  location.pathname === '/best-sellers' ? 'text-[#F97316]' : 'text-gray-800 hover:text-[#F97316]'
+                }`}
+              >
+                Deals
               </Link>
             </div>
 
-            {/* Right: Actions (Search, Account, Wishlist, Cart) matching reference image */}
+            {/* Right: Actions (Search, Wishlist, Cart, and SHOP NOW Button) matching reference image */}
             <div className="flex items-center space-x-2 sm:space-x-3">
               {/* Search Icon */}
               <button
@@ -217,7 +163,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <Search className="w-5 h-5" />
               </button>
 
-
               {/* Wishlist Icon */}
               <Link
                 to="/wishlist"
@@ -226,13 +171,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <Heart className={`w-5 h-5 ${wishlistCount > 0 ? 'text-rose-500 fill-rose-500' : ''}`} />
                 {wishlistCount > 0 && (
-                  <span className="absolute 1 top-0 right-0 w-4 h-4 bg-[#F97316] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                  <span className="absolute top-0 right-0 w-4 h-4 bg-[#F97316] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                     {wishlistCount}
                   </span>
                 )}
               </Link>
 
-              {/* Cart Button with vibrant orange badge count matching reference image */}
+              {/* Cart Button with vibrant orange badge count */}
               <button
                 onClick={() => setIsCartOpen(true)}
                 className="relative p-2 text-gray-700 hover:text-[#F97316] hover:bg-gray-100 rounded-full transition-colors"
@@ -245,6 +190,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </span>
                 )}
               </button>
+
+              {/* SHOP NOW Button matching reference design */}
+              <Link
+                to="/shop"
+                className="hidden sm:inline-flex items-center px-5 py-2.5 bg-[#F97316] hover:bg-[#EA580C] text-white font-extrabold text-xs uppercase tracking-wider rounded-lg shadow-sm hover:shadow-orange-500/20 transition-all duration-150 active:scale-95 ml-1"
+              >
+                <span>SHOP NOW</span>
+              </Link>
             </div>
           </div>
         </div>
