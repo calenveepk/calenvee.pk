@@ -27,6 +27,7 @@ import {
   generateOrderId,
   generateTrackingNumber,
 } from '../utils/formatters';
+import { PAYMENT_ACCOUNTS } from '../data/paymentAccounts';
 
 export const CheckoutPage: React.FC = () => {
   const { items, subtotal, discount, shippingFee, finalTotal, clearCart } = useCart();
@@ -128,26 +129,61 @@ export const CheckoutPage: React.FC = () => {
             </div>
 
             {/* Crucial Receipt Instruction if non-COD */}
-            {completedOrder.paymentMethod !== 'cod' && (
-              <div className="p-4 rounded-xl bg-orange-50 border border-orange-200 text-left space-y-2.5">
-                <div className="flex items-center space-x-2 text-orange-900 font-bold text-xs">
-                  <AlertCircle className="w-4 h-4 text-[#F97316] flex-shrink-0" />
-                  <span>Important: Please Send Payment Receipt on WhatsApp</span>
+            {completedOrder.paymentMethod !== 'cod' && (() => {
+              const acc = PAYMENT_ACCOUNTS[completedOrder.paymentMethod];
+              return (
+                <div className="p-4 rounded-xl bg-orange-50 border border-orange-200 text-left space-y-3">
+                  <div className="flex items-center space-x-2 text-orange-900 font-bold text-xs">
+                    <AlertCircle className="w-4 h-4 text-[#F97316] flex-shrink-0" />
+                    <span>Payment Verification Required ({acc?.providerName || completedOrder.paymentMethod.toUpperCase()})</span>
+                  </div>
+                  <p className="text-xs text-orange-800 leading-relaxed font-normal">
+                    Please transfer <strong>{formatPKR(completedOrder.total)}</strong> to our official account below and share the screenshot slip on WhatsApp:
+                  </p>
+
+                  {acc && (
+                    <div className="bg-white p-3 rounded-lg border border-orange-200 font-mono text-[11px] space-y-1 text-gray-800">
+                      {acc.bankName && <div><strong className="text-gray-500 font-sans">Bank:</strong> {acc.bankName}</div>}
+                      <div><strong className="text-gray-500 font-sans">Title:</strong> {acc.accountTitle}</div>
+                      <div className="flex justify-between items-center">
+                        <span><strong className="text-gray-500 font-sans">Account No:</strong> {acc.accountNumber}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(acc.accountNumber, 'order-acc')}
+                          className="text-[#F97316] hover:underline flex items-center gap-1 font-bold font-sans text-xs"
+                        >
+                          {copiedAccount === 'order-acc' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                          <span>{copiedAccount === 'order-acc' ? 'Copied' : 'Copy'}</span>
+                        </button>
+                      </div>
+                      {acc.iban && (
+                        <div className="flex justify-between items-center pt-1 border-t border-gray-100">
+                          <span className="truncate mr-2"><strong className="text-gray-500 font-sans">IBAN:</strong> {acc.iban}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(acc.iban!, 'order-iban')}
+                            className="text-[#F97316] hover:underline flex items-center gap-1 font-bold font-sans text-xs flex-shrink-0"
+                          >
+                            {copiedAccount === 'order-iban' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                            <span>{copiedAccount === 'order-iban' ? 'Copied' : 'Copy'}</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <a
+                    href={whatsappReceiptLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center space-x-2 py-2.5 px-5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs rounded-lg shadow-md transition-all"
+                  >
+                    <RealWhatsAppIcon size={20} />
+                    <span>Send Receipt Slip to WhatsApp ({PHYSICAL_STORE_LOCATION.whatsappNumber})</span>
+                  </a>
                 </div>
-                <p className="text-xs text-orange-800 leading-relaxed font-normal">
-                  To confirm and dispatch your order immediately, please share a screenshot of your {completedOrder.paymentMethod.toUpperCase()} transaction slip to our official WhatsApp.
-                </p>
-                <a
-                  href={whatsappReceiptLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center space-x-2 py-2.5 px-5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs rounded-lg shadow-md transition-all"
-                >
-                  <RealWhatsAppIcon size={20} />
-                  <span>Send Receipt Slip to WhatsApp ({PHYSICAL_STORE_LOCATION.whatsappNumber})</span>
-                </a>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Receipt Summary */}
             <div className="rounded-xl bg-gray-50 border border-gray-200 p-5 text-left space-y-3">
@@ -415,32 +451,64 @@ export const CheckoutPage: React.FC = () => {
                       </label>
                     </div>
 
-                    {/* Prominent Payment Slip WhatsApp Requirement */}
-                    {paymentMethod !== 'cod' && (
-                      <div className="p-3.5 rounded-xl bg-orange-50 border border-orange-200 text-xs text-orange-900 space-y-2">
-                        <div className="flex items-center space-x-2 font-bold text-[#F97316]">
-                          <AlertCircle className="w-4 h-4 text-[#F97316] flex-shrink-0" />
-                          <span>Payment Slip Verification Required</span>
-                        </div>
-                        <p className="font-normal leading-relaxed text-orange-800">
-                          After placing this order, transfer <strong>{formatPKR(finalTotal)}</strong> to our official account and send your screenshot slip to our WhatsApp (<strong>{PHYSICAL_STORE_LOCATION.whatsappNumber}</strong>).
-                        </p>
-                        <div className="bg-white p-2.5 rounded-lg border border-orange-200 font-mono text-[11px] space-y-1 text-gray-800">
-                          <div className="flex justify-between items-center">
-                            <span><strong>Account:</strong> 0341-7865207</span>
-                            <button
-                              type="button"
-                              onClick={() => handleCopy('03417865207', 'acc')}
-                              className="text-[#F97316] hover:underline flex items-center gap-1 font-bold"
-                            >
-                              {copiedAccount === 'acc' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-                              <span>{copiedAccount === 'acc' ? 'Copied' : 'Copy'}</span>
-                            </button>
+                    {/* Dynamic Payment Account Instructions */}
+                    {paymentMethod !== 'cod' && (() => {
+                      const acc = PAYMENT_ACCOUNTS[paymentMethod];
+                      return (
+                        <div className="p-3.5 rounded-xl bg-orange-50 border border-orange-200 text-xs text-orange-900 space-y-2.5">
+                          <div className="flex items-center space-x-2 font-bold text-[#F97316]">
+                            <AlertCircle className="w-4 h-4 text-[#F97316] flex-shrink-0" />
+                            <span>{acc.providerName} Details</span>
                           </div>
-                          <div><strong>Account Title:</strong> Calenvee Official</div>
+                          <p className="font-normal leading-relaxed text-orange-800 text-[11px]">
+                            {acc.instructions}
+                          </p>
+                          <div className="bg-white p-3 rounded-lg border border-orange-200 font-mono text-[11px] space-y-1.5 text-gray-800">
+                            {acc.bankName && (
+                              <div><strong className="text-gray-500 font-sans">Bank:</strong> {acc.bankName}</div>
+                            )}
+                            <div><strong className="text-gray-500 font-sans">Account Title:</strong> {acc.accountTitle}</div>
+                            <div className="flex justify-between items-center">
+                              <span><strong className="text-gray-500 font-sans">Account No:</strong> {acc.accountNumber}</span>
+                              <button
+                                type="button"
+                                onClick={() => handleCopy(acc.accountNumber, 'acc')}
+                                className="text-[#F97316] hover:underline flex items-center gap-1 font-bold font-sans text-xs"
+                              >
+                                {copiedAccount === 'acc' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                                <span>{copiedAccount === 'acc' ? 'Copied' : 'Copy'}</span>
+                              </button>
+                            </div>
+                            {acc.iban && (
+                              <div className="flex justify-between items-center pt-1 border-t border-gray-100">
+                                <span className="truncate mr-2"><strong className="text-gray-500 font-sans">IBAN:</strong> {acc.iban}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopy(acc.iban!, 'iban')}
+                                  className="text-[#F97316] hover:underline flex items-center gap-1 font-bold font-sans text-xs flex-shrink-0"
+                                >
+                                  {copiedAccount === 'iban' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                                  <span>{copiedAccount === 'iban' ? 'Copied' : 'Copy'}</span>
+                                </button>
+                              </div>
+                            )}
+                            {acc.raastId && (
+                              <div className="flex justify-between items-center pt-1 border-t border-gray-100">
+                                <span><strong className="text-gray-500 font-sans">Raast ID:</strong> {acc.raastId}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopy(acc.raastId!, 'raast')}
+                                  className="text-[#F97316] hover:underline flex items-center gap-1 font-bold font-sans text-xs"
+                                >
+                                  {copiedAccount === 'raast' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                                  <span>{copiedAccount === 'raast' ? 'Copied' : 'Copy'}</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      );
+                    })()}
                   </div>
                 </form>
               </div>

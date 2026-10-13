@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, ProductVariantColor, ProductVariantSize, CartItem, PromoCode } from '../types';
+import { AVAILABLE_PROMOS } from '../data/promotions';
 
 interface CartContextType {
   items: CartItem[];
@@ -25,27 +26,6 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const FREE_SHIPPING_THRESHOLD = 2999; // Rs. 2,999 for free nationwide delivery
 const STANDARD_SHIPPING_FEE = 199; // Rs. 199 standard delivery across Pakistan
-
-const AVAILABLE_PROMOS: Record<string, PromoCode> = {
-  'CAMPUS20': {
-    code: 'CAMPUS20',
-    discountPercentage: 20,
-    minOrderValue: 2000,
-    description: '20% Student Discount for University Students',
-  },
-  'GENZ15': {
-    code: 'GENZ15',
-    discountPercentage: 15,
-    minOrderValue: 1500,
-    description: '15% Off Your Entire Cart',
-  },
-  'CALENVEE10': {
-    code: 'CALENVEE10',
-    discountPercentage: 10,
-    minOrderValue: 1000,
-    description: '10% Welcome Discount for New Shoppers',
-  },
-};
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>(() => {
