@@ -50,16 +50,19 @@ export const PAKISTAN_CITIES = [
   'Other City',
 ];
 
+import storeSettingsData from '../data/storeSettings.json';
+
 export const PHYSICAL_STORE_LOCATION = {
-  address: "Online E-Commerce Store — Serving All Pakistan Cities",
-  city: "Pakistan",
+  address: storeSettingsData.address || "Online E-Commerce Store — Serving All Pakistan Cities",
+  city: storeSettingsData.city || "Pakistan",
   province: "Pakistan",
-  country: "Pakistan",
-  whatsappNumber: "+923001234567",
-  whatsappRaw: "923001234567",
-  instagram: "@calenvee.pk",
+  country: storeSettingsData.country || "Pakistan",
+  whatsappNumber: storeSettingsData.whatsappNumber || "+923001234567",
+  whatsappRaw: storeSettingsData.whatsappRaw || "923001234567",
+  instagram: storeSettingsData.instagram || "@calenvee.pk",
   facebook: "calenvee.pk",
   expectedDeliveryDays: "7-10 Days",
+  slogan: storeSettingsData.storeSlogan || "SHOP SMART, LIVE BETTER",
 };
 
 export const STORE_INFO = PHYSICAL_STORE_LOCATION;

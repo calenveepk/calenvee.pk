@@ -19,7 +19,8 @@
 // OFFICIAL STORE CONFIGURATION
 const STORE_CONFIG = {
   storeName: "Calenvee.pk",
-  storeTagline: "Engineered for Modern Presence",
+  storeTagline: "SHOP SMART, LIVE BETTER", // Official Store Slogan
+  logoUrl: "https://calenvee.pk/logo-white.png", // Store Logo
   ownerEmail: "calenvee.pk@gmail.com", // Official Store Gmail
   helplinePhone: "+923001234567",
   helplineWhatsAppRaw: "923001234567",
@@ -284,11 +285,14 @@ function sendCustomerOrderConfirmationEmail(order) {
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9FAFB; margin: 0; padding: 24px; color: #111827;">
       <table align="center" width="100%" max-width="600" style="max-width: 600px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E5E7EB; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin: 0 auto;">
         
-        <!-- Header -->
+        <!-- Header with Store Logo & Slogan -->
         <tr>
-          <td style="background-color: ${STORE_CONFIG.brandNavy}; padding: 32px 24px; text-align: center;">
-            <h1 style="color: #FFFFFF; margin: 0; font-size: 26px; letter-spacing: 2px; font-weight: 800;">CALENVEE</h1>
-            <p style="color: ${STORE_CONFIG.brandOrange}; font-size: 11px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold;">${STORE_CONFIG.storeTagline}</p>
+          <td style="background-color: ${STORE_CONFIG.brandNavy}; padding: 36px 24px; text-align: center;">
+            <div style="margin-bottom: 12px;">
+              <img src="${STORE_CONFIG.logoUrl}" alt="${STORE_CONFIG.storeName}" style="max-height: 48px; width: auto; display: inline-block; border: 0;" />
+            </div>
+            <h1 style="color: #FFFFFF; margin: 0; font-size: 26px; letter-spacing: 2px; font-weight: 800; font-family: 'Arial Black', Arial, sans-serif;">CALENVEE</h1>
+            <p style="color: ${STORE_CONFIG.brandOrange}; font-size: 12px; margin: 8px 0 0 0; text-transform: uppercase; letter-spacing: 2px; font-weight: bold;">${STORE_CONFIG.storeTagline}</p>
           </td>
         </tr>
         
@@ -402,10 +406,14 @@ function sendCustomerDispatchEmail(dispatchData) {
     <head><meta charset="utf-8"></head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9FAFB; margin: 0; padding: 24px; color: #111827;">
       <table align="center" width="100%" style="max-width: 600px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E5E7EB; overflow: hidden; margin: 0 auto;">
+        <!-- Header with Store Logo & Slogan -->
         <tr>
-          <td style="background-color: ${STORE_CONFIG.brandNavy}; padding: 28px 24px; text-align: center;">
-            <h1 style="color: #FFFFFF; margin: 0; font-size: 24px; letter-spacing: 2px;">CALENVEE</h1>
-            <p style="color: ${STORE_CONFIG.brandOrange}; font-size: 10px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: bold;">Order Dispatched</p>
+          <td style="background-color: ${STORE_CONFIG.brandNavy}; padding: 32px 24px; text-align: center;">
+            <div style="margin-bottom: 10px;">
+              <img src="${STORE_CONFIG.logoUrl}" alt="${STORE_CONFIG.storeName}" style="max-height: 44px; width: auto; display: inline-block; border: 0;" />
+            </div>
+            <h1 style="color: #FFFFFF; margin: 0; font-size: 24px; letter-spacing: 2px; font-weight: 800; font-family: 'Arial Black', Arial, sans-serif;">CALENVEE</h1>
+            <p style="color: ${STORE_CONFIG.brandOrange}; font-size: 11px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 2px; font-weight: bold;">${STORE_CONFIG.storeTagline} • ORDER DISPATCHED</p>
           </td>
         </tr>
         <tr>
