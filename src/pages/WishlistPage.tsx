@@ -111,59 +111,88 @@ export const WishlistPage: React.FC = () => {
           </div>
         ) : (
           /* Multi Card Grid with automatic single-card row centering */
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6
-            [&:has(>&:nth-child(odd):last-child)>:last-child]:col-span-2
-            md:[&:has(>&:nth-child(odd):last-child)>:last-child]:col-span-1
-            [&:has(>&:nth-child(odd):last-child)>:last-child]:max-w-[calc(50%-0.5rem)]
-            md:[&:has(>&:nth-child(odd):last-child)>:last-child]:max-w-none
-            [&:has(>&:nth-child(odd):last-child)>:last-child]:mx-auto
-            [&:has(>&:nth-child(odd):last-child)>:last-child]:w-full"
-          >
-            {wishlist.map((product) => (
-              <div
-                key={product.id}
-                className="bg-white rounded-xl overflow-hidden border border-gray-200 shadow-xs flex flex-col justify-between text-center"
-              >
-                <div className="relative aspect-square bg-gray-50 p-4 flex items-center justify-center">
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="w-full h-full object-contain mix-blend-multiply"
-                  />
-                  <button
-                    onClick={() => toggleWishlist(product)}
-                    className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-white text-red-500 shadow-xs border border-gray-200 hover:scale-110 transition-transform"
-                    title="Remove from wishlist"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {wishlist.map((product, index) => {
+              const isLast = index === wishlist.length - 1;
+              const isAloneMobile = wishlist.length % 2 === 1;
+              const isAloneMd = wishlist.length % 3 === 1;
+              const isAloneLg = wishlist.length % 4 === 1;
 
-                <div className="p-4 space-y-3">
-                  <div className="flex flex-col items-center">
-                    <span className="text-[10px] text-[#F97316] font-bold uppercase tracking-wider block">
-                      {product.categoryLabel}
-                    </span>
-                    <Link to={`/product/${product.slug}`} className="block w-full">
-                      <h4 className="text-xs sm:text-sm font-semibold text-gray-900 hover:text-[#F97316] line-clamp-1 transition-colors text-center">
-                        {product.name}
-                      </h4>
-                    </Link>
-                    <div className="pt-1 text-sm font-extrabold text-[#0B132B]">
-                      {formatPKR(product.price)}
+              let wrapperClasses = 'w-full';
+              let innerClasses = 'w-full';
+
+              if (isLast) {
+                if (isAloneMobile) {
+                  wrapperClasses += ' col-span-2 flex justify-center';
+                  innerClasses += ' max-w-[calc(50%-0.5rem)]';
+                } else {
+                  wrapperClasses += ' col-span-1 block';
+                }
+
+                if (isAloneMd) {
+                  wrapperClasses += ' md:col-span-3 md:flex md:justify-center';
+                  innerClasses += ' md:max-w-[calc(33.333%-0.875rem)]';
+                } else {
+                  wrapperClasses += ' md:col-span-1 md:block';
+                  innerClasses += ' md:max-w-none';
+                }
+
+                if (isAloneLg) {
+                  wrapperClasses += ' lg:col-span-4 lg:flex lg:justify-center';
+                  innerClasses += ' lg:max-w-[calc(25%-1.125rem)]';
+                } else {
+                  wrapperClasses += ' lg:col-span-1 lg:block';
+                  innerClasses += ' lg:max-w-none';
+                }
+              }
+
+              return (
+                <div key={product.id} className={wrapperClasses.trim()}>
+                  <div
+                    className={`${innerClasses.trim()} bg-white rounded-xl overflow-hidden border border-gray-200 shadow-xs flex flex-col justify-between text-center`}
+                  >
+                    <div className="relative aspect-square bg-gray-50 p-4 flex items-center justify-center">
+                      <img
+                        src={product.images[0]}
+                        alt={product.name}
+                        className="w-full h-full object-contain mix-blend-multiply"
+                      />
+                      <button
+                        onClick={() => toggleWishlist(product)}
+                        className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-white text-red-500 shadow-xs border border-gray-200 hover:scale-110 transition-transform"
+                        title="Remove from wishlist"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <div className="p-4 space-y-3">
+                      <div className="flex flex-col items-center">
+                        <span className="text-[10px] text-[#F97316] font-bold uppercase tracking-wider block">
+                          {product.categoryLabel}
+                        </span>
+                        <Link to={`/product/${product.slug}`} className="block w-full">
+                          <h4 className="text-xs sm:text-sm font-semibold text-gray-900 hover:text-[#F97316] line-clamp-1 transition-colors text-center">
+                            {product.name}
+                          </h4>
+                        </Link>
+                        <div className="pt-1 text-sm font-extrabold text-[#0B132B]">
+                          {formatPKR(product.price)}
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleMoveToBag(product)}
+                        className="w-full py-2.5 px-3 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg font-bold text-xs uppercase tracking-wider flex items-center justify-center space-x-1.5 shadow-xs transition-colors"
+                      >
+                        <ShoppingBag className="w-3.5 h-3.5" />
+                        <span>Move To Cart</span>
+                      </button>
                     </div>
                   </div>
-
-                  <button
-                    onClick={() => handleMoveToBag(product)}
-                    className="w-full py-2.5 px-3 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg font-bold text-xs uppercase tracking-wider flex items-center justify-center space-x-1.5 shadow-xs transition-colors"
-                  >
-                    <ShoppingBag className="w-3.5 h-3.5" />
-                    <span>Move To Cart</span>
-                  </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
