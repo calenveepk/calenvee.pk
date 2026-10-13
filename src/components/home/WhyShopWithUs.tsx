@@ -26,11 +26,11 @@ export const WhyShopWithUs: React.FC = () => {
   ];
 
   return (
-    <section className="bg-white py-12 sm:py-16 border-b border-gray-100">
+    <section className="bg-white py-6 sm:py-8 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Heading with Centered Orange Underline */}
-        <div className="text-center mb-10 space-y-2">
+        <div className="text-center mb-6 space-y-2">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#0B132B] uppercase tracking-wider relative inline-block">
             OUR <span className="text-[#F97316]">SERVICE</span> PROMISE
             <span className="block w-16 h-1 bg-[#F97316] mx-auto mt-2 rounded-full" />

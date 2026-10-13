@@ -6,24 +6,24 @@ import { STORE_INFO } from '../utils/formatters';
 
 export const ReturnsRefundsPage: React.FC = () => {
   return (
-    <div className="min-h-screen py-10 sm:py-16 bg-white text-gray-900">
+    <div className="min-h-screen py-6 sm:py-10 bg-white text-gray-900">
       <SEO
         title="Returns & Refunds Policy | Calenvee.pk"
         description="Official 7-Day Exchange & Return Guarantee for Calenvee Pakistan. Hassle-free replacements, verified claims, and refund processing."
       />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-        {/* Page Header */}
-        <div className="mb-8 text-left space-y-2 border-b border-gray-100 pb-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Page Header — Centered */}
+        <div className="mb-6 text-center space-y-2 border-b border-gray-100 pb-5 flex flex-col items-center">
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-orange-50 text-orange-800 text-xs font-semibold uppercase tracking-wider">
             <RotateCcw className="w-3.5 h-3.5 text-[#F97316]" />
             <span>Buyer Protection</span>
           </div>
           <h1 className="text-2xl sm:text-4xl font-extrabold text-[#0B132B] uppercase tracking-wider">
             RETURNS & REFUNDS
-            <span className="block w-16 h-1 bg-[#F97316] mt-2 rounded-full" />
+            <span className="block w-16 h-1 bg-[#F97316] mx-auto mt-2 rounded-full" />
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 max-w-2xl font-normal leading-relaxed pt-0.5">
+          <p className="text-xs sm:text-sm text-gray-500 max-w-2xl mx-auto font-normal leading-relaxed pt-0.5">
             Clear guidelines on our 7-day exchange window, replacement eligibility, and refund procedure.
           </p>
         </div>

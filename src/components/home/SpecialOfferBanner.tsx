@@ -61,7 +61,7 @@ export const SpecialOfferBanner: React.FC = () => {
   };
 
   return (
-    <section className="bg-white py-10 sm:py-14">
+    <section className="bg-white py-6 sm:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Deal of the Day Card matching reference design */}

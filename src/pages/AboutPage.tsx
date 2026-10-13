@@ -10,20 +10,20 @@ import { STORE_INFO } from '../utils/formatters';
 
 export const AboutPage: React.FC = () => {
   return (
-    <div className="min-h-screen py-8 sm:py-12 bg-white text-gray-900">
+    <div className="min-h-screen py-5 sm:py-8 bg-white text-gray-900">
       <SEO
         title="About Calenvee | Modern Online Lifestyle Store"
         description="Learn about Calenvee.pk, an independent Pakistani online brand curating premium, accessible watches, jewelry, and lifestyle accessories with Cash on Delivery nationwide."
       />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-        {/* Standardized Page Header Banner */}
-        <div className="mb-8 text-left space-y-2 border-b border-gray-100 pb-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Standardized Page Header Banner — Centered */}
+        <div className="mb-6 text-center space-y-2 border-b border-gray-100 pb-5 flex flex-col items-center">
           <h1 className="text-2xl sm:text-4xl font-extrabold text-[#0B132B] uppercase tracking-wider">
             ABOUT CALENVEE
-            <span className="block w-16 h-1 bg-[#F97316] mt-2 rounded-full" />
+            <span className="block w-16 h-1 bg-[#F97316] mx-auto mt-2 rounded-full" />
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 max-w-2xl font-normal leading-relaxed pt-0.5">
+          <p className="text-xs sm:text-sm text-gray-500 max-w-2xl mx-auto font-normal leading-relaxed pt-0.5">
             Curated accessories designed for modern individuals across Pakistan who appreciate clean aesthetics without paying inflated prices.
           </p>
         </div>

@@ -34,24 +34,24 @@ export const TermsPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen py-10 sm:py-16 bg-white text-gray-900">
+    <div className="min-h-screen py-6 sm:py-10 bg-white text-gray-900">
       <SEO
         title="Terms & Conditions & FAQs | Calenvee.pk"
         description="Official Terms of Service, user policies, and frequently asked questions for Calenvee Pakistan."
       />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-        {/* Page Header */}
-        <div className="text-left space-y-2 border-b border-gray-100 pb-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Page Header — Centered */}
+        <div className="text-center space-y-2 border-b border-gray-100 pb-5 flex flex-col items-center">
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-xs font-semibold uppercase tracking-wider">
             <FileText className="w-3.5 h-3.5 text-[#F97316]" />
             <span>Store Agreement & FAQs</span>
           </div>
           <h1 className="text-2xl sm:text-4xl font-extrabold text-[#0B132B] uppercase tracking-wider">
             TERMS & CONDITIONS
-            <span className="block w-16 h-1 bg-[#F97316] mt-2 rounded-full" />
+            <span className="block w-16 h-1 bg-[#F97316] mx-auto mt-2 rounded-full" />
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 max-w-2xl font-normal leading-relaxed pt-0.5">
+          <p className="text-xs sm:text-sm text-gray-500 max-w-2xl mx-auto font-normal leading-relaxed pt-0.5">
             Official store guidelines, terms of service, customer commitments, and frequently asked questions for Calenvee Pakistan.
           </p>
         </div>

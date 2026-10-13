@@ -10,6 +10,7 @@ import { ProductVariantColor, ProductVariantSize } from '../types';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { ProductCard } from '../components/products/ProductCard';
+import { ProductGrid } from '../components/products/ProductGrid';
 import { formatPKR } from '../utils/formatters';
 import { SEO } from '../components/common/SEO';
 import {
@@ -298,23 +299,19 @@ export const ProductDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Related Pieces */}
+        {/* Related Pieces — Centered */}
         {relatedProducts.length > 0 && (
-          <div className="mt-14 pt-8 border-t border-gray-100 space-y-6">
-            <div className="space-y-2 border-b border-gray-100 pb-5">
+          <div className="mt-10 pt-6 border-t border-gray-100 space-y-5">
+            <div className="space-y-2 border-b border-gray-100 pb-5 text-center flex flex-col items-center">
               <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#0B132B] uppercase tracking-wider">
                 YOU MAY ALSO LIKE
-                <span className="block w-16 h-1 bg-[#F97316] mt-2 rounded-full" />
+                <span className="block w-16 h-1 bg-[#F97316] mx-auto mt-2 rounded-full" />
               </h2>
-              <p className="text-xs sm:text-sm text-gray-500 max-w-2xl font-normal leading-relaxed pt-0.5">
+              <p className="text-xs sm:text-sm text-gray-500 max-w-2xl mx-auto font-normal leading-relaxed pt-0.5">
                 Curated companion pieces designed to complement your selection.
               </p>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-              {relatedProducts.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
+            <ProductGrid products={relatedProducts} />
           </div>
         )}
       </div>

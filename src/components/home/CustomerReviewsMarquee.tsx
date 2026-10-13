@@ -8,8 +8,8 @@ export const CustomerReviewsMarquee: React.FC = () => {
   const marqueeReviews = [...curatedReviews, ...curatedReviews];
 
   return (
-    <section className="bg-white py-12 sm:py-16 border-b border-gray-100 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10">
+    <section className="bg-white py-6 sm:py-8 border-b border-gray-100 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-5 sm:mb-7">
         {/* Standardized Centered Section Header */}
         <div className="text-center space-y-2">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#0B132B] uppercase tracking-wider relative inline-block">

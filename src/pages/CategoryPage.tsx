@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, CheckCircle2, Tag, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { CATEGORIES } from '../data/categories';
 import { PRODUCTS } from '../data/products';
 import { CATEGORY_REVIEWS } from '../data/categoryReviews';
-import { ProductCard } from '../components/products/ProductCard';
+import { ProductGrid } from '../components/products/ProductGrid';
 import { QuickViewModal } from '../components/common/QuickViewModal';
 import { SEO } from '../components/common/SEO';
 import { RealisticShieldIcon, RealisticStarIcon } from '../components/common/RealisticIcons';
@@ -46,11 +46,11 @@ export const CategoryPage: React.FC = () => {
   ];
 
   // Recommendations from other categories
-  const otherCategoryProducts = PRODUCTS.filter((p) => p.category !== slug && p.isBestSeller).slice(0, 5);
+  const otherCategoryProducts = PRODUCTS.filter((p) => p.category !== slug && p.isBestSeller).slice(0, 4);
 
   if (!category) {
     return (
-      <div className="min-h-screen py-24 text-center px-4 bg-white text-gray-900">
+      <div className="min-h-screen py-16 text-center px-4 bg-white text-gray-900 flex flex-col items-center justify-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Collection Not Found</h1>
         <p className="text-gray-500 text-xs mb-6">The collection you are searching for does not exist.</p>
         <Link
@@ -65,16 +65,16 @@ export const CategoryPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen py-8 sm:py-12 bg-white text-gray-900">
+    <div className="min-h-screen py-5 sm:py-7 bg-white text-gray-900">
       <SEO
         title={`${category.name} | Calenvee.pk`}
         description={category.description}
         keywords={category.seoKeywords.join(', ')}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
         {/* Breadcrumb — Centered */}
-        <div className="flex items-center justify-center space-x-2 text-xs text-gray-500 -mb-6 sm:-mb-8">
+        <div className="flex items-center justify-center space-x-2 text-xs text-gray-500 -mb-4 sm:-mb-6">
           <Link to="/" className="hover:text-[#F97316] transition-colors">Home</Link>
           <span>/</span>
           <Link to="/shop" className="hover:text-[#F97316] transition-colors">Collections</Link>
@@ -109,44 +109,39 @@ export const CategoryPage: React.FC = () => {
         </div>
 
         {/* 1. Category Products Section */}
-        <div className="space-y-6">
-          {/* Standardized Section Header */}
-          <div className="space-y-2 border-b border-gray-100 pb-5">
+        <div className="space-y-5">
+          {/* Centered Section Header */}
+          <div className="space-y-2 border-b border-gray-100 pb-5 text-center flex flex-col items-center">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#0B132B] uppercase tracking-wider">
               EXPLORE {category.name.toUpperCase()}
-              <span className="block w-16 h-1 bg-[#F97316] mt-2 rounded-full" />
+              <span className="block w-16 h-1 bg-[#F97316] mx-auto mt-2 rounded-full" />
             </h2>
-            <p className="text-xs sm:text-sm text-gray-500 max-w-2xl font-normal leading-relaxed pt-0.5">
+            <p className="text-xs sm:text-sm text-gray-500 max-w-2xl mx-auto font-normal leading-relaxed pt-0.5">
               Contemporary styling and premium durability, delivered with Nationwide Cash on Delivery (7-10 Days).
             </p>
           </div>
 
           {categoryProducts.length === 0 ? (
-            <div className="text-center py-16 text-gray-500 text-xs bg-gray-50 rounded-xl border border-gray-200">
+            <div className="text-center py-14 text-gray-500 text-xs bg-gray-50 rounded-xl border border-gray-200">
               New drops for {category.name} are arriving soon. Stay tuned!
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 pt-2">
-              {categoryProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onQuickView={(p) => setQuickViewProduct(p)}
-                />
-              ))}
-            </div>
+            <ProductGrid
+              products={categoryProducts}
+              onQuickView={(p) => setQuickViewProduct(p)}
+            />
           )}
         </div>
 
         {/* 2. Specific Category Customer Reviews Section */}
-        <div className="space-y-6 pt-4 border-t border-gray-100">
-          {/* Standardized Section Header */}
-          <div className="space-y-2 border-b border-gray-100 pb-5">
+        <div className="space-y-5 pt-4 border-t border-gray-100">
+          {/* Centered Section Header */}
+          <div className="space-y-2 border-b border-gray-100 pb-5 text-center flex flex-col items-center">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#0B132B] uppercase tracking-wider">
               WHAT BUYERS ARE SAYING
-              <span className="block w-16 h-1 bg-[#F97316] mt-2 rounded-full" />
+              <span className="block w-16 h-1 bg-[#F97316] mx-auto mt-2 rounded-full" />
             </h2>
-            <p className="text-xs sm:text-sm text-gray-500 max-w-2xl font-normal leading-relaxed pt-0.5">
+            <p className="text-xs sm:text-sm text-gray-500 max-w-2xl mx-auto font-normal leading-relaxed pt-0.5">
               Real impressions and daily styling feedback from verified clients wearing Calenvee across Pakistan.
             </p>
           </div>
@@ -179,22 +174,16 @@ export const CategoryPage: React.FC = () => {
                     "{rev.title}"
                   </h3>
 
-                  {/* Review Body */}
-                  <p className="text-xs text-gray-600 font-normal leading-relaxed">
+                  {/* Review Text */}
+                  <p className="text-xs text-gray-600 leading-relaxed font-normal">
                     {rev.comment}
                   </p>
                 </div>
 
-                {/* Reviewer Details & Product Tag */}
-                <div className="pt-3 border-t border-gray-200/70 space-y-2">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="font-bold text-gray-900">{rev.customerName}</span>
-                    <span className="text-gray-400 font-medium">{rev.city}, Pakistan</span>
-                  </div>
-                  <div className="flex items-center space-x-1.5 text-[10px] text-gray-500 bg-white px-2.5 py-1 rounded-md border border-gray-200/80">
-                    <Tag className="w-3 h-3 text-[#F97316] flex-shrink-0" />
-                    <span className="truncate font-medium">{rev.productName}</span>
-                  </div>
+                {/* Author Info */}
+                <div className="pt-3 border-t border-gray-200/60 flex items-center justify-between text-xs text-gray-500">
+                  <span className="font-semibold text-gray-800">{rev.customerName}</span>
+                  <span>{rev.city}</span>
                 </div>
               </div>
             ))}
@@ -202,20 +191,20 @@ export const CategoryPage: React.FC = () => {
         </div>
 
         {/* 3. Recommendations From Other Categories */}
-        <div className="space-y-6 pt-4 border-t border-gray-100">
-          {/* Standardized Section Header */}
-          <div className="space-y-2 border-b border-gray-100 pb-5">
+        <div className="space-y-5 pt-4 border-t border-gray-100">
+          {/* Centered Section Header */}
+          <div className="space-y-2 border-b border-gray-100 pb-5 text-center flex flex-col items-center">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#0B132B] uppercase tracking-wider">
               COMPLETE YOUR LOOK
-              <span className="block w-16 h-1 bg-[#F97316] mt-2 rounded-full" />
+              <span className="block w-16 h-1 bg-[#F97316] mx-auto mt-2 rounded-full" />
             </h2>
-            <p className="text-xs sm:text-sm text-gray-500 max-w-2xl font-normal leading-relaxed pt-0.5">
+            <p className="text-xs sm:text-sm text-gray-500 max-w-2xl mx-auto font-normal leading-relaxed pt-0.5">
               Carefully curated companion pieces handpicked to pair effortlessly with this collection.
             </p>
           </div>
 
-          {/* Other Categories Navigation Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          {/* Other Categories Navigation Pills — Centered */}
+          <div className="flex items-center justify-center gap-2 overflow-x-auto pb-2 scrollbar-none flex-wrap">
             {CATEGORIES.filter((c) => c.slug !== slug).map((c) => (
               <Link
                 key={c.id}
@@ -228,16 +217,11 @@ export const CategoryPage: React.FC = () => {
             ))}
           </div>
 
-          {/* Recommended Products Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5 pt-2">
-            {otherCategoryProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onQuickView={(p) => setQuickViewProduct(p)}
-              />
-            ))}
-          </div>
+          {/* Recommended Products Grid with Automatic Row Centering */}
+          <ProductGrid
+            products={otherCategoryProducts}
+            onQuickView={(p) => setQuickViewProduct(p)}
+          />
         </div>
 
       </div>

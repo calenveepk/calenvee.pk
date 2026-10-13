@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { PRODUCTS } from '../../data/products';
-import { ProductCard } from '../products/ProductCard';
+import { ProductGrid } from '../products/ProductGrid';
 import { QuickViewModal } from '../common/QuickViewModal';
 import { Product } from '../../types';
 
@@ -13,11 +13,11 @@ export const FeaturedDrops: React.FC = () => {
   const newArrivals = PRODUCTS.filter((p) => p.isNewDrop).slice(0, 4);
 
   return (
-    <section className="bg-white py-12 sm:py-16">
+    <section className="bg-white py-6 sm:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header: Centered */}
-        <div className="text-center mb-8 sm:mb-10 space-y-2 flex flex-col items-center">
+        <div className="text-center mb-6 sm:mb-8 space-y-2 flex flex-col items-center">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B132B] tracking-tight">
             New Arrivals
           </h2>
@@ -32,16 +32,11 @@ export const FeaturedDrops: React.FC = () => {
           </div>
         </div>
 
-        {/* 4-Column Responsive Grid matching reference design */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {newArrivals.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onQuickView={(p) => setSelectedQuickViewProduct(p)}
-            />
-          ))}
-        </div>
+        {/* Responsive Grid with Automatic Row Centering */}
+        <ProductGrid
+          products={newArrivals}
+          onQuickView={(p) => setSelectedQuickViewProduct(p)}
+        />
 
         {/* Quick View Modal */}
         <QuickViewModal

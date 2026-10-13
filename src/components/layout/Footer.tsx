@@ -14,16 +14,16 @@ import {
 export const Footer: React.FC = () => {
   return (
     <footer className="bg-white text-gray-700 border-t border-gray-200">
-      {/* Main Footer Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 sm:pt-14 pb-10 text-center">
+      {/* Main Footer Container — Reduced Padding */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 pb-8 text-center">
         
         {/* Top: Brand Logo, Slogan, Description & Social Icons — Centered */}
-        <div className="max-w-xl mx-auto space-y-3 pb-8 border-b border-gray-100 flex flex-col items-center text-center">
+        <div className="max-w-xl mx-auto space-y-2.5 pb-6 border-b border-gray-100 flex flex-col items-center text-center">
           <Link to="/" className="inline-block group">
             <img
               src="/logo.png"
               alt="Calenvee"
-              className="h-9 w-auto object-contain transition-transform group-hover:scale-105 mx-auto"
+              className="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-105 mx-auto"
             />
           </Link>
 
@@ -36,7 +36,7 @@ export const Footer: React.FC = () => {
           </p>
 
           {/* Social Icons Centered */}
-          <div className="flex items-center justify-center space-x-3 pt-1">
+          <div className="flex items-center justify-center space-x-3 pt-0.5">
             <a
               href="https://facebook.com/calenvee.pk"
               target="_blank"
@@ -70,10 +70,10 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Middle: Quick Links, Customer Care, Contact Us — Side by Side in Same Row (3 Columns) */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-8 pt-8 pb-8 text-center max-w-4xl mx-auto">
+        <div className="grid grid-cols-3 gap-2 sm:gap-8 pt-6 pb-6 text-center max-w-4xl mx-auto">
           
           {/* Col 1: QUICK LINKS */}
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <h4 className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-900">
               QUICK LINKS
             </h4>
@@ -102,7 +102,7 @@ export const Footer: React.FC = () => {
           </div>
 
           {/* Col 2: CUSTOMER CARE */}
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <h4 className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-900">
               CUSTOMER CARE
             </h4>
@@ -136,11 +136,11 @@ export const Footer: React.FC = () => {
           </div>
 
           {/* Col 3: CONTACT US */}
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <h4 className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-900">
               CONTACT US
             </h4>
-            <ul className="space-y-2.5 text-[11px] sm:text-xs text-gray-500 flex flex-col items-center">
+            <ul className="space-y-2 text-[11px] sm:text-xs text-gray-500 flex flex-col items-center">
               <li>
                 <a
                   href="mailto:calenvee.pk@gmail.com"
@@ -169,28 +169,34 @@ export const Footer: React.FC = () => {
 
         </div>
 
-        {/* Bottom: COD, Easypaisa, Jazzcash, Bank — Center Aligned in One Row */}
-        <div className="pt-6 pb-6 border-t border-gray-100 flex items-center justify-center gap-2 sm:gap-4 flex-wrap">
+        {/* Bottom: COD, Easypaisa, Jazzcash, Bank — Official Badges in One Row Center Aligned */}
+        <div className="pt-5 pb-5 border-t border-gray-100 flex items-center justify-center gap-2.5 sm:gap-4 flex-wrap">
           {/* COD Badge */}
-          <div className="inline-flex items-center gap-1.5 bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-lg px-2.5 py-1.5 transition-colors">
+          <div className="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-lg px-3 py-1.5 transition-colors shadow-2xs h-10">
             <RealCODBadge size={24} />
-            <span className="text-[11px] font-bold text-gray-800 whitespace-nowrap">COD</span>
+            <span className="text-[11px] font-bold text-gray-800 whitespace-nowrap">Cash On Delivery</span>
           </div>
 
-          {/* EasyPaisa Badge */}
-          <div className="inline-flex items-center gap-1.5 bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-lg px-2.5 py-1.5 transition-colors">
-            <RealEasyPaisaIcon size={24} />
-            <span className="text-[11px] font-bold text-gray-800 whitespace-nowrap">EasyPaisa</span>
+          {/* Official EasyPaisa Logo Badge */}
+          <div className="inline-flex items-center justify-center bg-white border border-gray-200 hover:border-gray-300 rounded-lg px-3 py-1.5 transition-colors shadow-2xs h-10">
+            <img
+              src="/payments/easypaisa.png"
+              alt="EasyPaisa"
+              className="h-6 sm:h-7 w-auto object-contain"
+            />
           </div>
 
-          {/* JazzCash Badge */}
-          <div className="inline-flex items-center gap-1.5 bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-lg px-2.5 py-1.5 transition-colors">
-            <RealJazzCashIcon size={24} />
-            <span className="text-[11px] font-bold text-gray-800 whitespace-nowrap">JazzCash</span>
+          {/* Official JazzCash Logo Badge */}
+          <div className="inline-flex items-center justify-center bg-white border border-gray-200 hover:border-gray-300 rounded-lg px-3 py-1.5 transition-colors shadow-2xs h-10">
+            <img
+              src="/payments/jazzcash.png"
+              alt="JazzCash"
+              className="h-7 sm:h-8 w-auto object-contain"
+            />
           </div>
 
           {/* Bank / Raast Badge */}
-          <div className="inline-flex items-center gap-1.5 bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-lg px-2.5 py-1.5 transition-colors">
+          <div className="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-lg px-3 py-1.5 transition-colors shadow-2xs h-10">
             <RealBankIcon size={24} />
             <span className="text-[11px] font-bold text-gray-800 whitespace-nowrap">Bank / Raast</span>
           </div>

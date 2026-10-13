@@ -5,11 +5,11 @@ import { CATEGORIES } from '../../data/categories';
 
 export const TrendingCategories: React.FC = () => {
   return (
-    <section className="bg-white py-12 sm:py-16">
+    <section className="bg-white py-6 sm:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Heading matching reference design */}
-        <div className="text-center mb-8 sm:mb-12">
+        <div className="text-center mb-5 sm:mb-7">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B132B] tracking-tight">
             Shop By Category
           </h2>

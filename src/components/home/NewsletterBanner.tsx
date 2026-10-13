@@ -21,11 +21,11 @@ export const NewsletterBanner: React.FC = () => {
   };
 
   return (
-    <section className="bg-white py-8 sm:py-12">
+    <section className="bg-white py-5 sm:py-7">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Banner matching reference design: Deep Forest Green container — Centered */}
-        <div className="rounded-2xl bg-gradient-to-r from-[#0A2619] via-[#0D2E1E] to-[#0A2619] p-6 sm:p-10 lg:p-12 shadow-xl border border-emerald-900/50 text-center">
+        <div className="rounded-2xl bg-gradient-to-r from-[#0A2619] via-[#0D2E1E] to-[#0A2619] p-6 sm:p-8 lg:p-9 shadow-xl border border-emerald-900/50 text-center">
           <div className="flex flex-col items-center justify-center text-center gap-5 max-w-2xl mx-auto">
             
             {/* Centered Icon & Text */}

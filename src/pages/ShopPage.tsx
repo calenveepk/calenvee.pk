@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { PRODUCTS } from '../data/products';
 import { CATEGORIES } from '../data/categories';
 import { Product } from '../types';
-import { ProductCard } from '../components/products/ProductCard';
+import { ProductGrid } from '../components/products/ProductGrid';
 import { QuickViewModal } from '../components/common/QuickViewModal';
 import { SEO } from '../components/common/SEO';
 
@@ -45,7 +45,7 @@ export const ShopPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen py-8 sm:py-12 bg-white text-gray-900">
+    <div className="min-h-screen py-5 sm:py-7 bg-white text-gray-900">
       <SEO
         title="All Collections | Calenvee.pk"
         description="Browse the complete collection of Calenvee timepieces, minimalist jewelry, eyewear, and everyday essentials in Pakistan with Cash on Delivery."
@@ -53,7 +53,7 @@ export const ShopPage: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Editorial Page Banner — Centered */}
-        <div className="mb-8 text-center space-y-2 border-b border-gray-100 pb-6 flex flex-col items-center">
+        <div className="mb-6 text-center space-y-2 border-b border-gray-100 pb-5 flex flex-col items-center">
           <h1 className="text-2xl sm:text-4xl font-extrabold text-[#0B132B] uppercase tracking-wider">
             ALL PRODUCTS
             <span className="block w-16 h-1 bg-[#F97316] mx-auto mt-2 rounded-full" />
@@ -64,12 +64,12 @@ export const ShopPage: React.FC = () => {
         </div>
 
         {/* Filter Bar & Sort Controls */}
-        <div className="bg-gray-50 p-4 rounded-xl mb-8 flex flex-col lg:flex-row items-center justify-between gap-4 border border-gray-200">
+        <div className="bg-gray-50 p-3.5 sm:p-4 rounded-xl mb-6 flex flex-col lg:flex-row items-center justify-between gap-3 border border-gray-200">
           {/* Category Filter Pills — Centered / Scrollable */}
-          <div className="flex items-center justify-center gap-2 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0 scrollbar-none">
+          <div className="flex items-center justify-center gap-2 overflow-x-auto w-full lg:w-auto pb-1 lg:pb-0 scrollbar-none">
             <button
               onClick={() => handleCategoryChange('all')}
-              className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
+              className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
                 selectedCategory === 'all'
                   ? 'bg-[#F97316] text-white shadow-xs'
                   : 'bg-white text-gray-700 hover:text-black hover:bg-gray-100 border border-gray-200'
@@ -81,7 +81,7 @@ export const ShopPage: React.FC = () => {
               <button
                 key={cat.id}
                 onClick={() => handleCategoryChange(cat.slug)}
-                className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
+                className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
                   selectedCategory === cat.slug
                     ? 'bg-[#F97316] text-white shadow-xs'
                     : 'bg-white text-gray-700 hover:text-black hover:bg-gray-100 border border-gray-200'
@@ -92,8 +92,8 @@ export const ShopPage: React.FC = () => {
             ))}
           </div>
 
-          {/* Sort Controls (No price range scroll slider) */}
-          <div className="flex items-center gap-3 w-full lg:w-auto justify-center lg:justify-end text-xs">
+          {/* Sort Controls */}
+          <div className="flex items-center gap-2.5 w-full lg:w-auto justify-center lg:justify-end text-xs">
             <span className="text-gray-500 whitespace-nowrap font-medium">Sort:</span>
             <select
               value={sortBy}
@@ -108,9 +108,9 @@ export const ShopPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Product Grid: 2 columns on mobile, 4 columns on desktop */}
+        {/* Product Grid with Automatic Row Centering */}
         {filteredProducts.length === 0 ? (
-          <div className="text-center py-20 space-y-4 bg-gray-50 rounded-2xl p-8 border border-gray-200">
+          <div className="text-center py-16 space-y-3 bg-gray-50 rounded-2xl p-6 border border-gray-200">
             <h3 className="text-base font-semibold text-gray-900">No items found</h3>
             <p className="text-xs text-gray-500 max-w-sm mx-auto font-normal">
               Try selecting another collection.
@@ -125,15 +125,10 @@ export const ShopPage: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onQuickView={(p) => setQuickViewProduct(p)}
-              />
-            ))}
-          </div>
+          <ProductGrid
+            products={filteredProducts}
+            onQuickView={(p) => setQuickViewProduct(p)}
+          />
         )}
       </div>
 

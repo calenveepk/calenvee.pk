@@ -4,9 +4,9 @@ import { ArrowRight } from 'lucide-react';
 
 export const HeroSection: React.FC = () => {
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-8">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 sm:pt-4 pb-4 sm:pb-6">
       {/* Full-Bleed Integrated Hero Card */}
-      <div className="relative rounded-3xl bg-[#0A2619] overflow-hidden shadow-2xl border border-emerald-950/60 min-h-[440px] sm:min-h-[500px] lg:min-h-[540px] flex items-center">
+      <div className="relative rounded-3xl bg-[#0A2619] overflow-hidden shadow-2xl border border-emerald-950/60 min-h-[420px] sm:min-h-[480px] lg:min-h-[520px] flex items-center">
         
         {/* Full-bleed background image anchored to the right */}
         <div className="absolute inset-0 z-0">
@@ -41,8 +41,8 @@ export const HeroSection: React.FC = () => {
           <span className="text-[9px] sm:text-[10px] uppercase font-extrabold tracking-wider text-orange-100">OFF</span>
         </div>
 
-        {/* Left Content Area: Headline, Subtitle, and Call to Action */}
-        <div className="relative z-10 p-6 sm:p-10 lg:p-16 max-w-xl lg:max-w-2xl space-y-5 sm:space-y-6 text-left">
+        {/* Left Content Area: Headline, Subtitle, and Call to Action — Centered */}
+        <div className="relative z-10 p-6 sm:p-10 lg:p-14 max-w-xl lg:max-w-2xl space-y-4 sm:space-y-5 text-center flex flex-col items-center">
           
           {/* Pill Badge */}
           <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-900/80 border border-emerald-500/40 text-emerald-300 text-xs font-semibold tracking-wider uppercase backdrop-blur-md">
@@ -50,22 +50,22 @@ export const HeroSection: React.FC = () => {
             <span>LIMITED TIME ONLY</span>
           </div>
 
-          {/* Main Title matching reference typography */}
+          {/* Main Title matching reference typography — Centered */}
           <div className="space-y-2">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.08] drop-shadow-sm">
               Shop More,<br />
               <span className="text-[#F97316]">Save More!</span>
             </h1>
-            <p className="text-sm sm:text-base text-emerald-100/90 font-normal max-w-lg pt-1 leading-relaxed">
+            <p className="text-sm sm:text-base text-emerald-100/90 font-normal max-w-lg mx-auto pt-1 leading-relaxed">
               Discover amazing deals on your favorite lifestyle products, timepieces, luxury handbags, and modern essentials across Pakistan.
             </p>
           </div>
 
-          {/* Primary Action Button & Slogan */}
-          <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          {/* Primary Action Button & Slogan — Centered */}
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               to="/shop"
-              className="inline-flex items-center space-x-2.5 px-8 py-4 bg-[#F97316] hover:bg-[#EA580C] text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider rounded-xl shadow-xl hover:shadow-orange-500/30 transition-all duration-200 active:scale-95 group"
+              className="inline-flex items-center space-x-2.5 px-8 py-3.5 sm:py-4 bg-[#F97316] hover:bg-[#EA580C] text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider rounded-xl shadow-xl hover:shadow-orange-500/30 transition-all duration-200 active:scale-95 group"
             >
               <span>EXPLORE COLLECTION</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
