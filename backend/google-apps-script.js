@@ -1803,6 +1803,8 @@ function onOpen() {
     .addSeparator()
     .addItem("✉️ 3. Send Dispatch Email for Selected Row", "sendDispatchEmailForSelectedRow")
     .addItem("🧪 4. Send Test Email to Store Owner", "testOrderEmail")
+    .addSeparator()
+    .addItem("🗑️ 5. Reset All Dummy Orders (Fresh Store)", "resetDummyData")
     .addToUi();
 }
 
@@ -1878,3 +1880,32 @@ function testOrderEmail() {
   sendOwnerNewOrderAlertEmail(sampleOrder, testBlob, "https://drive.google.com");
   Logger.log("Test emails with sample receipt sent to " + STORE_CONFIG.ownerEmail);
 }
+
+/**
+ * 10. RESET DUMMY DATA FUNCTION
+ * Clears all sample/starter orders and line items from "Orders" and "OrderItems" sheets,
+ * preserving header Row 1 and updating the Executive Dashboard to fresh zero state.
+ */
+function resetDummyData() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  // 1. Clear Orders tab (keep header row 1)
+  const ordersSheet = ss.getSheetByName("Orders");
+  if (ordersSheet && ordersSheet.getLastRow() > 1) {
+    ordersSheet.deleteRows(2, ordersSheet.getLastRow() - 1);
+  }
+
+  // 2. Clear OrderItems tab (keep header row 1)
+  const itemsSheet = ss.getSheetByName("OrderItems");
+  if (itemsSheet && itemsSheet.getLastRow() > 1) {
+    itemsSheet.deleteRows(2, itemsSheet.getLastRow() - 1);
+  }
+
+  // 3. Refresh Dashboard KPIs
+  if (typeof createExecutiveDashboard === 'function') {
+    createExecutiveDashboard();
+  }
+
+  Logger.log("✅ All dummy orders cleared successfully. Sheet is ready for real live customer orders!");
+}
+
