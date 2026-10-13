@@ -12,6 +12,7 @@ import confetti from 'canvas-confetti';
 import { useCart } from '../context/CartContext';
 import { formatPKR } from '../utils/formatters';
 import { OrderDetails } from '../types';
+import { submitOrderToBackend } from '../services/orderService';
 import { SEO } from '../components/common/SEO';
 import {
   RealWhatsAppIcon,
@@ -49,7 +50,7 @@ export const CheckoutPage: React.FC = () => {
     }
   };
 
-  const handlePlaceOrder = (e: React.FormEvent) => {
+  const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName.trim() || !phone.trim() || !address.trim()) {
       alert('Please fill in your name, mobile number, and complete delivery address.');
@@ -58,44 +59,42 @@ export const CheckoutPage: React.FC = () => {
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      const newOrder: OrderDetails = {
-        orderId: generateOrderId(),
-        trackingNumber: generateTrackingNumber('TCS Express'),
-        courier: 'TCS Express',
-        customerName: fullName,
-        email: email || 'N/A',
-        phone,
-        city,
-        address,
-        paymentMethod,
-        items: [...items],
-        subtotal,
-        discount,
-        shippingFee,
-        total: finalTotal,
-        createdAt: new Date().toISOString(),
-        status: 'confirmed',
-      };
+    const newOrder: OrderDetails = {
+      orderId: generateOrderId(),
+      trackingNumber: generateTrackingNumber('TCS Express'),
+      courier: 'TCS Express',
+      customerName: fullName.trim(),
+      email: email.trim() || 'N/A',
+      phone: phone.trim(),
+      city,
+      address: address.trim(),
+      notes: deliveryNotes.trim() || 'N/A',
+      paymentMethod,
+      items: [...items],
+      subtotal,
+      discount,
+      shippingFee,
+      total: finalTotal,
+      createdAt: new Date().toISOString(),
+      status: 'confirmed',
+    };
 
-      try {
-        const savedOrders = JSON.parse(localStorage.getItem('calenvee_orders') || '[]');
-        localStorage.setItem('calenvee_orders', JSON.stringify([newOrder, ...savedOrders]));
-      } catch (err) {
-        console.error('Failed to cache order', err);
-      }
+    try {
+      await submitOrderToBackend(newOrder);
+    } catch (err) {
+      console.warn('Backend sync error:', err);
+    }
 
-      confetti({
-        particleCount: 120,
-        spread: 80,
-        origin: { y: 0.6 },
-        colors: ['#F97316', '#0B132B', '#25D366', '#FFFFFF'],
-      });
+    confetti({
+      particleCount: 120,
+      spread: 80,
+      origin: { y: 0.6 },
+      colors: ['#F97316', '#0B132B', '#25D366', '#FFFFFF'],
+    });
 
-      setCompletedOrder(newOrder);
-      clearCart();
-      setIsSubmitting(false);
-    }, 900);
+    setCompletedOrder(newOrder);
+    clearCart();
+    setIsSubmitting(false);
   };
 
   const whatsappReceiptLink = completedOrder
