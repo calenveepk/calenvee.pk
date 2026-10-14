@@ -1703,7 +1703,7 @@ Ready to commit and deploy changes.</pre>
     }
 
     async function quickConfirmOrder(orderId) {
-      if (!confirm('Verify & Confirm Order #' + orderId + '?\nStatus will change from Placed to Confirmed.')) return;
+      if (!confirm('Verify & Confirm Order #' + orderId + '?\\nStatus will change from Placed to Confirmed.')) return;
       try {
         const res = await fetch('/api/orders/update-status', {
           method: 'POST',
