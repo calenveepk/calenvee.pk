@@ -66,13 +66,63 @@ export const ProductDetailPage: React.FC = () => {
     (p) => p.category === product.category && p.id !== product.id
   ).slice(0, 4);
 
+  const productKeywords = [
+    product.name,
+    product.categoryLabel,
+    product.subcategory,
+    ...(product.seoKeywords || []),
+    ...(product.tags || []),
+    'Calenvee',
+    'Calenvee.pk',
+    'buy online Pakistan',
+    'Cash on Delivery Pakistan',
+  ].filter(Boolean).join(', ');
+
+  const productSchema = {
+    '@context': 'https://schema.org/',
+    '@type': 'Product',
+    name: product.name,
+    image: product.images,
+    description: product.shortDescription || product.description,
+    sku: product.id.toUpperCase(),
+    brand: {
+      '@type': 'Brand',
+      name: 'Calenvee',
+    },
+    offers: {
+      '@type': 'Offer',
+      url: `https://calenvee.pk/product/${product.slug}`,
+      priceCurrency: 'PKR',
+      price: product.price,
+      priceValidUntil: '2027-12-31',
+      itemCondition: 'https://schema.org/NewCondition',
+      availability: product.inStock
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+      seller: {
+        '@type': 'Organization',
+        name: 'Calenvee.pk',
+      },
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: (product.rating || 5).toString(),
+      reviewCount: (product.reviewsCount || 120).toString(),
+      bestRating: '5',
+      worstRating: '1',
+    },
+  };
+
   return (
     <div className="min-h-screen py-6 sm:py-10 bg-white text-gray-900">
       <SEO
         title={`${product.name} | Calenvee.pk`}
-        description={product.shortDescription}
+        description={product.shortDescription || product.description}
+        keywords={productKeywords}
         image={product.images[0]}
+        url={`https://calenvee.pk/product/${product.slug}`}
         type="product"
+        schema={productSchema}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

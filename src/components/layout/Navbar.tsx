@@ -14,6 +14,7 @@ import { useWishlist } from '../../context/WishlistContext';
 import { CATEGORIES } from '../../data/categories';
 import { PRODUCTS } from '../../data/products';
 import { formatPKR } from '../../utils/formatters';
+import { getLiveSuggestions } from '../../utils/searchEngine';
 
 interface NavbarProps {
   onOpenSearch: () => void;
@@ -70,19 +71,9 @@ export const Navbar: React.FC<NavbarProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Live matching products as user types
+  // Live matching products as user types using Smart Search Engine
   const matchingProducts = useMemo(() => {
-    const q = searchInput.trim().toLowerCase();
-    if (!q || q.length < 1) return [];
-
-    return PRODUCTS.filter((p) => {
-      const matchName = p.name.toLowerCase().includes(q);
-      const matchCat = p.category.toLowerCase().includes(q) ||
-        (p.categoryLabel && p.categoryLabel.toLowerCase().includes(q));
-      const matchTags = Array.isArray(p.tags) && p.tags.some((t) => t.toLowerCase().includes(q));
-      const matchDesc = p.description.toLowerCase().includes(q);
-      return matchName || matchCat || matchTags || matchDesc;
-    }).slice(0, 5); // Show top 5 instant results
+    return getLiveSuggestions(searchInput, 5);
   }, [searchInput]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {

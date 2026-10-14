@@ -7,6 +7,7 @@ import { Product } from '../types';
 import { ProductGrid } from '../components/products/ProductGrid';
 import { QuickViewModal } from '../components/common/QuickViewModal';
 import { SEO } from '../components/common/SEO';
+import { searchProducts } from '../utils/searchEngine';
 
 export const ShopPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -24,23 +25,10 @@ export const ShopPage: React.FC = () => {
   }, [categoryParam]);
 
   const filteredProducts = useMemo(() => {
-    const q = searchQuery.toLowerCase();
+    // 1. Initial base items: if search query is present, use intelligent searchEngine!
+    const baseItems = searchQuery ? searchProducts(searchQuery) : PRODUCTS;
 
-    return PRODUCTS.filter((product) => {
-      // 1. Search Query filter (matches name, category, tags, description)
-      if (q) {
-        const matchesName = product.name.toLowerCase().includes(q);
-        const matchesCat = product.category.toLowerCase().includes(q) ||
-          (product.categoryLabel && product.categoryLabel.toLowerCase().includes(q));
-        const matchesTags = Array.isArray(product.tags) && product.tags.some(t => t.toLowerCase().includes(q));
-        const matchesDesc = product.description.toLowerCase().includes(q) ||
-          (product.shortDescription && product.shortDescription.toLowerCase().includes(q));
-
-        if (!matchesName && !matchesCat && !matchesTags && !matchesDesc) {
-          return false;
-        }
-      }
-
+    return baseItems.filter((product) => {
       // 2. Category filter
       if (selectedCategory !== 'all' && product.category !== selectedCategory) {
         return false;
@@ -53,6 +41,8 @@ export const ShopPage: React.FC = () => {
 
       return true;
     }).sort((a, b) => {
+      // If search query is active and sort is 'featured', maintain intelligent relevance ranking
+      if (searchQuery && sortBy === 'featured') return 0;
       if (sortBy === 'price-low') return a.price - b.price;
       if (sortBy === 'price-high') return b.price - a.price;
       if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
