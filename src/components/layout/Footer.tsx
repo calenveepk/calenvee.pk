@@ -13,32 +13,27 @@ export const Footer: React.FC = () => {
   return (
     <footer className="bg-[#081320] text-gray-300 border-t border-slate-800">
       {/* Main Footer Container with broad mobile width */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-10 sm:pt-14 pb-10">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-8">
         
-        {/* Top Grid: Brand & Description + 3 Navigation Columns (NO Download Our App) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 pb-10 border-b border-slate-800">
+        {/* Top Grid: Brand Section (Centered in mobile) + 3 Nav Columns Side-by-Side in Mobile */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 pb-8 border-b border-slate-800">
           
-          {/* Brand Info (4 cols) */}
-          <div className="lg:col-span-4 space-y-3.5 text-left">
-            <Link to="/" className="inline-block group">
+          {/* Brand Info (4 cols on desktop, centered on mobile) */}
+          <div className="lg:col-span-4 space-y-3 text-center lg:text-left flex flex-col items-center lg:items-start">
+            <Link to="/" className="inline-flex justify-center lg:justify-start group">
               <img
                 src="/logo-white.png"
                 alt="Calenvee"
-                className="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-105"
-                onError={(e) => {
-                  // Fallback if logo-white not found
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
+                className="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-105 mx-auto lg:mx-0"
               />
-              <span className="text-xl font-black text-white tracking-wider block">CALENVEE</span>
             </Link>
 
-            <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
+            <p className="text-xs text-slate-400 leading-relaxed max-w-sm mx-auto lg:mx-0">
               Your trusted store for premium timepieces, waterproof jewelry, and modern lifestyle essentials across Pakistan. Shop smart, live better.
             </p>
 
             {/* Social Icons */}
-            <div className="flex items-center space-x-2.5 pt-1">
+            <div className="flex items-center justify-center lg:justify-start space-x-2.5 pt-1">
               <a
                 href="https://facebook.com/calenvee.pk"
                 target="_blank"
@@ -71,112 +66,117 @@ export const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* Col 1: Shop (3 cols) */}
-          <div className="lg:col-span-3 space-y-3 text-left">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white">
-              Shop
-            </h4>
-            <ul className="space-y-2 text-xs text-slate-400">
-              <li>
-                <Link to="/shop" className="hover:text-white transition-colors">
-                  All Categories
-                </Link>
-              </li>
-              <li>
-                <Link to="/shop?filter=top-deals" className="hover:text-white transition-colors">
-                  Top Deals
-                </Link>
-              </li>
-              <li>
-                <Link to="/new-arrivals" className="hover:text-white transition-colors">
-                  New Arrivals
-                </Link>
-              </li>
-              <li>
-                <Link to="/best-sellers" className="hover:text-white transition-colors">
-                  Best Sellers
-                </Link>
-              </li>
-              <li>
-                <Link to="/category/watches" className="hover:text-white transition-colors">
-                  Watches
-                </Link>
-              </li>
-              <li>
-                <Link to="/category/jewelry" className="hover:text-white transition-colors">
-                  Jewelry
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {/* 3 Nav Columns Side by Side in Single Row on Mobile & Desktop (8 cols on desktop) */}
+          <div className="lg:col-span-8 grid grid-cols-3 gap-2 sm:gap-6 lg:gap-8 pt-2 lg:pt-0 text-center sm:text-left">
+            
+            {/* Col 1: Shop */}
+            <div className="space-y-2.5">
+              <h4 className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white whitespace-nowrap">
+                Shop
+              </h4>
+              <ul className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-slate-400">
+                <li>
+                  <Link to="/shop" className="hover:text-white transition-colors">
+                    All Items
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/shop?filter=top-deals" className="hover:text-white transition-colors">
+                    Top Deals
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/new-arrivals" className="hover:text-white transition-colors">
+                    New In
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/best-sellers" className="hover:text-white transition-colors">
+                    Best Sellers
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/category/watches" className="hover:text-white transition-colors">
+                    Watches
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/category/jewelry" className="hover:text-white transition-colors">
+                    Jewelry
+                  </Link>
+                </li>
+              </ul>
+            </div>
 
-          {/* Col 2: Customer Service (3 cols) */}
-          <div className="lg:col-span-3 space-y-3 text-left">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white">
-              Customer Service
-            </h4>
-            <ul className="space-y-2 text-xs text-slate-400">
-              <li>
-                <Link to="/contact" className="hover:text-white transition-colors">
-                  Help Center
-                </Link>
-              </li>
-              <li>
-                <Link to="/shipping-policy" className="hover:text-white transition-colors">
-                  Track Order
-                </Link>
-              </li>
-              <li>
-                <Link to="/returns-refunds" className="hover:text-white transition-colors">
-                  Returns &amp; Refunds
-                </Link>
-              </li>
-              <li>
-                <Link to="/shipping-policy" className="hover:text-white transition-colors">
-                  Shipping Info (7-10 Days COD)
-                </Link>
-              </li>
-              <li>
-                <a
-                  href="https://wa.me/923001234567"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-[#25D366] transition-colors inline-flex items-center space-x-1.5"
-                >
-                  <Phone className="w-3.5 h-3.5 text-[#F97316]" />
-                  <span>WhatsApp: +92 300 1234567</span>
-                </a>
-              </li>
-            </ul>
-          </div>
+            {/* Col 2: Customer Service */}
+            <div className="space-y-2.5">
+              <h4 className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white whitespace-nowrap">
+                Customer Care
+              </h4>
+              <ul className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-slate-400">
+                <li>
+                  <Link to="/contact" className="hover:text-white transition-colors">
+                    Help Center
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/shipping-policy" className="hover:text-white transition-colors">
+                    Track Order
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/returns-refunds" className="hover:text-white transition-colors">
+                    Returns
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/shipping-policy" className="hover:text-white transition-colors">
+                    Shipping (COD)
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    href="https://wa.me/923001234567"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#25D366] transition-colors inline-flex items-center space-x-1"
+                  >
+                    <Phone className="w-3 h-3 text-[#F97316]" />
+                    <span className="truncate">WhatsApp</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
 
-          {/* Col 3: About Calenvee (2 cols) */}
-          <div className="lg:col-span-2 space-y-3 text-left">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white">
-              About Calenvee
-            </h4>
-            <ul className="space-y-2 text-xs text-slate-400">
-              <li>
-                <Link to="/about" className="hover:text-white transition-colors">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link to="/terms-and-conditions" className="hover:text-white transition-colors">
-                  Terms &amp; Conditions
-                </Link>
-              </li>
-              <li>
-                <Link to="/privacy-policy" className="hover:text-white transition-colors">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <span className="text-[11px] text-slate-500 block pt-1">
-                  100% Inspected Packaging
-                </span>
-              </li>
-            </ul>
+            {/* Col 3: About Calenvee */}
+            <div className="space-y-2.5">
+              <h4 className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white whitespace-nowrap">
+                About Us
+              </h4>
+              <ul className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-slate-400">
+                <li>
+                  <Link to="/about" className="hover:text-white transition-colors">
+                    About Us
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/terms-and-conditions" className="hover:text-white transition-colors">
+                    Terms
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/privacy-policy" className="hover:text-white transition-colors">
+                    Privacy
+                  </Link>
+                </li>
+                <li>
+                  <span className="text-[9px] sm:text-[11px] text-slate-500 block pt-0.5">
+                    100% Inspected
+                  </span>
+                </li>
+              </ul>
+            </div>
+
           </div>
 
         </div>
