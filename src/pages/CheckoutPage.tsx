@@ -24,9 +24,8 @@ import { SEO } from '../components/common/SEO';
 import { OrderInvoice } from '../components/common/OrderInvoice';
 import {
   RealWhatsAppIcon,
-  RealJazzCashIcon,
-  RealEasyPaisaIcon,
-  RealisticTruckIcon,
+  RealCODBadge,
+  RealBankIcon,
   RealisticShieldIcon,
 } from '../components/common/RealisticIcons';
 import {
@@ -44,6 +43,7 @@ export const CheckoutPage: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [city, setCity] = useState(PAKISTAN_CITIES[0]);
+  const [customCity, setCustomCity] = useState('');
   const [address, setAddress] = useState('');
   const [deliveryNotes, setDeliveryNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'jazzcash' | 'easypaisa' | 'bank_transfer'>('cod');
@@ -143,6 +143,11 @@ export const CheckoutPage: React.FC = () => {
       return;
     }
 
+    if (city === 'Other City' && !customCity.trim()) {
+      alert('Please enter your city name in the input box.');
+      return;
+    }
+
     if (!email.trim() || !email.includes('@')) {
       alert('Please provide a valid Gmail / Email address so we can deliver your official invoice.');
       return;
@@ -157,17 +162,18 @@ export const CheckoutPage: React.FC = () => {
     setIsSubmitting(true);
 
     const initialOrderId = generateOrderId();
+    const finalCity = city === 'Other City' ? (customCity.trim() || 'Other City') : city;
 
     const newOrder: OrderDetails = {
       orderId: initialOrderId,
       trackingNumber: '', // NO tracking number upon initial order placement!
-      courier: 'Pending Dispatch (TCS Express)',
+      courier: '-', // Unassigned on initial order placement
       customerName: fullName.trim(),
       email: email.trim(),
       phone: phone.trim(),
-      city,
+      city: finalCity,
       address: address.trim(),
-      notes: deliveryNotes.trim() || 'N/A',
+      notes: deliveryNotes.trim() || '',
       paymentMethod,
       items: items.map(it => ({
         ...it,
@@ -547,6 +553,22 @@ export const CheckoutPage: React.FC = () => {
                           <option key={c} value={c} className="text-gray-900">{c}</option>
                         ))}
                       </select>
+
+                      {city === 'Other City' && (
+                        <div className="mt-2.5">
+                          <label className="block text-xs font-bold text-[#EA580C] mb-1">
+                            Enter Your City Name *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={customCity}
+                            onChange={(e) => setCustomCity(e.target.value)}
+                            placeholder="Type your city name (e.g. Gujrat, Kasur, Sahiwal...)"
+                            className="w-full bg-white border-2 border-[#F97316] rounded-lg px-3 py-2 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#F97316]"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -604,7 +626,10 @@ export const CheckoutPage: React.FC = () => {
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-gray-900">Cash On Delivery</span>
-                            <RealisticTruckIcon size={22} />
+                            <div className="inline-flex items-center gap-1 bg-slate-900 border border-slate-700/80 rounded-md px-1.5 py-0.5 text-white">
+                              <RealCODBadge size={16} />
+                              <span className="text-[9px] font-bold tracking-tight">COD</span>
+                            </div>
                           </div>
                           <div className="text-[11px] text-gray-500 mt-0.5">
                             Expected delivery: <strong className="text-[#F97316]">7-10 Working Days</strong>
@@ -630,7 +655,13 @@ export const CheckoutPage: React.FC = () => {
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-gray-900">JazzCash</span>
-                            <RealJazzCashIcon size={30} />
+                            <div className="inline-flex items-center justify-center bg-white border border-gray-200 rounded-md px-1.5 py-0.5 h-6">
+                              <img
+                                src="/payments/jazzcash.png"
+                                alt="JazzCash"
+                                className="h-4.5 w-auto object-contain"
+                              />
+                            </div>
                           </div>
                           <div className="text-[11px] text-emerald-600 font-semibold mt-0.5 flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
@@ -657,7 +688,13 @@ export const CheckoutPage: React.FC = () => {
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-gray-900">EasyPaisa</span>
-                            <RealEasyPaisaIcon size={30} />
+                            <div className="inline-flex items-center justify-center bg-white border border-gray-200 rounded-md px-1.5 py-0.5 h-6">
+                              <img
+                                src="/payments/easypaisa.png"
+                                alt="EasyPaisa"
+                                className="h-4 w-auto object-contain"
+                              />
+                            </div>
                           </div>
                           <div className="text-[11px] text-emerald-600 font-semibold mt-0.5 flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
@@ -683,8 +720,11 @@ export const CheckoutPage: React.FC = () => {
                         />
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-gray-900">Bank Transfer</span>
-                            <Building className="w-5 h-5 text-[#F97316]" />
+                            <span className="text-xs font-bold text-gray-900">Bank Transfer / Raast</span>
+                            <div className="inline-flex items-center gap-1 bg-slate-900 border border-slate-700/80 rounded-md px-1.5 py-0.5 text-white">
+                              <RealBankIcon size={16} />
+                              <span className="text-[9px] font-bold tracking-tight">Bank</span>
+                            </div>
                           </div>
                           <div className="text-[11px] text-emerald-600 font-semibold mt-0.5 flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
@@ -951,9 +991,7 @@ export const CheckoutPage: React.FC = () => {
                       ? 'Confirming Order...'
                       : items.length === 0
                       ? 'Your Cart is Empty'
-                      : paymentMethod === 'cod'
-                      ? 'Confirm Cash On Delivery Order'
-                      : 'Place Order & Send Slip on WhatsApp'}
+                      : 'Place Order'}
                   </span>
                 </button>
 
@@ -1012,7 +1050,7 @@ export const CheckoutPage: React.FC = () => {
               <div className="flex justify-between items-start pt-1 border-t border-gray-200/60">
                 <span className="text-gray-500 font-medium">Delivery Address:</span>
                 <span className="text-gray-900 font-medium text-right max-w-[220px]">
-                  {address}, {city}
+                  {address}, {city === 'Other City' ? customCity : city}
                 </span>
               </div>
               <div className="flex justify-between items-baseline pt-1 border-t border-gray-200/60">

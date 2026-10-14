@@ -108,35 +108,7 @@ function setupSheet() {
   itemsSheet.setFrozenRows(1);
   itemsSheet.setRowHeight(1, 35);
 
-  // If brand new sheet with no orders, add 3 realistic starter orders so the dashboard is immediately alive!
-  if (ordersSheet.getLastRow() <= 1) {
-    const now = new Date();
-    const sampleOrders = [
-      [
-        "CAL-ORD-1000001", now, "Hamza Tariq", "+923001234567", "calenvee.pk@gmail.com",
-        "Lahore", "DHA Phase 5, Sector C", "COD", 3899, "Delivered",
-        "TCS Express", "TRK-982101", "Obsidian Chronograph Edition (x1) - Rs. 3899", "Deliver after 4 PM", "Yes", "Yes", "N/A (Cash on Delivery)"
-      ],
-      [
-        "CAL-ORD-1000002", now, "Ayesha Malik", "+923219876543", "calenvee.pk@gmail.com",
-        "Karachi", "Clifton Block 4", "EASYPAISA", 4499, "Dispatched",
-        "Trax Logistics", "TRK-982102", "Royal Gold Dress Watch (x1) - Rs. 4499", "Call before arrival", "Yes", "Yes", "Attached in Drive & Email 🧾"
-      ],
-      [
-        "CAL-ORD-1000003", now, "Bilal Ahmed", "+923335551234", "calenvee.pk@gmail.com",
-        "Islamabad", "F-7/2, Street 14", "COD", 3499, "Placed",
-        "-", "-", "Azure Chronograph Edition (x1) - Rs. 3499", "Leave at reception", "No", "No", "N/A (Cash on Delivery)"
-      ]
-    ];
-    ordersSheet.getRange(2, 1, sampleOrders.length, sampleOrders[0].length).setValues(sampleOrders);
 
-    const sampleItems = [
-      ["CAL-ORD-1000001", now, "Obsidian Chronograph Edition", 1, 3899, 3899, "Matte Stealth Black", "Standard"],
-      ["CAL-ORD-1000002", now, "Royal Gold Dress Watch", 1, 4499, 4499, "Royal Gold", "Standard"],
-      ["CAL-ORD-1000003", now, "Azure Chronograph Edition", 1, 3499, 3499, "Ocean Sunburst Blue", "Standard"]
-    ];
-    itemsSheet.getRange(2, 1, sampleItems.length, sampleItems[0].length).setValues(sampleItems);
-  }
 
   // Tab 3: Inventory (Real-Time Catalog Sync)
   let invSheet = ss.getSheetByName("Inventory");
@@ -886,42 +858,57 @@ function handleCreateOrder(payload) {
 
   const timestamp = order.createdAt ? new Date(order.createdAt) : new Date();
 
+  const TARGET_FOLDER_ID = "1WFEsVs1hxJtFGLlOYMhrmJjJCcUyGTW_";
   let receiptBlob = null;
-  let receiptUrl = "N/A";
+  let receiptUrl = "";
   const paymentMethodUpper = (order.paymentMethod || "cod").toUpperCase();
 
-  if (order.receiptImage && typeof order.receiptImage === "string" && order.receiptImage.includes("base64,")) {
+  if (order.receiptImage && typeof order.receiptImage === "string" && order.receiptImage.length > 50) {
     try {
-      const parts = order.receiptImage.split(",");
-      const header = parts[0];
-      const base64Data = parts[1];
-      const mimeMatch = header.match(/:(.*?);/);
-      const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
+      let base64Data = order.receiptImage;
+      let mimeType = "image/jpeg";
+      if (order.receiptImage.includes("base64,")) {
+        const parts = order.receiptImage.split(",");
+        const header = parts[0];
+        base64Data = parts[1];
+        const mimeMatch = header.match(/:(.*?);/);
+        if (mimeMatch) mimeType = mimeMatch[1];
+      }
       const decodedBytes = Utilities.base64Decode(base64Data);
-      const safeExt = mimeType === "application/pdf" ? ".pdf" : ".jpg";
-      const fileName = order.receiptFileName || (`Receipt_${order.orderId || Date.now()}${safeExt}`);
+      const safeExt = mimeType === "application/pdf" ? ".pdf" : (mimeType === "image/png" ? ".png" : ".jpg");
+      
+      // Auto-rename image to specific order number (e.g. CAL-ORD-1000005_PaymentProof.jpg)
+      const fileName = `${order.orderId}_PaymentProof${safeExt}`;
 
       receiptBlob = Utilities.newBlob(decodedBytes, mimeType, fileName);
 
-      let folder;
-      const folders = DriveApp.getFoldersByName("Calenvee Payment Receipts");
-      if (folders.hasNext()) {
-        folder = folders.next();
-      } else {
-        folder = DriveApp.createFolder("Calenvee Payment Receipts");
+      let folder = null;
+      try {
+        folder = DriveApp.getFolderById(TARGET_FOLDER_ID);
+      } catch (fErr) {
+        Logger.log("Drive folder by ID error: " + fErr.toString());
       }
-      const driveFile = folder.createFile(receiptBlob);
-      driveFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-      receiptUrl = driveFile.getUrl();
+      
+      if (!folder) {
+        const folders = DriveApp.getFoldersByName("Calenvee Payment Receipts");
+        folder = folders.hasNext() ? folders.next() : DriveApp.createFolder("Calenvee Payment Receipts");
+      }
+
+      if (folder) {
+        const driveFile = folder.createFile(receiptBlob);
+        driveFile.setName(fileName);
+        driveFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        receiptUrl = driveFile.getUrl();
+      }
     } catch (receiptErr) {
       Logger.log("Receipt error: " + receiptErr.toString());
-      receiptUrl = "Error saving: " + receiptErr.toString();
+      receiptUrl = "";
     }
   }
 
-  const receiptProofCell = receiptUrl !== "N/A" && receiptUrl.startsWith("http")
-    ? `=HYPERLINK("${receiptUrl}", "View Receipt 🧾")`
-    : (paymentMethodUpper === "COD" ? "N/A (Cash on Delivery)" : "No Screenshot Uploaded");
+  const receiptProofCell = (receiptUrl && receiptUrl.startsWith("http"))
+    ? receiptUrl
+    : (paymentMethodUpper === "COD" ? "Cash on Delivery" : "No Screenshot Uploaded");
 
   const initialTracking = "-";
   const initialCourier = "-";
@@ -932,8 +919,8 @@ function handleCreateOrder(payload) {
     timestamp,
     customerName,
     phone,
-    order.email || "N/A",
-    order.city || "N/A",
+    order.email || "",
+    order.city || "Pakistan",
     address,
     paymentMethodUpper,
     total,
@@ -941,11 +928,20 @@ function handleCreateOrder(payload) {
     initialCourier, // Unassigned on placement (-)
     initialTracking, // Unassigned on placement (-)
     itemsSummary,
-    order.notes || "None",
+    order.notes || "",
     "No", // Confirmation Email Sent: No (will become Yes when status is set to Confirmed)
     "No", // Dispatch Email Sent: No
     receiptProofCell
   ]);
+
+  const newOrderRow = ordersSheet.getLastRow();
+  if (receiptUrl && receiptUrl.startsWith("http")) {
+    try {
+      ordersSheet.getRange(newOrderRow, 17).setFormula(`=HYPERLINK("${receiptUrl}", "View Receipt in Drive 🧾")`);
+    } catch (_) {
+      ordersSheet.getRange(newOrderRow, 17).setValue(receiptUrl);
+    }
+  }
 
   // Append items to OrderItems tab
   if (itemsSheet && itemsList.length > 0) {
@@ -970,7 +966,7 @@ function handleCreateOrder(payload) {
   }
 
   // Send customer order placement email with official luxury invoice
-  if (order.email && order.email.includes("@") && order.email !== "N/A") {
+  if (order.email && order.email.includes("@")) {
     try {
       sendCustomerOrderPlacedEmail(order);
     } catch (mailErr) {
@@ -978,9 +974,10 @@ function handleCreateOrder(payload) {
     }
   }
 
-  // Send store owner instant alert email to calenvee.pk@gmail.com
+  // Send store owner instant alert email with attached receipt and Google Drive link
+  order.receiptUrl = receiptUrl;
   try {
-    sendOwnerNewOrderAlertEmail(order);
+    sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl);
   } catch (ownerMailErr) {
     Logger.log("Owner alert email error: " + ownerMailErr.toString());
   }
@@ -2079,12 +2076,14 @@ function generateCustomerOrderCancelledEmailHtml(order, reason) {
  * Item list and payment attachments are omitted as per store configuration.
  * Strictly clean ASCII without unicode emojis.
  */
-function sendOwnerNewOrderAlertEmail(order) {
+function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
   const cfg = getDynamicStoreSettings();
   const paymentMethodUpper = (order.paymentMethod || "cod").toUpperCase();
   const subject = `[NEW ORDER PLACED] #${order.orderId} - Rs. ${Number(order.total || 0).toLocaleString()} (${order.customerName}, ${order.city})`;
 
-  const textBody = [
+  const resolvedReceiptUrl = receiptUrl || order.receiptUrl || "";
+
+  const textLines = [
     "New customer order received on Calenvee.pk!",
     "",
     `Order ID: ${order.orderId}`,
@@ -2096,11 +2095,18 @@ function sendOwnerNewOrderAlertEmail(order) {
     `Address: ${order.address}`,
     `Payment Method: ${paymentMethodUpper}`,
     `Total Payable: Rs. ${Number(order.total || 0).toLocaleString()}`,
-    `Delivery Notes: ${order.notes && order.notes !== 'N/A' && order.notes !== 'None' ? order.notes : 'None'}`,
-    "",
-    "Manage all orders in your Google Sheet:",
-    SpreadsheetApp.getActiveSpreadsheet().getUrl()
-  ].join("\n");
+    `Delivery Notes: ${order.notes && order.notes !== 'N/A' && order.notes !== 'None' ? order.notes : 'None'}`
+  ];
+
+  if (resolvedReceiptUrl) {
+    textLines.push(`Payment Proof (Google Drive): ${resolvedReceiptUrl}`);
+  }
+
+  textLines.push("");
+  textLines.push("Manage all orders in your Google Sheet:");
+  textLines.push(SpreadsheetApp.getActiveSpreadsheet().getUrl());
+
+  const textBody = textLines.join("\n");
 
   const htmlBody = `
     <!DOCTYPE html>
@@ -2111,7 +2117,9 @@ function sendOwnerNewOrderAlertEmail(order) {
         <!-- Top Banner -->
         <tr>
           <td style="background-color: ${cfg.brandNavy}; padding: 24px 20px; text-align: center;">
-            <img src="${cfg.logoUrl}" alt="${cfg.storeName}" style="max-height: 38px; margin-bottom: 8px; display: block; margin-left: auto; margin-right: auto;" />
+            <a href="https://calenvee.pk" target="_blank" style="text-decoration: none; display: inline-block;">
+              <img src="${cfg.logoUrl}" alt="${cfg.storeName}" width="120" style="max-height: 38px; width: 120px; margin-bottom: 8px; display: block; margin-left: auto; margin-right: auto; border: 0; outline: none; pointer-events: none;" />
+            </a>
             <div style="color: #FFFFFF; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">NEW ORDER PLACED (PENDING CONFIRMATION)</div>
             <div style="color: ${cfg.brandOrange}; font-size: 10px; font-weight: bold; margin-top: 4px; letter-spacing: 1.5px;">${cfg.storeTagline}</div>
           </td>
@@ -2144,6 +2152,24 @@ function sendOwnerNewOrderAlertEmail(order) {
                 <tr><td style="color: #64748B;">City:</td><td style="font-weight: bold; color: #1E293B;">${order.city}</td></tr>
                 <tr><td style="color: #64748B;">Address:</td><td style="color: #1E293B;">${order.address}</td></tr>
                 <tr><td style="color: #64748B;">Payment:</td><td style="font-weight: bold; color: #0B132B; text-transform: uppercase;">${paymentMethodUpper}</td></tr>
+                ${resolvedReceiptUrl ? `
+                <tr>
+                  <td style="color: #64748B; vertical-align: top; padding-top: 6px;">Payment Proof:</td>
+                  <td style="padding-top: 6px;">
+                    <a href="${resolvedReceiptUrl}" target="_blank" style="background-color: #059669; color: #FFFFFF; font-weight: bold; font-size: 11px; padding: 6px 14px; border-radius: 6px; text-decoration: none; display: inline-block;">
+                      View Uploaded Receipt in Google Drive
+                    </a>
+                    <div style="font-size: 10px; color: #2563EB; margin-top: 4px; word-break: break-all;">
+                      <a href="${resolvedReceiptUrl}" target="_blank" style="color: #2563EB;">${resolvedReceiptUrl}</a>
+                    </div>
+                  </td>
+                </tr>
+                ` : (paymentMethodUpper !== 'COD' ? `
+                <tr>
+                  <td style="color: #64748B;">Payment Proof:</td>
+                  <td style="color: #DC2626; font-weight: bold;">No screenshot uploaded during checkout</td>
+                </tr>
+                ` : '')}
                 ${order.notes && order.notes !== "None" && order.notes !== "N/A" ? `<tr><td style="color: #64748B;">Notes:</td><td style="color: #D97706; font-style: italic;">"${order.notes}"</td></tr>` : ""}
               </table>
             </div>
@@ -2172,10 +2198,15 @@ function sendOwnerNewOrderAlertEmail(order) {
     </html>
   `;
 
-  GmailApp.sendEmail(cfg.ownerEmail, subject, textBody, {
+  const mailOptions = {
     htmlBody: htmlBody,
     name: "Calenvee Order Bot"
-  });
+  };
+  if (receiptBlob) {
+    mailOptions.attachments = [receiptBlob];
+  }
+
+  GmailApp.sendEmail(cfg.ownerEmail, subject, textBody, mailOptions);
 }
 
 /**
@@ -2433,7 +2464,8 @@ function cleanGhostOrders() {
     const phone = String(row[3] || "").trim();
     const total = Number(row[8] || 0);
     
-    const isGhost = (!customerName || customerName.toUpperCase() === "N/A") && (total === 0 || !phone || phone.toUpperCase() === "N/A");
+    const isSampleOrder = orderId === "CV-999001" || ((orderId === "CAL-ORD-1000001" || orderId === "CAL-ORD-1000002" || orderId === "CAL-ORD-1000003") && (customerName === "Hamza Tariq" || customerName === "Ayesha Malik" || customerName === "Bilal Ahmed"));
+    const isGhost = isSampleOrder || (!customerName || customerName.toUpperCase() === "N/A") || (total === 0 && (!phone || phone.toUpperCase() === "N/A"));
     
     if (isGhost) {
       if (orderId) deletedOrders.push(orderId);

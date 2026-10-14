@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, ProductVariantColor, ProductVariantSize, CartItem, PromoCode } from '../types';
 import { AVAILABLE_PROMOS } from '../data/promotions';
+import storeSettingsData from '../data/storeSettings.json';
 
 interface CartContextType {
   items: CartItem[];
@@ -20,12 +21,11 @@ interface CartContextType {
   removePromoCode: () => void;
   freeShippingProgress: number; // 0 to 100%
   amountUntilFreeShipping: number;
+  freeShippingThreshold: number;
+  standardShippingFee: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
-
-const FREE_SHIPPING_THRESHOLD = 2999; // Rs. 2,999 for free nationwide delivery
-const STANDARD_SHIPPING_FEE = 199; // Rs. 199 standard delivery across Pakistan
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>(() => {
@@ -46,6 +46,31 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return null;
     }
   });
+
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState<number>(() => {
+    return Number(storeSettingsData.freeShippingThreshold) || 3500;
+  });
+
+  const [standardShippingFee, setStandardShippingFee] = useState<number>(() => {
+    return Number(storeSettingsData.standardShippingFee) || 250;
+  });
+
+  useEffect(() => {
+    // Sync with local admin server if running
+    const syncLiveSettings = async () => {
+      try {
+        const res = await fetch('http://localhost:4200/api/settings');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.freeShippingThreshold) setFreeShippingThreshold(Number(data.freeShippingThreshold));
+          if (data.standardShippingFee !== undefined) setStandardShippingFee(Number(data.standardShippingFee));
+        }
+      } catch (_) {
+        // Fallback: storeSettingsData is already active
+      }
+    };
+    syncLiveSettings();
+  }, []);
 
   useEffect(() => {
     try {
@@ -150,12 +175,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ? Math.round((subtotal * appliedPromo.discountPercentage) / 100)
     : 0;
 
-  const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD || items.length === 0;
-  const shippingFee = items.length === 0 ? 0 : isFreeShipping ? 0 : STANDARD_SHIPPING_FEE;
+  const isFreeShipping = subtotal >= freeShippingThreshold || items.length === 0;
+  const shippingFee = items.length === 0 ? 0 : isFreeShipping ? 0 : standardShippingFee;
   const finalTotal = Math.max(0, subtotal - discount + shippingFee);
 
-  const amountUntilFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
-  const freeShippingProgress = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100));
+  const amountUntilFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
+  const freeShippingProgress = Math.min(100, Math.round((subtotal / freeShippingThreshold) * 100));
 
   return (
     <CartContext.Provider
@@ -177,6 +202,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         removePromoCode,
         freeShippingProgress,
         amountUntilFreeShipping,
+        freeShippingThreshold,
+        standardShippingFee,
       }}
     >
       {children}

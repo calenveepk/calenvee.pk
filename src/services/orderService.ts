@@ -58,7 +58,7 @@ export async function submitOrderToBackend(order: OrderDetails): Promise<OrderSu
           success: true,
           orderId: data.orderId || order.orderId,
           source: 'google_sheets',
-          message: data.message || 'Order confirmed and recorded in Google Sheets.',
+          message: data.message || 'Order placed and recorded in Google Sheets.',
         };
       }
     } catch (networkError) {
