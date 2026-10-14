@@ -22,11 +22,11 @@
 const STORE_CONFIG = {
   storeName: "Calenvee.pk",
   storeTagline: "SHOP SMART, LIVE BETTER",
-  logoUrl: "https://calenvee.pk/logo-white.png",
+  logoUrl: "https://raw.githubusercontent.com/calenveepk/calenvee.pk/main/public/logo-white.png",
   ownerEmail: "calenvee.pk@gmail.com",
   helplinePhone: "+923001234567",
   helplineWhatsAppRaw: "923001234567",
-  deliveryWindow: "Nationwide Cash on Delivery (7-10 Working Days)",
+  deliveryWindow: "7-10 Working Days",
   brandNavy: "#0B132B",
   brandOrange: "#F97316"
 };
@@ -317,7 +317,7 @@ function createExecutiveDashboard() {
     .setVerticalAlignment("middle");
 
   dash.getRange("B3:M3").merge()
-    .setValue("SHOP SMART, LIVE BETTER  |  Official Store: " + STORE_CONFIG.ownerEmail + "  |  Nationwide Cash on Delivery (7-10 Working Days)")
+    .setValue("SHOP SMART, LIVE BETTER  |  Official Store: " + STORE_CONFIG.ownerEmail + "  |  7-10 Working Days Nationwide Delivery")
     .setBackground("#1E293B")
     .setFontColor(STORE_CONFIG.brandOrange)
     .setFontWeight("bold")
@@ -1436,13 +1436,20 @@ function onEdit(e) {
 }
 
 /**
- * 5A. OFFICIAL LUXURY HTML INVOICE: CUSTOMER ORDER PLACED EMAIL
- * Matches the official Luxury Invoice layout in Image 2.
+ * 5A. OFFICIAL LUXURY HTML EMAIL: CUSTOMER ORDER PLACED EMAIL
+ * Matches the official sleek card template with:
+ * - Official white logo header with "SHOP SMART, LIVE BETTER" slogan (No "CALENVEE" text)
+ * - Green checkmark circle with order reference badge
+ * - Order Summary table with clean item lines and variants
+ * - Strictly "Total Amount: Rs. ..." (never "Total Payable (COD)")
+ * - "CUSTOMER DETAILS" box (never "Shipping Details")
+ * - Strictly "Expected Delivery: 7-10 Working Days"
+ * - WhatsApp helpline support button
  */
 function sendCustomerOrderPlacedEmail(order) {
   const cfg = getDynamicStoreSettings();
-  const subject = `Order Placed: #${order.orderId} | Official Invoice — ${cfg.storeName}`;
-  const htmlBody = generateCustomerInvoiceEmailHtml(order, "placed");
+  const subject = `Order Placed: ${order.orderId} | ${cfg.storeName}`;
+  const htmlBody = generateCustomerOrderEmailHtml(order, "placed");
 
   GmailApp.sendEmail(order.email, subject, "", {
     htmlBody: htmlBody,
@@ -1451,13 +1458,13 @@ function sendCustomerOrderPlacedEmail(order) {
 }
 
 /**
- * 5B. OFFICIAL LUXURY HTML INVOICE: CUSTOMER ORDER CONFIRMATION EMAIL
+ * 5B. OFFICIAL LUXURY HTML EMAIL: CUSTOMER ORDER CONFIRMATION EMAIL
  * Sent once internal management verifies and marks the order as "Confirmed".
  */
 function sendCustomerOrderConfirmationEmail(order) {
   const cfg = getDynamicStoreSettings();
-  const subject = `Order Confirmed: #${order.orderId} | Ready for Packing — ${cfg.storeName}`;
-  const htmlBody = generateCustomerInvoiceEmailHtml(order, "confirmed");
+  const subject = `Order Confirmed: ${order.orderId} | ${cfg.storeName}`;
+  const htmlBody = generateCustomerOrderEmailHtml(order, "confirmed");
 
   GmailApp.sendEmail(order.email, subject, "", {
     htmlBody: htmlBody,
@@ -1466,359 +1473,168 @@ function sendCustomerOrderConfirmationEmail(order) {
 }
 
 /**
- * GENERATES HIGH-RESOLUTION LUXURY HTML INVOICE EMAIL
+ * GENERATES HIGH-RESOLUTION CUSTOMER ORDER EMAIL (OFFICIAL CARD TEMPLATE)
  * Supports both stage = "placed" and stage = "confirmed"
  */
-function generateCustomerInvoiceEmailHtml(order, stage) {
+function generateCustomerOrderEmailHtml(order, stage) {
   const cfg = getDynamicStoreSettings();
   const isConfirmed = stage === "confirmed";
-
-  const dateStr = order.createdAt 
-    ? Utilities.formatDate(new Date(order.createdAt), "Asia/Karachi", "dd MMM yyyy")
-    : Utilities.formatDate(new Date(), "Asia/Karachi", "dd MMM yyyy");
 
   const itemsList = Array.isArray(order.items) && order.items.length > 0 
     ? order.items 
     : [{ name: order.itemsSummary || "Calenvee Product", quantity: 1, price: order.total || 0 }];
 
-  const rowsHtml = itemsList.map((item, idx) => {
+  const itemsHtml = itemsList.map(item => {
     const itemName = item.name || (item.product && item.product.name) || "Calenvee Product";
-    let itemImage = (item.product && item.product.images && item.product.images[0]) || item.image || "https://calenvee.pk/hero/hero_podium_collection.jpg";
-    if (itemImage && !itemImage.startsWith("http")) {
-      itemImage = "https://calenvee.pk" + (itemImage.startsWith("/") ? "" : "/") + itemImage;
-    }
-    const itemPrice = Number(item.price || (item.product && item.product.price) || 0);
     const itemQty = Number(item.quantity || 1);
+    const itemPrice = Number(item.price || (item.product && item.product.price) || 0);
     const itemColor = (item.selectedColor && item.selectedColor.name) || item.color || "";
     const itemSize = (item.selectedSize && item.selectedSize.name) || item.size || "";
-    
+
     let variantDetails = [];
     if (itemSize && itemSize !== "Standard") variantDetails.push(`Size: ${itemSize}`);
     if (itemColor && itemColor !== "Standard") variantDetails.push(`Color: ${itemColor}`);
     const variantStr = variantDetails.join(" | ");
 
     return `
-      <tr style="border-bottom: 1px solid #E5E7EB;">
-        <td style="padding: 14px 10px; text-align: center; font-size: 12px; font-weight: bold; color: #6B7280; vertical-align: middle;">
-          ${idx + 1}
+      <tr>
+        <td style="padding: 12px 8px; border-bottom: 1px solid #E5E7EB; font-size: 13px; color: #111827;">
+          <strong>${itemName}</strong>
+          ${variantStr ? `<br><span style="font-size: 11px; color: #6B7280;">${variantStr}</span>` : ""}
         </td>
-        <td style="padding: 14px 12px; vertical-align: middle;">
-          <table cellpadding="0" cellspacing="0" border="0">
-            <tr>
-              <td style="width: 48px; vertical-align: middle;">
-                <img src="${itemImage}" alt="${itemName}" width="46" height="46" style="width: 46px; height: 46px; object-fit: contain; border-radius: 8px; border: 1px solid #E5E7EB; background-color: #F9FAFB; display: block;" />
-              </td>
-              <td style="padding-left: 12px; vertical-align: middle;">
-                <div style="font-size: 13px; font-weight: 700; color: #111827; line-height: 1.3;">${itemName}</div>
-                ${variantStr ? `<div style="font-size: 11px; color: #6B7280; margin-top: 3px;">${variantStr}</div>` : ""}
-              </td>
-            </tr>
-          </table>
-        </td>
-        <td style="padding: 14px 10px; text-align: center; font-size: 12px; font-weight: 600; color: #111827; vertical-align: middle;">
+        <td style="padding: 12px 8px; border-bottom: 1px solid #E5E7EB; font-size: 13px; text-align: center; color: #374151;">
           ${itemQty}
         </td>
-        <td style="padding: 14px 12px; text-align: right; font-size: 12px; font-weight: 600; color: #374151; vertical-align: middle;">
-          ${itemPrice.toLocaleString()}
-        </td>
-        <td style="padding: 14px 12px; text-align: right; font-size: 13px; font-weight: 800; color: #111827; vertical-align: middle;">
-          ${(itemPrice * itemQty).toLocaleString()}
+        <td style="padding: 12px 8px; border-bottom: 1px solid #E5E7EB; font-size: 13px; text-align: right; color: #111827; font-weight: bold;">
+          Rs. ${(itemPrice * itemQty).toLocaleString()}
         </td>
       </tr>
     `;
   }).join("");
 
   const subtotal = Number(order.subtotal || order.total || 0);
-  const shippingFeeStr = order.shippingFee === 0 ? "FREE" : (order.shippingFee ? order.shippingFee.toLocaleString() : "250");
+  const shippingFeeStr = order.shippingFee === 0 ? "FREE" : (order.shippingFee ? "Rs. " + Number(order.shippingFee).toLocaleString() : "FREE");
   const totalStr = Number(order.total || 0).toLocaleString();
-  const paymentMethodLabel = (order.paymentMethod === "cod" || !order.paymentMethod)
-    ? "Cash on Delivery (COD)"
-    : String(order.paymentMethod).toUpperCase();
+  const paymentMethodUpper = String(order.paymentMethod || "cod").toUpperCase();
 
-  const statusHeadline = isConfirmed ? "ORDER CONFIRMED" : "INVOICE";
-  const statusSubtitle = isConfirmed ? "YOUR ORDER HAS BEEN CONFIRMED!" : "THANK YOU FOR YOUR ORDER!";
-  const statusNoticeText = isConfirmed 
-    ? "Great news! Your order has been verified and confirmed by our team. It is now being carefully prepared and packaged for courier dispatch."
-    : "Your order has been placed successfully and is pending internal verification. Our management team will verify and confirm your order shortly. Nationwide delivery in 7-10 Working Days.";
+  const heroTitle = isConfirmed ? "Your Order is Confirmed!" : "Thank You For Your Order!";
+  const heroSubtitle = isConfirmed
+    ? `Dear <strong>${order.customerName}</strong>, your order has been verified and confirmed by our team. It is now being prepared for dispatch.`
+    : `Dear <strong>${order.customerName}</strong>, your order has been received and is being prepared for dispatch.`;
 
   return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${statusHeadline} #${order.orderId}</title>
-</head>
-<body style="margin: 0; padding: 20px 10px; background-color: #F3F4F6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #111827;">
-  <table align="center" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 660px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E5E7EB; overflow: hidden; margin: 0 auto; box-shadow: 0 4px 16px rgba(0,0,0,0.06);">
-    
-    <!-- Header: Logo & Contact Info -->
-    <tr>
-      <td style="padding: 0;">
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
-          <tr>
-            <td style="padding: 30px 24px 16px 30px; vertical-align: top;">
-              <table cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td>
-                    <div style="font-size: 32px; font-weight: 900; letter-spacing: 1px; color: #111827; font-family: 'Arial Black', Arial, sans-serif; line-height: 1;">
-                      C<span style="color: #F97316;">A</span>LENVEE
-                    </div>
-                    <div style="font-size: 10px; font-weight: 800; letter-spacing: 2.5px; color: #111827; margin-top: 5px; text-transform: uppercase;">
-                      SHOP SMART. LIVE BETTER.
-                    </div>
-                  </td>
-                </tr>
-              </table>
-            </td>
-            <td style="padding: 24px 28px 16px 10px; text-align: right; vertical-align: top;">
-              <div style="display: inline-block; text-align: right; font-size: 11px; color: #4B5563; line-height: 1.7;">
-                <div>🌐 <a href="https://calenvee.pk" style="color: #4B5563; text-decoration: none;">www.calenvee.pk</a></div>
-                <div>📷 <a href="https://instagram.com/calenvee" style="color: #4B5563; text-decoration: none;">@calenvee</a></div>
-                <div>✉️ <a href="mailto:support@calenvee.pk" style="color: #4B5563; text-decoration: none;">support@calenvee.pk</a></div>
-              </div>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${heroTitle}</title>
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9FAFB; margin: 0; padding: 24px; color: #111827;">
+      <table align="center" width="100%" style="max-width: 600px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E5E7EB; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin: 0 auto;">
+        
+        <!-- Header with Official Logo & Slogan (No "CALENVEE" plain text) -->
+        <tr>
+          <td style="background-color: ${cfg.brandNavy}; padding: 36px 24px; text-align: center;">
+            <div style="margin-bottom: 10px;">
+              <img src="${cfg.logoUrl}" alt="${cfg.storeName}" style="max-height: 48px; width: auto; display: inline-block; border: 0;" />
+            </div>
+            <p style="color: ${cfg.brandOrange}; font-size: 11px; margin: 8px 0 0 0; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+              ${cfg.storeTagline}
+            </p>
+          </td>
+        </tr>
+        
+        <!-- Hero Confirmation -->
+        <tr>
+          <td style="padding: 32px 24px 20px 24px; text-align: center;">
+            <div style="display: inline-block; width: 48px; height: 48px; line-height: 48px; border-radius: 50%; background-color: #ECFDF5; color: #059669; font-size: 24px; margin-bottom: 12px;">✓</div>
+            <h2 style="margin: 0; font-size: 20px; color: #111827;">${heroTitle}</h2>
+            <p style="margin: 8px 0 0 0; font-size: 13px; color: #6B7280; line-height: 1.5;">
+              ${heroSubtitle}
+            </p>
+            <div style="margin-top: 16px; padding: 10px 18px; background-color: #FFF7ED; border: 1px solid #FED7AA; border-radius: 8px; display: inline-block;">
+              <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #C2410C; font-weight: bold;">ORDER REFERENCE:</span>
+              <span style="font-size: 14px; font-weight: 800; color: #9A3412; margin-left: 6px;">${order.orderId}</span>
+            </div>
+          </td>
+        </tr>
 
-    <!-- Title & Metadata Section -->
-    <tr>
-      <td style="padding: 10px 30px 20px 30px;">
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top: 1px solid #F1F5F9; padding-top: 20px;">
-          <tr>
-            <td style="vertical-align: top;">
-              <h1 style="margin: 0; font-size: 30px; font-weight: 900; color: #111827; letter-spacing: 0.5px; line-height: 1.1;">${statusHeadline}</h1>
-              <div style="margin-top: 6px; font-size: 13px; font-weight: 800; color: ${isConfirmed ? '#059669' : '#111827'}; letter-spacing: 0.5px; text-transform: uppercase;">${statusSubtitle}</div>
-              <p style="margin: 6px 0 0 0; font-size: 12px; color: #6B7280; line-height: 1.5;">
-                We truly appreciate your trust in CALENVEE.<br>Here is a summary of your official order details.
+        <!-- Order Items Table -->
+        <tr>
+          <td style="padding: 0 24px 24px 24px;">
+            <h3 style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #374151; margin-bottom: 12px; border-bottom: 2px solid ${cfg.brandOrange}; padding-bottom: 6px;">ORDER SUMMARY</h3>
+            <table width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+              <thead>
+                <tr style="background-color: #F3F4F6;">
+                  <th style="padding: 8px; text-align: left; font-size: 11px; text-transform: uppercase; color: #4B5563;">ITEM</th>
+                  <th style="padding: 8px; text-align: center; font-size: 11px; text-transform: uppercase; color: #4B5563;">QTY</th>
+                  <th style="padding: 8px; text-align: right; font-size: 11px; text-transform: uppercase; color: #4B5563;">PRICE</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+
+            <!-- Totals (Strictly "Total Amount", NOT "Total Payable (COD)") -->
+            <table width="100%" style="margin-top: 16px; font-size: 13px;">
+              <tr>
+                <td style="color: #6B7280; padding: 4px 0;">Subtotal:</td>
+                <td style="text-align: right; font-weight: 600; color: #111827;">Rs. ${subtotal.toLocaleString()}</td>
+              </tr>
+              ${order.discount ? `
+              <tr>
+                <td style="color: #059669; padding: 4px 0;">Discount Applied:</td>
+                <td style="text-align: right; font-weight: 600; color: #059669;">- Rs. ${Number(order.discount).toLocaleString()}</td>
+              </tr>` : ""}
+              <tr>
+                <td style="color: #6B7280; padding: 4px 0;">Delivery Charges:</td>
+                <td style="text-align: right; font-weight: 600; color: #111827;">${shippingFeeStr}</td>
+              </tr>
+              <tr style="border-top: 2px solid #E5E7EB; font-size: 16px;">
+                <td style="padding-top: 10px; font-weight: 800; color: ${cfg.brandNavy};">Total Amount:</td>
+                <td style="padding-top: 10px; text-align: right; font-weight: 800; color: ${cfg.brandOrange};">Rs. ${totalStr}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Customer Details (Replaces Shipping Details) -->
+        <tr>
+          <td style="padding: 0 24px 24px 24px;">
+            <div style="background-color: #F9FAFB; border-radius: 12px; padding: 16px; border: 1px solid #E5E7EB;">
+              <h4 style="margin: 0 0 10px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #4B5563; font-weight: 800;">CUSTOMER DETAILS</h4>
+              <p style="margin: 0; font-size: 12px; color: #1F2937; line-height: 1.7;">
+                <strong>Recipient:</strong> ${order.customerName}<br>
+                <strong>Phone:</strong> ${order.phone}<br>
+                <strong>Delivery Address:</strong> ${order.address}${order.city ? ', ' + order.city : ''}<br>
+                <strong>Expected Delivery:</strong> 7-10 Working Days<br>
+                <strong>Payment Method:</strong> ${paymentMethodUpper}
               </p>
-            </td>
-            <td style="text-align: right; vertical-align: top; width: 230px;">
-              <table cellpadding="0" cellspacing="0" border="0" align="right" style="margin-top: 4px;">
-                <tr>
-                  <td style="padding-bottom: 8px;">
-                    <table cellpadding="0" cellspacing="0" border="0" style="background-color: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 6px 12px;">
-                      <tr>
-                        <td style="width: 26px; font-size: 16px; vertical-align: middle;">📅</td>
-                        <td style="padding-left: 6px; text-align: left;">
-                          <div style="font-size: 9px; font-weight: 700; color: #6B7280; text-transform: uppercase;">Order Date</div>
-                          <div style="font-size: 12px; font-weight: 700; color: #111827;">${dateStr}</div>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <table cellpadding="0" cellspacing="0" border="0" style="background-color: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 6px 12px;">
-                      <tr>
-                        <td style="width: 26px; vertical-align: middle;">
-                          <div style="width: 20px; height: 20px; background-color: #F97316; color: #FFFFFF; border-radius: 4px; text-align: center; line-height: 20px; font-size: 11px; font-weight: 900;">#</div>
-                        </td>
-                        <td style="padding-left: 6px; text-align: left;">
-                          <div style="font-size: 9px; font-weight: 700; color: #6B7280; text-transform: uppercase;">Order Number</div>
-                          <div style="font-size: 12px; font-weight: 900; color: #111827; font-family: monospace;">#${order.orderId}</div>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
+            </div>
+          </td>
+        </tr>
 
-    <!-- Customer Details Section -->
-    <tr>
-      <td style="padding: 0 30px 20px 30px;">
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top: 1px solid #E5E7EB; padding-top: 16px;">
-          <tr>
-            <td>
-              <div style="font-size: 14px; font-weight: 800; color: #111827; margin-bottom: 10px;">
-                <span style="color: #F97316; font-size: 16px; margin-right: 4px;">👤</span> Customer Details
-              </div>
-              <table cellpadding="3" cellspacing="0" border="0" style="font-size: 12px; color: #374151;">
-                <tr>
-                  <td style="width: 70px; font-weight: 600; color: #6B7280;">Name</td>
-                  <td style="font-weight: 700; color: #111827;">: ${order.customerName}</td>
-                </tr>
-                <tr>
-                  <td style="font-weight: 600; color: #6B7280;">Phone</td>
-                  <td style="font-weight: 500; color: #111827;">: ${order.phone}</td>
-                </tr>
-                <tr>
-                  <td style="font-weight: 600; color: #6B7280;">Email</td>
-                  <td style="font-weight: 500; color: #111827;">: ${order.email || 'N/A'}</td>
-                </tr>
-                <tr>
-                  <td style="font-weight: 600; color: #6B7280; vertical-align: top;">Address</td>
-                  <td style="font-weight: 500; color: #111827; line-height: 1.4;">: ${order.address || ''}${order.city ? ', ' + order.city : ''}, Pakistan</td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-
-    <!-- Order Summary Table -->
-    <tr>
-      <td style="padding: 0 30px 20px 30px;">
-        <div style="font-size: 14px; font-weight: 800; color: #111827; margin-bottom: 12px; border-top: 1px solid #E5E7EB; padding-top: 16px;">
-          <span style="color: #F97316; font-size: 16px; margin-right: 4px;">🛒</span> Order Summary
-        </div>
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; border: 1px solid #E5E7EB; border-radius: 10px; overflow: hidden;">
-          <thead>
-            <tr style="background-color: #111827; color: #FFFFFF; font-size: 11px; text-transform: uppercase;">
-              <th style="padding: 10px 8px; width: 36px; text-align: center;">#</th>
-              <th style="padding: 10px 12px; text-align: left;">Item</th>
-              <th style="padding: 10px 8px; width: 60px; text-align: center;">Quantity</th>
-              <th style="padding: 10px 12px; width: 100px; text-align: right;">Unit Price (PKR)</th>
-              <th style="padding: 10px 12px; width: 100px; text-align: right;">Total Price (PKR)</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rowsHtml}
-          </tbody>
-        </table>
-      </td>
-    </tr>
-
-    <!-- Notice Box & Calculation Totals -->
-    <tr>
-      <td style="padding: 0 30px 24px 30px;">
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
-          <tr>
-            <!-- Left Notice Box -->
-            <td style="width: 50%; vertical-align: top; padding-right: 14px;">
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px;">
-                <tr>
-                  <td style="width: 38px; vertical-align: top;">
-                    <div style="width: 32px; height: 32px; background-color: #F97316; border-radius: 50%; text-align: center; line-height: 32px; font-size: 16px; color: #FFFFFF;">🚚</div>
-                  </td>
-                  <td style="padding-left: 10px; vertical-align: top;">
-                    <p style="margin: 0; font-size: 12px; color: #334155; line-height: 1.5; font-weight: 500;">
-                      ${statusNoticeText}
-                    </p>
-                    <div style="width: 36px; height: 3px; background-color: #F97316; border-radius: 2px; margin-top: 8px;"></div>
-                  </td>
-                </tr>
-              </table>
-            </td>
-            <!-- Right Totals Table -->
-            <td style="width: 50%; vertical-align: top; padding-left: 14px;">
-              <table width="100%" cellpadding="4" cellspacing="0" border="0" style="font-size: 12px;">
-                <tr>
-                  <td style="color: #6B7280; font-weight: 500;">Subtotal</td>
-                  <td style="text-align: right; font-weight: 700; color: #111827;">${subtotal.toLocaleString()}</td>
-                </tr>
-                ${order.discount ? `
-                <tr>
-                  <td style="color: #059669; font-weight: 500;">Discount</td>
-                  <td style="text-align: right; font-weight: 700; color: #059669;">- ${Number(order.discount).toLocaleString()}</td>
-                </tr>` : ""}
-                <tr>
-                  <td style="color: #6B7280; font-weight: 500;">Shipping Fee</td>
-                  <td style="text-align: right; font-weight: 700; color: #111827;">${shippingFeeStr}</td>
-                </tr>
-                <tr>
-                  <td colspan="2" style="padding-top: 8px;">
-                    <table width="100%" cellpadding="10" cellspacing="0" border="0" style="background-color: #FFF7ED; border: 1px solid #FED7AA; border-radius: 8px;">
-                      <tr>
-                        <td style="font-size: 13px; font-weight: 800; color: #111827; text-transform: uppercase;">Total Amount</td>
-                        <td style="text-align: right; font-size: 18px; font-weight: 900; color: #111827;">${totalStr}</td>
-                      </tr>
-                    </table>
-                    <div style="font-size: 10px; color: #9CA3AF; text-align: right; margin-top: 4px; font-style: italic;">
-                      (All prices are in Pakistani Rupees)
-                    </div>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-
-    <!-- Bottom 3 Cards: Payment Method, Order Notes, Thank You -->
-    <tr>
-      <td style="padding: 0 30px 26px 30px;">
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top: 1px solid #E5E7EB; padding-top: 18px;">
-          <tr>
-            <!-- Card 1: Payment Method -->
-            <td style="width: 33%; vertical-align: top; padding-right: 8px;">
-              <div style="background-color: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 12px; min-height: 85px;">
-                <div style="font-size: 12px; font-weight: 800; color: #111827; margin-bottom: 4px;">
-                  ℹ️ Payment Method
-                </div>
-                <div style="font-size: 11px; font-weight: 700; color: #111827; margin-bottom: 3px;">
-                  ${paymentMethodLabel}
-                </div>
-                <div style="font-size: 10px; color: #6B7280; line-height: 1.4;">
-                  ${order.paymentMethod === 'cod' || !order.paymentMethod ? 'You can pay at the time of delivery.' : 'Receipt verified & confirmed.'}
-                </div>
-              </div>
-            </td>
-            <!-- Card 2: Order Notes -->
-            <td style="width: 34%; vertical-align: top; padding: 0 4px;">
-              <div style="background-color: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 12px; min-height: 85px;">
-                <div style="font-size: 12px; font-weight: 800; color: #111827; margin-bottom: 4px;">
-                  📝 Order Notes
-                </div>
-                <div style="font-size: 10px; color: #6B7280; line-height: 1.4;">
-                  ${order.notes && order.notes !== 'N/A' && order.notes !== 'None' ? order.notes : 'Please inspect your parcel at the time of delivery. In case of any query, contact us within 24 hours.'}
-                </div>
-              </div>
-            </td>
-            <!-- Card 3: Thank You Signature -->
-            <td style="width: 33%; vertical-align: top; padding-left: 8px;">
-              <div style="background-color: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 12px; min-height: 85px; text-align: center;">
-                <div style="font-family: 'Brush Script MT', 'Caveat', cursive, sans-serif; font-size: 28px; color: #F97316; line-height: 1; font-weight: bold;">
-                  Thank You
-                </div>
-                <div style="font-size: 9px; font-weight: 800; letter-spacing: 1.5px; color: #111827; text-transform: uppercase; margin-top: 4px;">
-                  FOR CHOOSING CALENVEE!
-                </div>
-                <div style="width: 28px; height: 2px; background-color: #F97316; margin: 6px auto 0 auto; border-radius: 2px;"></div>
-              </div>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-
-    <!-- Footer Banner -->
-    <tr>
-      <td style="background-color: #111827; padding: 18px 24px; color: #FFFFFF;">
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
-          <tr>
-            <td style="vertical-align: middle;">
-              <div style="font-size: 18px; font-weight: 900; letter-spacing: 1px; color: #FFFFFF; font-family: 'Arial Black', Arial, sans-serif;">
-                C<span style="color: #F97316;">A</span>LENVEE
-              </div>
-              <div style="font-size: 8px; font-weight: 700; letter-spacing: 2px; color: #94A3B8; text-transform: uppercase; margin-top: 2px;">
-                SHOP SMART. LIVE BETTER.
-              </div>
-            </td>
-            <td style="width: 20px; text-align: center; color: #374151; font-size: 18px; vertical-align: middle;">|</td>
-            <td style="text-align: right; vertical-align: middle; font-size: 11px; color: #D1D5DB;">
-              <span style="margin-left: 8px;">🛡️ Quality Products</span>
-              <span style="margin-left: 12px;">🚚 Fast &amp; Reliable Shipping</span>
-              <span style="margin-left: 12px;">💬 Dedicated Support</span>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-
-  </table>
-</body>
-</html>
+        <!-- Footer -->
+        <tr>
+          <td style="background-color: #F3F4F6; padding: 20px 24px; text-align: center; border-top: 1px solid #E5E7EB;">
+            <p style="margin: 0; font-size: 12px; color: #4B5563;">
+              Have questions or need to modify your order? Chat with our team:
+            </p>
+            <p style="margin: 10px 0 0 0;">
+              <a href="https://wa.me/${cfg.helplineWhatsAppRaw}" style="display: inline-block; background-color: #25D366; color: #FFFFFF; font-weight: bold; font-size: 12px; padding: 8px 18px; border-radius: 8px; text-decoration: none;">
+                WhatsApp Helpline: ${cfg.helplinePhone}
+              </a>
+            </p>
+            <p style="margin: 14px 0 0 0; font-size: 10px; color: #9CA3AF;">
+              &copy; 2026 ${cfg.storeName} (${cfg.ownerEmail}). 100% Online Store Serving All Pakistan Cities.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
   `;
 }
 
@@ -1854,13 +1670,12 @@ function sendCustomerDispatchEmail(dispatchData) {
     <head><meta charset="utf-8"></head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9FAFB; margin: 0; padding: 24px; color: #111827;">
       <table align="center" width="100%" style="max-width: 600px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E5E7EB; overflow: hidden; margin: 0 auto;">
-        <!-- Header with Store Logo & Slogan -->
+        <!-- Header with Store Logo & Slogan (No "CALENVEE" plain text) -->
         <tr>
           <td style="background-color: ${cfg.brandNavy}; padding: 32px 24px; text-align: center;">
             <div style="margin-bottom: 10px;">
               <img src="${cfg.logoUrl}" alt="${cfg.storeName}" style="max-height: 44px; width: auto; display: inline-block; border: 0;" />
             </div>
-            <h1 style="color: #FFFFFF; margin: 0; font-size: 24px; letter-spacing: 2px; font-weight: 800; font-family: 'Arial Black', Arial, sans-serif;">CALENVEE</h1>
             <p style="color: ${cfg.brandOrange}; font-size: 11px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 2px; font-weight: bold;">${cfg.storeTagline} • ORDER DISPATCHED</p>
           </td>
         </tr>
