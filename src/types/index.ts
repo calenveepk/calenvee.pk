@@ -26,9 +26,11 @@ export interface Product {
   id: string;
   name: string;
   slug: string;
-  category: 'watches' | 'jewelry' | 'eyewear' | 'fragrances' | 'streetwear-bags' | 'tech-everyday';
+  category: string;
   categoryLabel: string;
   subcategory?: string;
+  gender?: 'men' | 'women' | 'unisex';
+  seoKeywords?: string[];
   price: number; // in PKR
   originalPrice: number; // in PKR
   discountPercentage: number;

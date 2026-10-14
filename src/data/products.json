@@ -4,7 +4,7 @@
     "name": "Santal 26 — Luxury Eau de Parfum",
     "slug": "santal-26-luxury-eau-de-parfum",
     "category": "beauty",
-    "categoryLabel": "Beauty",
+    "categoryLabel": "Fragrances",
     "subcategory": "Fragrances",
     "price": 2999,
     "originalPrice": 4500,
@@ -41,7 +41,27 @@
         "inStock": true
       }
     ],
-    "reviews": []
+    "reviews": [],
+    "gender": "unisex",
+    "seoKeywords": [
+      "perfume",
+      "perfumes",
+      "fragrance",
+      "fragrances",
+      "santal 26",
+      "eau de parfum",
+      "french perfume",
+      "scent",
+      "scents",
+      "men perfume",
+      "women perfume",
+      "luxury perfume pakistan",
+      "long lasting perfume",
+      "extrait de parfum",
+      "attar",
+      "cologne",
+      "best perfume"
+    ]
   },
   {
     "id": "cv-new-sneakers",
@@ -90,7 +110,23 @@
         "inStock": true
       }
     ],
-    "reviews": []
+    "reviews": [],
+    "gender": "men",
+    "seoKeywords": [
+      "sneakers",
+      "sneaker",
+      "shoes",
+      "shoe",
+      "white sneakers",
+      "minimalist sneakers",
+      "men shoes",
+      "casual shoes",
+      "low top sneakers",
+      "men footwear",
+      "leather sneakers",
+      "streetwear shoes pakistan",
+      "mens footwear"
+    ]
   },
   {
     "id": "cv-new-handbag",
@@ -144,7 +180,24 @@
         "inStock": true
       }
     ],
-    "reviews": []
+    "reviews": [],
+    "gender": "women",
+    "seoKeywords": [
+      "bag",
+      "bags",
+      "handbag",
+      "handbags",
+      "leather handbag",
+      "women bag",
+      "ladies bag",
+      "women handbag",
+      "purse",
+      "shoulder bag",
+      "tote bag",
+      "designer handbag pakistan",
+      "luxury purse",
+      "ladies purse"
+    ]
   },
   {
     "id": "cv-new-hoodie",
@@ -193,29 +246,40 @@
         "inStock": true
       }
     ],
-    "reviews": []
+    "reviews": [],
+    "gender": "unisex",
+    "seoKeywords": [
+      "hoodie",
+      "hoodies",
+      "sweatshirt",
+      "fleece hoodie",
+      "heavyweight hoodie",
+      "oversized hoodie",
+      "winter wear",
+      "streetwear hoodie pakistan",
+      "warm hoodie",
+      "unisex hoodie"
+    ]
   },
   {
     "id": "cv-deal-smartwatch",
     "name": "Smart Watch Pro — Fitness & Health Edition",
-    "slug": "smart-watch-pro-fitness-edition",
-    "category": "electronics",
-    "categoryLabel": "Electronics",
+    "slug": "smart-watch-pro-fitness-health-edition",
+    "category": "watches",
+    "categoryLabel": "Watches",
     "subcategory": "Smartwatch",
     "price": 4999,
     "originalPrice": 8999,
     "discountPercentage": 44,
-    "rating": 5,
-    "reviewsCount": 342,
+    "rating": 4.9,
+    "reviewsCount": 1,
     "inStock": true,
     "stockCount": 23,
     "isNewDrop": true,
     "isBestSeller": true,
     "isTrending": true,
     "tags": [
-      "Deal of the Day",
-      "Bestseller",
-      "Water Resistant"
+      "Minimalist Luxe"
     ],
     "material": "Aerospace Aluminum Case & Retina OLED Display",
     "warranty": "1 Year Official Calenvee Warranty",
@@ -234,24 +298,35 @@
     },
     "colors": [
       {
-        "name": "Stealth Black",
+        "name": "Standard Edition",
         "hex": "#111111",
-        "inStock": true
-      },
-      {
-        "name": "Space Silver",
-        "hex": "#E2E8F0",
         "inStock": true
       }
     ],
-    "reviews": []
+    "reviews": [],
+    "gender": "unisex",
+    "seoKeywords": [
+      "smartwatch",
+      "smart watch",
+      "watch",
+      "watches",
+      "fitness watch",
+      "calling watch",
+      "health watch",
+      "bluetooth smartwatch",
+      "men smartwatch",
+      "women smartwatch",
+      "smart watch pakistan",
+      "digital watch",
+      "smartwatches"
+    ]
   },
   {
     "id": "cv-watch-01",
     "name": "Calenvee Obsidian Chrono Edition",
     "slug": "calenvee-obsidian-chrono-edition",
-    "category": "men",
-    "categoryLabel": "Men",
+    "category": "watches",
+    "categoryLabel": "Watches",
     "subcategory": "Chronograph",
     "price": 3899,
     "originalPrice": 5999,
@@ -325,14 +400,34 @@
         "comment": "Packaging was remarkably clean with an official warranty card and micro-fiber polishing cloth. Highly recommended.",
         "helpfulCount": 19
       }
+    ],
+    "gender": "men",
+    "seoKeywords": [
+      "watch",
+      "watches",
+      "men watch",
+      "man watches",
+      "mens watches",
+      "black watch",
+      "chronograph",
+      "chronograph watch",
+      "wrist watch men",
+      "luxury watch pakistan",
+      "gents watch",
+      "male watch",
+      "timepiece",
+      "timepieces",
+      "analog watch",
+      "steel watch",
+      "cash on delivery watch"
     ]
   },
   {
     "id": "cv-watch-02",
     "name": "Calenvee Emerald Royal Legacy Watch",
     "slug": "calenvee-emerald-royal-legacy-watch",
-    "category": "men",
-    "categoryLabel": "Men",
+    "category": "watches",
+    "categoryLabel": "Watches",
     "subcategory": "Dress Watch",
     "price": 3499,
     "originalPrice": 4999,
@@ -386,14 +481,33 @@
         "comment": "Wore this to a dinner last night and received multiple compliments. The sunburst dial captures light gracefully.",
         "helpfulCount": 22
       }
+    ],
+    "gender": "men",
+    "seoKeywords": [
+      "watch",
+      "watches",
+      "gold watch",
+      "emerald watch",
+      "green dial watch",
+      "men watch",
+      "man watches",
+      "mens watches",
+      "royal watch",
+      "dress watch",
+      "luxury watch pakistan",
+      "gents watch",
+      "timepiece",
+      "timepieces",
+      "formal watch",
+      "male watch"
     ]
   },
   {
     "id": "cv-watch-03",
     "name": "Calenvee Minimalist Frost Ceramic Watch",
     "slug": "calenvee-minimalist-frost-ceramic-watch",
-    "category": "men",
-    "categoryLabel": "Men",
+    "category": "watches",
+    "categoryLabel": "Watches",
     "subcategory": "Minimalist",
     "price": 2999,
     "originalPrice": 4200,
@@ -451,14 +565,31 @@
         "comment": "Super light, doesn’t scratch, and goes with any outfit from casual to formal wear.",
         "helpfulCount": 15
       }
+    ],
+    "gender": "unisex",
+    "seoKeywords": [
+      "watch",
+      "watches",
+      "white watch",
+      "ceramic watch",
+      "minimalist watch",
+      "unisex watch",
+      "men watch",
+      "man watches",
+      "women watch",
+      "ladies watch",
+      "timepiece",
+      "timepieces",
+      "clean watch",
+      "luxury watch pakistan"
     ]
   },
   {
     "id": "cv-jewel-01",
     "name": "Calenvee 8mm Miami Cuban Link Chain",
     "slug": "calenvee-8mm-miami-cuban-link-chain",
-    "category": "women",
-    "categoryLabel": "Women",
+    "category": "jewelry",
+    "categoryLabel": "Jewelry",
     "subcategory": "Chains & Pendants",
     "price": 1899,
     "originalPrice": 2800,
@@ -528,14 +659,32 @@
         "comment": "Outstanding quality. Solid weight and the box clasp is secure and satisfying to wear.",
         "helpfulCount": 48
       }
+    ],
+    "gender": "unisex",
+    "seoKeywords": [
+      "jewelry",
+      "jewellery",
+      "chain",
+      "chains",
+      "cuban chain",
+      "cuban link",
+      "miami cuban",
+      "gold chain",
+      "silver chain",
+      "necklace",
+      "men chain",
+      "waterproof jewelry",
+      "anti-tarnish jewelry",
+      "men necklace pakistan",
+      "gold jewelry"
     ]
   },
   {
     "id": "cv-jewel-02",
     "name": "Calenvee Celestial Compass Pendant Chain",
     "slug": "calenvee-celestial-compass-pendant-chain",
-    "category": "women",
-    "categoryLabel": "Women",
+    "category": "jewelry",
+    "categoryLabel": "Jewelry",
     "subcategory": "Chains & Pendants",
     "price": 1699,
     "originalPrice": 2400,
@@ -587,14 +736,30 @@
         "comment": "Incredible attention to detail, premium weight, and zero skin irritation.",
         "helpfulCount": 18
       }
+    ],
+    "gender": "unisex",
+    "seoKeywords": [
+      "jewelry",
+      "jewellery",
+      "chain",
+      "chains",
+      "pendant",
+      "compass pendant",
+      "necklace",
+      "men pendant",
+      "silver necklace",
+      "waterproof chain",
+      "locket",
+      "anti-tarnish jewelry pakistan",
+      "mens chain"
     ]
   },
   {
     "id": "cv-jewel-03",
     "name": "Calenvee Onyx Sovereign Signet Ring",
     "slug": "calenvee-onyx-sovereign-signet-ring",
-    "category": "women",
-    "categoryLabel": "Women",
+    "category": "jewelry",
+    "categoryLabel": "Jewelry",
     "subcategory": "Rings",
     "price": 1399,
     "originalPrice": 1999,
@@ -659,14 +824,31 @@
         "comment": "The ring sizing guide was spot on. Delivery in Karachi was under 48 hours.",
         "helpfulCount": 29
       }
+    ],
+    "gender": "men",
+    "seoKeywords": [
+      "ring",
+      "rings",
+      "signet ring",
+      "onyx ring",
+      "black ring",
+      "men ring",
+      "man ring",
+      "mens rings",
+      "jewelry",
+      "jewellery",
+      "angothi",
+      "challa",
+      "stainless steel ring pakistan",
+      "male ring"
     ]
   },
   {
     "id": "cv-jewel-04",
     "name": "Calenvee Cyber Aura Magnetic Couple Bracelets",
     "slug": "calenvee-cyber-aura-magnetic-couple-bracelets",
-    "category": "women",
-    "categoryLabel": "Women",
+    "category": "jewelry",
+    "categoryLabel": "Jewelry",
     "subcategory": "Bracelets",
     "price": 1499,
     "originalPrice": 2200,
@@ -717,14 +899,28 @@
         "comment": "The magnetic snap is solid and the cord doesn’t fray at all. Excellent presentation box.",
         "helpfulCount": 31
       }
+    ],
+    "gender": "unisex",
+    "seoKeywords": [
+      "bracelet",
+      "bracelets",
+      "couple bracelet",
+      "magnetic bracelet",
+      "jewelry",
+      "jewellery",
+      "wristband",
+      "gift for couples",
+      "matching bracelets",
+      "men bracelet",
+      "women bracelet pakistan"
     ]
   },
   {
     "id": "cv-eye-01",
     "name": "Calenvee Matrix Y2K Cyber Shields",
     "slug": "calenvee-matrix-y2k-cyber-shields",
-    "category": "men",
-    "categoryLabel": "Men",
+    "category": "sunglasses",
+    "categoryLabel": "Sunglasses",
     "subcategory": "Cyber Shields",
     "price": 1999,
     "originalPrice": 3200,
@@ -783,14 +979,29 @@
         "comment": "These look exceptional on camera. Came with a hard case and cleaning cloth that keep them scratch-free.",
         "helpfulCount": 21
       }
+    ],
+    "gender": "unisex",
+    "seoKeywords": [
+      "sunglasses",
+      "sunglass",
+      "glasses",
+      "shades",
+      "cyber shields",
+      "matrix glasses",
+      "y2k sunglasses",
+      "futuristic sunglasses",
+      "eyewear",
+      "chashma",
+      "uv400 sunglasses pakistan",
+      "goggles"
     ]
   },
   {
     "id": "cv-eye-02",
     "name": "Calenvee Tokyo Noir Acetate Square Frames",
     "slug": "calenvee-tokyo-noir-acetate-square-frames",
-    "category": "men",
-    "categoryLabel": "Men",
+    "category": "sunglasses",
+    "categoryLabel": "Sunglasses",
     "subcategory": "Retro Frames",
     "price": 2199,
     "originalPrice": 3500,
@@ -842,14 +1053,29 @@
         "comment": "Feels identical to luxury boutique eyewear that costs ten times more. Sturdy metal hinges and zero wobble.",
         "helpfulCount": 27
       }
+    ],
+    "gender": "unisex",
+    "seoKeywords": [
+      "sunglasses",
+      "sunglass",
+      "glasses",
+      "black sunglasses",
+      "square sunglasses",
+      "acetate frames",
+      "shades",
+      "men sunglasses",
+      "women sunglasses",
+      "polarized shades",
+      "eyewear pakistan",
+      "retro frames"
     ]
   },
   {
     "id": "cv-eye-03",
     "name": "Calenvee Lumina Anti-Blue Light Glasses",
     "slug": "calenvee-lumina-anti-blue-light-glasses",
-    "category": "men",
-    "categoryLabel": "Men",
+    "category": "sunglasses",
+    "categoryLabel": "Sunglasses",
     "subcategory": "Screen Glasses",
     "price": 1799,
     "originalPrice": 2600,
@@ -900,6 +1126,20 @@
         "comment": "Sitting long hours in front of monitors used to cause severe eye strain. These glasses made an immediate difference.",
         "helpfulCount": 33
       }
+    ],
+    "gender": "unisex",
+    "seoKeywords": [
+      "glasses",
+      "blue light glasses",
+      "computer glasses",
+      "anti blue light",
+      "screen glasses",
+      "gaming glasses",
+      "eyewear",
+      "reading glasses",
+      "protective glasses",
+      "clear glasses pakistan",
+      "specs"
     ]
   },
   {
@@ -907,7 +1147,7 @@
     "name": "Calenvee Midnight Amber Extract de Parfum (50ml)",
     "slug": "calenvee-midnight-amber-extract-de-parfum",
     "category": "beauty",
-    "categoryLabel": "Beauty",
+    "categoryLabel": "Fragrances",
     "subcategory": "Extrait de Parfum",
     "price": 2499,
     "originalPrice": 3800,
@@ -958,6 +1198,23 @@
         "comment": "Two sprays lasted throughout the entire day. Deep, smoky vanilla amber that smells like niche perfumery.",
         "helpfulCount": 52
       }
+    ],
+    "gender": "unisex",
+    "seoKeywords": [
+      "perfume",
+      "perfumes",
+      "fragrance",
+      "fragrances",
+      "amber perfume",
+      "extrait de parfum",
+      "scent",
+      "men perfume",
+      "man perfume",
+      "mens perfume",
+      "luxury scent",
+      "long lasting perfume pakistan",
+      "attar",
+      "cologne"
     ]
   },
   {
@@ -965,7 +1222,7 @@
     "name": "Calenvee Vanilla Clouds Eau de Parfum (50ml)",
     "slug": "calenvee-vanilla-clouds-eau-de-parfum",
     "category": "beauty",
-    "categoryLabel": "Beauty",
+    "categoryLabel": "Fragrances",
     "subcategory": "Gourmand Perfume",
     "price": 2299,
     "originalPrice": 3400,
@@ -1014,6 +1271,20 @@
         "comment": "Smells delectable and stays on clothes until the next day. The frosted bottle is beautiful on the dresser.",
         "helpfulCount": 39
       }
+    ],
+    "gender": "women",
+    "seoKeywords": [
+      "perfume",
+      "perfumes",
+      "fragrance",
+      "fragrances",
+      "vanilla perfume",
+      "women perfume",
+      "ladies perfume",
+      "sweet perfume",
+      "gourmand scent",
+      "eau de parfum",
+      "perfume for girls pakistan"
     ]
   },
   {
@@ -1079,6 +1350,20 @@
         "comment": "Carries my 15-inch laptop and accessories effortlessly. The top zipper keeps everything secure.",
         "helpfulCount": 42
       }
+    ],
+    "gender": "unisex",
+    "seoKeywords": [
+      "bag",
+      "bags",
+      "tote bag",
+      "canvas tote",
+      "tote",
+      "shopping bag",
+      "women bag",
+      "college bag",
+      "everyday bag",
+      "aesthetic tote bag pakistan",
+      "handbag"
     ]
   },
   {
@@ -1138,6 +1423,21 @@
         "comment": "The magnetic buckle releases effortlessly. Rain-proof construction keeps electronics completely dry.",
         "helpfulCount": 26
       }
+    ],
+    "gender": "unisex",
+    "seoKeywords": [
+      "bag",
+      "bags",
+      "crossbody",
+      "crossbody bag",
+      "messenger bag",
+      "tactical bag",
+      "shoulder bag",
+      "men bag",
+      "women bag",
+      "chest bag",
+      "side bag pakistan",
+      "waist bag"
     ]
   },
   {
@@ -1145,7 +1445,7 @@
     "name": "Calenvee Carbon Pulse Mag-Cardholder & Kickstand",
     "slug": "calenvee-carbon-pulse-mag-cardholder-kickstand",
     "category": "electronics",
-    "categoryLabel": "Electronics",
+    "categoryLabel": "Tech Essentials",
     "subcategory": "MagSafe Accessories",
     "price": 1599,
     "originalPrice": 2400,
@@ -1201,6 +1501,19 @@
         "comment": "Cards sit securely and the magnetic snap is strong. The kickstand works reliably in landscape mode.",
         "helpfulCount": 38
       }
+    ],
+    "gender": "unisex",
+    "seoKeywords": [
+      "magsafe",
+      "wallet",
+      "cardholder",
+      "phone wallet",
+      "iphone wallet",
+      "magsafe wallet",
+      "tech essentials",
+      "carbon fiber wallet",
+      "kickstand",
+      "phone accessories pakistan"
     ]
   },
   {
@@ -1208,7 +1521,7 @@
     "name": "Calenvee Titanium Modular Key Organizer",
     "slug": "calenvee-titanium-modular-key-organizer",
     "category": "electronics",
-    "categoryLabel": "Electronics",
+    "categoryLabel": "Tech Essentials",
     "subcategory": "Key Organizers",
     "price": 1299,
     "originalPrice": 1999,
@@ -1257,14 +1570,26 @@
         "comment": "House, office, and vehicle keys all fold neatly. No more jingling keys.",
         "helpfulCount": 14
       }
+    ],
+    "gender": "unisex",
+    "seoKeywords": [
+      "key organizer",
+      "keychain",
+      "titanium keychain",
+      "modular key holder",
+      "edc",
+      "everyday carry",
+      "gadgets",
+      "tech accessories",
+      "keys holder pakistan"
     ]
   },
   {
     "id": "cv-watch-04",
     "name": "Calenvee Monaco Vintage Racing Chronograph",
     "slug": "calenvee-monaco-vintage-racing-chronograph",
-    "category": "men",
-    "categoryLabel": "Men",
+    "category": "watches",
+    "categoryLabel": "Watches",
     "subcategory": "Chronograph",
     "price": 3699,
     "originalPrice": 5200,
@@ -1305,14 +1630,31 @@
         "inStock": true
       }
     ],
-    "reviews": []
+    "reviews": [],
+    "gender": "men",
+    "seoKeywords": [
+      "watch",
+      "watches",
+      "chronograph",
+      "racing watch",
+      "vintage watch",
+      "leather strap watch",
+      "men watch",
+      "man watches",
+      "mens watches",
+      "sports watch",
+      "luxury watch pakistan",
+      "gents watch",
+      "timepiece",
+      "timepieces"
+    ]
   },
   {
     "id": "cv-jewel-05",
     "name": "Calenvee Flat Snake Bone Herringbone Chain",
     "slug": "calenvee-flat-snake-bone-herringbone-chain",
-    "category": "women",
-    "categoryLabel": "Women",
+    "category": "jewelry",
+    "categoryLabel": "Jewelry",
     "subcategory": "Chains & Pendants",
     "price": 1899,
     "originalPrice": 2800,
@@ -1351,14 +1693,30 @@
         "inStock": true
       }
     ],
-    "reviews": []
+    "reviews": [],
+    "gender": "unisex",
+    "seoKeywords": [
+      "jewelry",
+      "jewellery",
+      "chain",
+      "chains",
+      "snake chain",
+      "herringbone chain",
+      "flat chain",
+      "gold chain",
+      "silver chain",
+      "necklace",
+      "women chain",
+      "men chain",
+      "waterproof jewelry pakistan"
+    ]
   },
   {
     "id": "cv-eye-04",
     "name": "Calenvee Golden Hour Wire Aviator Shades",
     "slug": "calenvee-golden-hour-wire-aviator-shades",
-    "category": "men",
-    "categoryLabel": "Men",
+    "category": "sunglasses",
+    "categoryLabel": "Sunglasses",
     "subcategory": "Retro Frames",
     "price": 1999,
     "originalPrice": 2900,
@@ -1397,27 +1755,40 @@
         "inStock": true
       }
     ],
-    "reviews": []
+    "reviews": [],
+    "gender": "unisex",
+    "seoKeywords": [
+      "sunglasses",
+      "sunglass",
+      "glasses",
+      "aviator",
+      "aviator sunglasses",
+      "gold aviator",
+      "wire shades",
+      "vintage sunglasses",
+      "men sunglasses",
+      "women sunglasses",
+      "polarized shades pakistan",
+      "eyewear"
+    ]
   },
   {
     "id": "cv-tech-03",
     "name": "Calenvee Alpine Magnetic Loop Watch Strap",
     "slug": "calenvee-alpine-magnetic-loop-watch-strap",
-    "category": "electronics",
-    "categoryLabel": "Electronics",
+    "category": "watches",
+    "categoryLabel": "Watches",
     "subcategory": "Strap Accessories",
     "price": 1599,
     "originalPrice": 2300,
     "discountPercentage": 30,
     "rating": 4.9,
-    "reviewsCount": 54,
+    "reviewsCount": 1,
     "inStock": true,
     "stockCount": 22,
     "isBestSeller": true,
     "tags": [
-      "Quick Snap",
-      "Breathable Weave",
-      "Universal Fit"
+      "Minimalist Luxe"
     ],
     "material": "Dual-Layer Woven Nylon & Neodymium Magnetic Clasp",
     "images": [
@@ -1432,21 +1803,30 @@
     },
     "colors": [
       {
-        "name": "Alpine Starlight Cream",
-        "hex": "#f1f5f9",
-        "inStock": true
-      },
-      {
-        "name": "Deep Midnight Blue",
-        "hex": "#0f172a",
-        "inStock": true
-      },
-      {
-        "name": "Military Olive Green",
-        "hex": "#3f6212",
+        "name": "Standard Edition",
+        "hex": "#111111",
         "inStock": true
       }
     ],
-    "reviews": []
+    "reviews": [],
+    "gender": "unisex",
+    "seoKeywords": [
+      "watch strap",
+      "apple watch strap",
+      "smartwatch strap",
+      "magnetic loop",
+      "alpine loop",
+      "nylon strap",
+      "watch band",
+      "iwatch strap",
+      "tech accessories",
+      "straps pakistan",
+      "watches accessories",
+      "watch",
+      "watches"
+    ],
+    "warranty": "",
+    "isNewDrop": false,
+    "isTrending": false
   }
 ]
