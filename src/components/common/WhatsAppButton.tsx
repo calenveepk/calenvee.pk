@@ -229,7 +229,7 @@ export const WhatsAppButton: React.FC = () => {
         </div>
       )}
 
-      {/* Main Moveable WhatsApp Toggle Button (No glowing circle) */}
+      {/* Main Moveable WhatsApp Toggle Button (Transparent, no white background, toggle only) */}
       <div className={`relative ${isNearTop ? 'order-1' : 'order-2'}`}>
         <button
           ref={buttonRef}
@@ -240,15 +240,19 @@ export const WhatsAppButton: React.FC = () => {
             }
           }}
           onClick={handleToggle}
-          className={`flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-[#128C7E] via-[#25D366] to-[#2BE875] text-white shadow-xl focus:outline-none border-2 border-white/40 drop-shadow-lg touch-none transition-transform duration-150 ${
+          className={`flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-transparent border-none p-0 focus:outline-none touch-none transition-transform duration-150 select-none ${
             isDragging
-              ? 'cursor-grabbing scale-110 shadow-2xl'
-              : 'cursor-grab hover:scale-105 active:scale-95'
+              ? 'cursor-grabbing scale-110'
+              : 'cursor-grab hover:scale-108 active:scale-95'
           }`}
           aria-label="WhatsApp Support"
           title="Drag to reposition anywhere, tap to chat"
         >
-          <RealWhatsAppIcon size={34} className="filter drop-shadow-md sm:scale-110 pointer-events-none" />
+          <img
+            src="/whatsapp-toggle.png"
+            alt="WhatsApp Support"
+            className="w-full h-full object-contain pointer-events-none filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.25)]"
+          />
         </button>
       </div>
     </div>
