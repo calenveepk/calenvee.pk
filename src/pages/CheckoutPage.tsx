@@ -652,14 +652,15 @@ export const CheckoutPage: React.FC = () => {
                           onChange={() => setPaymentMethod('jazzcash')}
                           className="mt-1 accent-[#F97316]"
                         />
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-gray-900">JazzCash</span>
-                            <div className="inline-flex items-center justify-center bg-white border border-gray-200 rounded-md px-1.5 py-0.5 h-6">
+                            <div className="inline-flex items-center justify-center bg-white border border-gray-200 rounded-md px-1.5 py-0.5 h-6 w-14 overflow-hidden shrink-0">
                               <img
                                 src="/payments/jazzcash.png"
                                 alt="JazzCash"
-                                className="h-4.5 w-auto object-contain"
+                                className="h-4 max-h-4 max-w-full w-auto object-contain"
+                                style={{ maxHeight: '16px', maxWidth: '48px' }}
                               />
                             </div>
                           </div>
@@ -685,14 +686,15 @@ export const CheckoutPage: React.FC = () => {
                           onChange={() => setPaymentMethod('easypaisa')}
                           className="mt-1 accent-[#F97316]"
                         />
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-gray-900">EasyPaisa</span>
-                            <div className="inline-flex items-center justify-center bg-white border border-gray-200 rounded-md px-1.5 py-0.5 h-6">
+                            <div className="inline-flex items-center justify-center bg-white border border-gray-200 rounded-md px-1.5 py-0.5 h-6 w-14 overflow-hidden shrink-0">
                               <img
                                 src="/payments/easypaisa.png"
                                 alt="EasyPaisa"
-                                className="h-4 w-auto object-contain"
+                                className="h-3.5 max-h-3.5 max-w-full w-auto object-contain"
+                                style={{ maxHeight: '14px', maxWidth: '48px' }}
                               />
                             </div>
                           </div>

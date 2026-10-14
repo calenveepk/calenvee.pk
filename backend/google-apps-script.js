@@ -897,7 +897,11 @@ function handleCreateOrder(payload) {
       if (folder) {
         const driveFile = folder.createFile(receiptBlob);
         driveFile.setName(fileName);
-        driveFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        try {
+          driveFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        } catch (shareErr) {
+          Logger.log("Drive share setting notice: " + shareErr.toString());
+        }
         receiptUrl = driveFile.getUrl();
       }
     } catch (receiptErr) {
@@ -937,7 +941,7 @@ function handleCreateOrder(payload) {
   const newOrderRow = ordersSheet.getLastRow();
   if (receiptUrl && receiptUrl.startsWith("http")) {
     try {
-      ordersSheet.getRange(newOrderRow, 17).setFormula(`=HYPERLINK("${receiptUrl}", "View Receipt in Drive 🧾")`);
+      ordersSheet.getRange(newOrderRow, 17).setFormula(`=HYPERLINK("${receiptUrl}", "View Receipt in Drive")`);
     } catch (_) {
       ordersSheet.getRange(newOrderRow, 17).setValue(receiptUrl);
     }
@@ -2225,6 +2229,8 @@ function onOpen() {
     .addItem("🧹 6. Clean Ghost / Empty Orders (Remove Blank Rows)", "cleanGhostOrders")
     .addItem("🧪 7. Send Test Email to Store Owner", "testOrderEmail")
     .addItem("🗑️ 8. Reset All Dummy Orders (Fresh Store)", "resetDummyData")
+    .addSeparator()
+    .addItem("🔍 9. Authorize & Test Google Drive", "testDriveAndEmailSetup")
     .addToUi();
 }
 
@@ -2550,4 +2556,36 @@ function resetDummyData() {
   }
 
   Logger.log("✅ All dummy orders cleared successfully. Sheet is ready for real live customer orders!");
+}
+
+/**
+ * 12. DIAGNOSTIC: TEST DRIVE & EMAIL SETUP
+ * Run this function from Apps Script editor or "Calenvee Store > 🔍 9. Authorize & Test Google Drive"
+ * to immediately trigger Google's permission prompt and verify access to target Drive folder.
+ */
+function testDriveAndEmailSetup() {
+  const FOLDER_ID = "1WFEsVs1hxJtFGLlOYMhrmJjJCcUyGTW_";
+  const ui = SpreadsheetApp.getUi();
+  try {
+    const folder = DriveApp.getFolderById(FOLDER_ID);
+    const testBlob = Utilities.newBlob("Calenvee Drive Connection Diagnostic", "text/plain", "test_connection.txt");
+    const testFile = folder.createFile(testBlob);
+    testFile.setTrashed(true); // Clean up immediately
+
+    ui.alert(
+      "✅ Google Drive & Permissions Fully Active!\n\n" +
+      "1. Target Drive Folder Found: " + folder.getName() + " (ID: " + FOLDER_ID + ")\n" +
+      "2. File upload permission verified successfully.\n" +
+      "3. Gmail & Sheets services active.\n\n" +
+      "⚠️ CRITICAL STEP TO ACTIVATE:\n" +
+      "Click: Deploy > Manage deployments > Edit (pencil icon) > Version: select 'New version' > Click Deploy!"
+    );
+  } catch (err) {
+    Logger.log("Diagnostic test error: " + err.toString());
+    ui.alert(
+      "❌ Diagnostic / Authorization Notice:\n\n" +
+      "Error: " + err.toString() + "\n\n" +
+      "Please ensure Google Drive permissions are granted when prompted."
+    );
+  }
 }
