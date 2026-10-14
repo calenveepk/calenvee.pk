@@ -38,6 +38,9 @@ export async function submitOrderToBackend(order: OrderDetails): Promise<OrderSu
 
   // If webhook URL is configured, POST to Google Apps Script Webhook
   if (webhookUrl && webhookUrl.trim() !== '') {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+
     try {
       // Google Apps Script requires text/plain or no-cors mode to avoid CORS preflight blocks
       const response = await fetch(webhookUrl, {
@@ -50,7 +53,10 @@ export async function submitOrderToBackend(order: OrderDetails): Promise<OrderSu
           order,
           timestamp: new Date().toISOString(),
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
@@ -62,7 +68,8 @@ export async function submitOrderToBackend(order: OrderDetails): Promise<OrderSu
         };
       }
     } catch (networkError) {
-      console.warn('Backend webhook submission failed, order preserved locally:', networkError);
+      clearTimeout(timeoutId);
+      console.warn('Backend webhook submission took too long or failed, order preserved locally:', networkError);
     }
   }
 

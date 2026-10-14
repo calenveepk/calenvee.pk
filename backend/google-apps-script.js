@@ -947,16 +947,15 @@ function handleCreateOrder(payload) {
     }
   }
 
-  // Append items to OrderItems tab
+  // Batch append items to OrderItems tab (atomic single write for ultra-fast performance)
   if (itemsSheet && itemsList.length > 0) {
-    itemsList.forEach(item => {
+    const itemRows = itemsList.map(item => {
       const itemName = item.name || (item.product && item.product.name) || "Calenvee Product";
       const itemPrice = item.price || (item.product && item.product.price) || 0;
       const itemQty = item.quantity || 1;
       const itemColor = (item.selectedColor && item.selectedColor.name) || item.color || "Standard";
       const itemSize = (item.selectedSize && item.selectedSize.name) || item.size || "Standard";
-
-      itemsSheet.appendRow([
+      return [
         order.orderId,
         timestamp,
         itemName,
@@ -965,8 +964,10 @@ function handleCreateOrder(payload) {
         itemPrice * itemQty,
         itemColor,
         itemSize
-      ]);
+      ];
     });
+    const lastRow = itemsSheet.getLastRow();
+    itemsSheet.getRange(lastRow + 1, 1, itemRows.length, itemRows[0].length).setValues(itemRows);
   }
 
   // Send customer order placement email with official luxury invoice
@@ -2222,8 +2223,8 @@ function onOpen() {
     .addItem("📊 1. Build / Refresh Executive Dashboard", "createExecutiveDashboard")
     .addItem("⚙️ 2. Setup All Sheets (Dashboard + Orders + OrderItems + Inventory + Settings)", "setupSheet")
     .addSeparator()
-    .addItem("✉️ 3. Confirm Selected Order & Send Email", "confirmSelectedOrderRow")
-    .addItem("🚚 4. Dispatch Selected Order & Send Email", "sendDispatchEmailForSelectedRow")
+    .addItem("✉️ 3. Confirm Selected Order(s) & Send Email", "confirmSelectedOrderRows")
+    .addItem("🚚 4. Dispatch Selected Order(s) & Send Email", "sendDispatchEmailForSelectedRows")
     .addItem("❌ 5. Cancel Selected Order & Send Email", "cancelSelectedOrderRow")
     .addSeparator()
     .addItem("🧹 6. Clean Ghost / Empty Orders (Remove Blank Rows)", "cleanGhostOrders")
@@ -2235,48 +2236,84 @@ function onOpen() {
 }
 
 /**
- * 8A. Confirm Selected Order from Sheet Menu (Option 3)
- * Transitions status to "Confirmed", queries OrderItems for exact line items and pricing,
- * and sends customer the official luxury confirmation email.
+ * 8A. BATCH CONFIRM SELECTED ORDERS FROM SHEET MENU (Option 3)
+ * Allows management to confirm 1 or multiple orders simultaneously!
  */
-function confirmSelectedOrderRow() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const row = sheet.getActiveCell().getRow();
+function confirmSelectedOrderRows() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("Orders") || ss.getActiveSheet();
+  const range = sheet.getActiveRange();
   const ui = SpreadsheetApp.getUi();
 
-  if (row <= 1) {
-    ui.alert("⚠️ Please select a customer order row first (click on row 2 or below in the Orders sheet).");
+  if (!range) {
+    ui.alert("⚠️ Please select one or more order rows in the Orders sheet.");
     return;
   }
 
-  const values = sheet.getRange(row, 1, 1, 17).getValues()[0];
-  const orderId = String(values[0] || "").trim();
-  const customerName = String(values[2] || "").trim();
-  const email = String(values[4] || "").trim();
+  const startRow = range.getRow();
+  const numRows = range.getNumRows();
 
-  if (!orderId) {
-    ui.alert("⚠️ No Order ID found in the selected row.");
+  const targetRows = [];
+  for (let r = startRow; r < startRow + numRows; r++) {
+    if (r >= 2 && !targetRows.includes(r)) {
+      targetRows.push(r);
+    }
+  }
+
+  if (targetRows.length === 0) {
+    ui.alert("⚠️ Please select customer order rows (row 2 or below in the Orders sheet).");
     return;
   }
 
-  // Update Status in Column J to Confirmed
-  sheet.getRange(row, 10).setValue("Confirmed");
+  const confirmedList = [];
+  const skippedList = [];
 
-  // Fetch full order data including line items, subtotal, shipping fee, address, payment method
-  const orderData = getOrderDetailsFromSheet(orderId, values);
+  targetRows.forEach(row => {
+    try {
+      const values = sheet.getRange(row, 1, 1, 17).getValues()[0];
+      const orderId = String(values[0] || "").trim();
+      const customerName = String(values[2] || "").trim();
+      const email = String(values[4] || "").trim();
 
-  if (email && email.includes("@") && email !== "N/A") {
-    sendCustomerOrderConfirmationEmail(orderData);
-    sheet.getRange(row, 15).setValue("Yes");
-    ui.alert(`✅ Order #${orderId} marked Confirmed!\n\nConfirmation email sent to ${customerName} (${email})\nSubtotal: Rs. ${orderData.subtotal.toLocaleString()} | Delivery: Rs. ${orderData.shippingFee.toLocaleString()} | Total: Rs. ${orderData.total.toLocaleString()}`);
-  } else {
-    ui.alert(`✅ Order #${orderId} marked Confirmed! (No email on file)`);
-  }
+      if (!orderId || !customerName) return;
 
-  // Refresh Executive Dashboard if available
+      sheet.getRange(row, 10).setValue("Confirmed");
+
+      if (email && email.includes("@") && email !== "N/A") {
+        const orderData = getOrderDetailsFromSheet(orderId, values);
+        sendCustomerOrderConfirmationEmail(orderData);
+        sheet.getRange(row, 15).setValue("Yes");
+        confirmedList.push(`${orderId} (${customerName}) → Email sent to ${email}`);
+      } else {
+        skippedList.push(`${orderId} (${customerName}) - Confirmed (No email on file)`);
+      }
+    } catch (err) {
+      Logger.log("Error confirming row " + row + ": " + err.toString());
+    }
+  });
+
   if (typeof createExecutiveDashboard === 'function') {
     try { createExecutiveDashboard(); } catch (_) {}
   }
+
+  let summary = `✅ BATCH CONFIRMATION SUMMARY\n\n`;
+  summary += `Confirmed & Emailed: ${confirmedList.length} order(s)\n`;
+  if (confirmedList.length > 0) {
+    summary += confirmedList.map(item => `  • ${item}`).slice(0, 15).join("\n") + "\n";
+    if (confirmedList.length > 15) {
+      summary += `  ... and ${confirmedList.length - 15} more orders.\n`;
+    }
+  }
+  if (skippedList.length > 0) {
+    summary += `\n⚠️ Confirmed without email: ${skippedList.length}\n`;
+    summary += skippedList.map(item => `  • ${item}`).join("\n");
+  }
+
+  ui.alert(summary);
+}
+
+function confirmSelectedOrderRow() {
+  return confirmSelectedOrderRows();
 }
 
 /**
@@ -2342,105 +2379,131 @@ function cancelSelectedOrderRow() {
 }
 
 /**
- * 8C. Dispatch Selected Order from Sheet Menu (Option 4)
- * Prompts user for Courier Company Name and optional Tracking ID,
- * updates Columns K and L in Orders tab, sets status to Dispatched,
- * and sends customer the official Dispatch Email.
+ * 8C. BATCH DISPATCH SELECTED ORDERS FROM SHEET MENU (Option 4)
+ * - Supports selecting 1 single order or 100+ orders at once!
+ * - Reads Courier directly from Column K (defaults to "TCS Express" if empty or "-")
+ * - Reads Tracking ID directly from Column L (optional — if empty or "-", sends without tracking)
+ * - Zero repeated popups! Management enters Courier/Tracking directly in the sheet and clicks once.
+ * - Updates Status (Col J) -> "Dispatched"
+ * - Updates Courier (Col K) -> courier name
+ * - Updates Tracking (Col L) -> tracking ID or "-"
+ * - Updates Dispatch Email Sent (Col P) -> "Yes"
+ * - Displays an executive summary popup of all sent emails!
  */
-function sendDispatchEmailForSelectedRow() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const row = sheet.getActiveCell().getRow();
+function sendDispatchEmailForSelectedRows() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("Orders") || ss.getActiveSheet();
+  const range = sheet.getActiveRange();
   const ui = SpreadsheetApp.getUi();
 
-  if (row <= 1) {
-    ui.alert("⚠️ Please select a customer order row first (click on row 2 or below in the Orders sheet).");
+  if (!range) {
+    ui.alert("⚠️ Please select one or more order rows in the Orders sheet.");
     return;
   }
 
-  const values = sheet.getRange(row, 1, 1, 17).getValues()[0];
-  const orderId = String(values[0] || "").trim();
-  const customerName = String(values[2] || "").trim();
-  const email = String(values[4] || "").trim();
+  const startRow = range.getRow();
+  const numRows = range.getNumRows();
 
-  if (!orderId) {
-    ui.alert("⚠️ No Order ID found in the selected row.");
+  // Collect all unique row numbers >= 2 from the current selection
+  const targetRows = [];
+  for (let r = startRow; r < startRow + numRows; r++) {
+    if (r >= 2 && !targetRows.includes(r)) {
+      targetRows.push(r);
+    }
+  }
+
+  if (targetRows.length === 0) {
+    ui.alert("⚠️ Please select customer order rows (row 2 or below in the Orders sheet).");
     return;
   }
 
-  if (!email || !email.includes("@")) {
-    ui.alert(`⚠️ No valid email address found for Order #${orderId} (${customerName}).`);
-    return;
-  }
+  const dispatchedList = [];
+  const skippedList = [];
+  const errorsList = [];
 
-  // Determine intelligent default courier name (clean any "Pending..." or "-")
-  let defaultCourier = String(values[10] || "").trim();
-  if (!defaultCourier || defaultCourier === "-" || defaultCourier.toLowerCase().includes("pending")) {
-    defaultCourier = "TCS Express";
-  }
+  targetRows.forEach(row => {
+    try {
+      const values = sheet.getRange(row, 1, 1, 17).getValues()[0];
+      const orderId = String(values[0] || "").trim();
+      const customerName = String(values[2] || "").trim();
+      const email = String(values[4] || "").trim();
 
-  // Prompt 1: Ask for Courier Partner Name
-  const courierPrompt = ui.prompt(
-    "Step 1: Courier Company Name",
-    `Dispatching Order #${orderId} for ${customerName}\n\nEnter Courier Company Name (e.g. TCS Express, Leopards, Trax, PostEx, Rider, Call Courier):`,
-    ui.ButtonSet.OK_CANCEL
-  );
+      if (!orderId || !customerName) {
+        return; // Blank row, skip silently
+      }
 
-  if (courierPrompt.getSelectedButton() !== ui.Button.OK) {
-    return; // Cancelled
-  }
+      // Read Courier from Column K (values[10])
+      let courierName = String(values[10] || "").trim();
+      if (!courierName || courierName === "-" || courierName.toLowerCase().includes("pending")) {
+        courierName = "TCS Express";
+      }
 
-  let courierName = courierPrompt.getResponseText().trim();
-  if (!courierName) {
-    courierName = defaultCourier;
-  }
+      // Read Tracking from Column L (values[11])
+      let trackingNumber = String(values[11] || "").trim();
+      if (trackingNumber === "-" || trackingNumber.toUpperCase() === "N/A" || trackingNumber.toLowerCase().includes("pending")) {
+        trackingNumber = "";
+      }
 
-  // Determine existing tracking number (ignore "-" or "N/A")
-  let existingTracking = String(values[11] || "").trim();
-  if (existingTracking === "-" || existingTracking.toUpperCase() === "N/A" || existingTracking.toLowerCase().includes("pending")) {
-    existingTracking = "";
-  }
+      if (!email || !email.includes("@")) {
+        sheet.getRange(row, 10).setValue("Dispatched");
+        sheet.getRange(row, 11).setValue(courierName);
+        sheet.getRange(row, 12).setValue(trackingNumber || "-");
+        skippedList.push(`${orderId} (${customerName}) - Status set to Dispatched (No email on file)`);
+        return;
+      }
 
-  // Prompt 2: Ask for Tracking ID (Optional)
-  const trackingPrompt = ui.prompt(
-    "Step 2: Tracking ID (Optional)",
-    `Enter Tracking ID / Consignment Number for ${courierName}:\n\n(Optional — leave blank if not yet available, rider will coordinate via SMS)`,
-    ui.ButtonSet.OK_CANCEL
-  );
+      // Send Customer Dispatch Email
+      sendCustomerDispatchEmail({
+        orderId: orderId,
+        customerName: customerName,
+        email: email,
+        courier: courierName,
+        trackingNumber: trackingNumber
+      });
 
-  if (trackingPrompt.getSelectedButton() !== ui.Button.OK) {
-    return; // Cancelled
-  }
+      // Update Orders sheet
+      sheet.getRange(row, 10).setValue("Dispatched");
+      sheet.getRange(row, 11).setValue(courierName);
+      sheet.getRange(row, 12).setValue(trackingNumber || "-");
+      sheet.getRange(row, 16).setValue("Yes");
 
-  let trackingNumber = trackingPrompt.getResponseText().trim();
-  if (!trackingNumber) {
-    trackingNumber = "-";
-  }
-
-  // Update Orders Sheet:
-  // Column J (10): Order Status -> "Dispatched"
-  // Column K (11): Courier -> courierName
-  // Column L (12): Tracking Number -> trackingNumber
-  // Column P (16): Dispatch Email Sent -> "Yes"
-  sheet.getRange(row, 10).setValue("Dispatched");
-  sheet.getRange(row, 11).setValue(courierName);
-  sheet.getRange(row, 12).setValue(trackingNumber);
-  sheet.getRange(row, 16).setValue("Yes");
-
-  // Send the professional dispatch email
-  sendCustomerDispatchEmail({
-    orderId: orderId,
-    customerName: customerName,
-    email: email,
-    courier: courierName,
-    trackingNumber: trackingNumber
+      const trackInfo = trackingNumber ? `Tracking: ${trackingNumber}` : "No tracking";
+      dispatchedList.push(`${orderId} (${customerName}) → ${courierName} [${trackInfo}]`);
+    } catch (err) {
+      errorsList.push(`Row ${row}: ${err.toString()}`);
+    }
   });
 
-  // Refresh Executive Dashboard KPIs if available
+  // Refresh Executive Dashboard
   if (typeof createExecutiveDashboard === 'function') {
     try { createExecutiveDashboard(); } catch (_) {}
   }
 
-  ui.alert(`✅ Order #${orderId} Dispatched Successfully!\n\nCourier: ${courierName}\nTracking ID: ${trackingNumber}\n\nEmail sent to ${customerName} (${email})\nGoogle Sheet Columns K & L updated.`);
+  // Display summary
+  let summary = `🚚 BATCH DISPATCH SUMMARY\n\n`;
+  summary += `✅ Dispatched Successfully: ${dispatchedList.length} order(s)\n`;
+  if (dispatchedList.length > 0) {
+    summary += dispatchedList.map(item => `  • ${item}`).slice(0, 15).join("\n") + "\n";
+    if (dispatchedList.length > 15) {
+      summary += `  ... and ${dispatchedList.length - 15} more orders.\n`;
+    }
+  }
+
+  if (skippedList.length > 0) {
+    summary += `\n⚠️ Dispatched without email: ${skippedList.length}\n`;
+    summary += skippedList.map(item => `  • ${item}`).join("\n") + "\n";
+  }
+
+  if (errorsList.length > 0) {
+    summary += `\n❌ Errors:\n`;
+    summary += errorsList.map(item => `  • ${item}`).join("\n") + "\n";
+  }
+
+  ui.alert(summary);
+}
+
+function sendDispatchEmailForSelectedRow() {
+  return sendDispatchEmailForSelectedRows();
 }
 
 /**

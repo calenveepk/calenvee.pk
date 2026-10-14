@@ -4,6 +4,7 @@ import {
   ShoppingBag,
   Heart,
   Share2,
+  CheckCircle2,
 } from 'lucide-react';
 import { PRODUCTS } from '../data/products';
 import { ProductVariantColor, ProductVariantSize } from '../types';
@@ -44,14 +45,17 @@ export const ProductDetailPage: React.FC = () => {
   );
   const [quantity, setQuantity] = useState(1);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
 
-  const { addItem } = useCart();
+  const { addItem, setIsOpen: setIsCartOpen } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
   const isFavorited = isInWishlist(product.id);
 
   const handleAddToCart = () => {
     addItem(product, selectedColor, selectedSize, quantity);
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2400);
   };
 
   const handleShare = () => {
@@ -292,10 +296,23 @@ export const ProductDetailPage: React.FC = () => {
                 <div className="flex gap-3">
                   <button
                     onClick={handleAddToCart}
-                    className="flex-1 py-3.5 px-6 bg-[#F97316] hover:bg-[#EA580C] text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-all flex items-center justify-center space-x-2 shadow-md active:scale-98"
+                    className={`flex-1 py-3.5 px-6 font-bold text-xs uppercase tracking-wider rounded-lg transition-all flex items-center justify-center space-x-2 shadow-md active:scale-98 ${
+                      isAdded
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-[#F97316] hover:bg-[#EA580C] text-white'
+                    }`}
                   >
-                    <ShoppingBag className="w-4 h-4 text-white" />
-                    <span>ADD TO CART</span>
+                    {isAdded ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 text-white" />
+                        <span>ADDED TO BAG!</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingBag className="w-4 h-4 text-white" />
+                        <span>ADD TO CART</span>
+                      </>
+                    )}
                   </button>
 
                   <button
@@ -365,6 +382,20 @@ export const ProductDetailPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Floating Added to Bag Pill */}
+      {isAdded && (
+        <div className="fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#0B132B] text-white px-5 py-2.5 rounded-full shadow-2xl border border-white/10 flex items-center gap-3 animate-bounce">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span className="text-xs font-medium">Added to Bag</span>
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="text-xs font-bold text-[#F97316] hover:underline uppercase tracking-wide ml-1 cursor-pointer"
+          >
+            View Bag →
+          </button>
+        </div>
+      )}
     </div>
   );
 };

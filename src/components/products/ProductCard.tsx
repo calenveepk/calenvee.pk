@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingBag, Star, Eye } from 'lucide-react';
+import { Heart, ShoppingBag, Star, Eye, Check } from 'lucide-react';
 import { Product } from '../../types';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -18,7 +18,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   showBadge = true,
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const { addItem, setIsOpen: setIsCartOpen } = useCart();
+  const [isAdded, setIsAdded] = useState(false);
+  const { addItem } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
   const isFavorited = isInWishlist(product.id);
@@ -27,7 +28,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     e.preventDefault();
     e.stopPropagation();
     addItem(product, product.colors?.[0] || { name: 'Standard', hex: '#111111', inStock: true });
-    setIsCartOpen(true);
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 1600);
   };
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
@@ -165,12 +167,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           {/* Quick Add Cart Button: Full-width button with label on mobile, neat square icon button on desktop */}
           <button
             onClick={handleQuickAdd}
-            className="w-full sm:w-9 h-8 sm:h-9 shrink-0 rounded-lg border border-gray-200 hover:border-[#F97316] hover:bg-[#F97316] text-gray-700 hover:text-white flex items-center justify-center transition-all duration-200 active:scale-95 shadow-2xs space-x-1.5 sm:space-x-0 cursor-pointer"
-            title="Add to cart"
-            aria-label="Add to cart"
+            className={`w-full sm:w-9 h-8 sm:h-9 shrink-0 rounded-lg border transition-all duration-200 active:scale-95 shadow-2xs flex items-center justify-center space-x-1.5 sm:space-x-0 cursor-pointer ${
+              isAdded
+                ? 'bg-emerald-600 border-emerald-600 text-white'
+                : 'border-gray-200 hover:border-[#F97316] hover:bg-[#F97316] text-gray-700 hover:text-white'
+            }`}
+            title={isAdded ? 'Added to bag' : 'Add to cart'}
+            aria-label={isAdded ? 'Added to bag' : 'Add to cart'}
           >
-            <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-            <span className="text-[11px] font-bold uppercase sm:hidden">Add to Cart</span>
+            {isAdded ? (
+              <>
+                <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-white" />
+                <span className="text-[11px] font-bold uppercase sm:hidden">Added!</span>
+              </>
+            ) : (
+              <>
+                <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                <span className="text-[11px] font-bold uppercase sm:hidden">Add to Cart</span>
+              </>
+            )}
           </button>
         </div>
       </div>

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Flame } from 'lucide-react';
+import { ArrowRight, Flame, Check } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { PRODUCTS } from '../../data/products';
 import { formatPKR } from '../../utils/formatters';
 
 export const SpecialOfferBanner: React.FC = () => {
-  const { addItem, setIsOpen: setIsCartOpen } = useCart();
+  const { addItem } = useCart();
+  const [isClaimed, setIsClaimed] = useState(false);
 
   // Find the deal product or use default
   const dealProduct = PRODUCTS.find((p) => p.id === 'cv-deal-smartwatch') || PRODUCTS[0];
@@ -56,7 +57,8 @@ export const SpecialOfferBanner: React.FC = () => {
   const handleQuickAddDeal = () => {
     if (dealProduct) {
       addItem(dealProduct, dealProduct.colors?.[0] || { name: 'Standard Edition', hex: '#111111', inStock: true });
-      setIsCartOpen(true);
+      setIsClaimed(true);
+      setTimeout(() => setIsClaimed(false), 2000);
     }
   };
 
@@ -90,10 +92,23 @@ export const SpecialOfferBanner: React.FC = () => {
               <div>
                 <button
                   onClick={handleQuickAddDeal}
-                  className="inline-flex items-center space-x-2 px-7 py-3.5 bg-[#F97316] hover:bg-[#EA580C] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg hover:shadow-orange-500/20 transition-all duration-200 active:scale-95 group"
+                  className={`inline-flex items-center space-x-2 px-7 py-3.5 font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all duration-200 active:scale-95 group ${
+                    isClaimed
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-[#F97316] hover:bg-[#EA580C] text-white hover:shadow-orange-500/20'
+                  }`}
                 >
-                  <span>SHOP THE DEAL</span>
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  {isClaimed ? (
+                    <>
+                      <Check className="w-4 h-4 text-white" />
+                      <span>DEAL ADDED TO BAG!</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>SHOP THE DEAL</span>
+                      <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    </>
+                  )}
                 </button>
               </div>
 
