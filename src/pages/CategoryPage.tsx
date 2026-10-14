@@ -28,7 +28,7 @@ export const CategoryPage: React.FC = () => {
       rating: 5,
       date: 'March 12, 2026',
       title: 'Solid build quality and fast COD delivery',
-      comment: 'Arrived within the 7-10 day window in clean packaging. Exactly as pictured on the website.',
+      comment: 'Arrived within the 7-10 Working Days window in clean packaging. Exactly as pictured on the website.',
       verifiedBuyer: true,
     },
     {
@@ -103,7 +103,7 @@ export const CategoryPage: React.FC = () => {
 
             <div className="pt-2 flex items-center justify-center space-x-2 text-xs text-orange-200">
               <RealisticShieldIcon size={16} />
-              <span>Direct-to-Consumer • Nationwide Cash on Delivery (7-10 Days)</span>
+              <span>Direct-to-Consumer • Nationwide Cash on Delivery (7-10 Working Days)</span>
             </div>
           </div>
         </div>
@@ -117,7 +117,7 @@ export const CategoryPage: React.FC = () => {
               <span className="block w-16 h-1 bg-[#F97316] mx-auto mt-2 rounded-full" />
             </h2>
             <p className="text-xs sm:text-sm text-gray-500 max-w-2xl mx-auto font-normal leading-relaxed pt-0.5">
-              Contemporary styling and premium durability, delivered with Nationwide Cash on Delivery (7-10 Days).
+              Contemporary styling and premium durability, delivered with Nationwide Cash on Delivery (7-10 Working Days).
             </p>
           </div>
 

@@ -218,7 +218,7 @@ export const CheckoutPage: React.FC = () => {
     <div className="min-h-screen py-8 sm:py-12 bg-gray-50 text-gray-900">
       <SEO
         title="Checkout | Calenvee.pk"
-        description="Checkout with Cash on Delivery or Mobile Accounts. Expected 7-10 Days Delivery across Pakistan."
+        description="Checkout with Cash on Delivery or Mobile Accounts. Expected 7-10 Working Days Delivery across Pakistan."
       />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -236,7 +236,7 @@ export const CheckoutPage: React.FC = () => {
                   Thank You, {completedOrder.customerName}
                 </h1>
                 <p className="text-xs text-gray-600 max-w-md mx-auto">
-                  Your order reference is <strong className="text-gray-900 font-mono">#{completedOrder.orderId}</strong>. Expected delivery across Pakistan is <strong className="text-[#F97316]">7-10 Days</strong>. A copy of your invoice has also been sent to your email.
+                  Your order reference is <strong className="text-gray-900 font-mono">#{completedOrder.orderId}</strong>. Expected delivery across Pakistan is <strong className="text-[#F97316]">7-10 Working Days</strong>. A copy of your invoice has also been sent to your email.
                 </p>
               </div>
 
@@ -391,13 +391,13 @@ export const CheckoutPage: React.FC = () => {
 
                 <div className="p-3.5 rounded-xl border border-gray-100 bg-gray-50/60 space-y-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">
-                    Delivery & Courier
+                    Delivery Timeline
                   </span>
                   <p className="text-xs font-semibold text-[#F97316]">
-                    TCS Express (Expected 7-10 Days Delivery)
+                    Nationwide Cash on Delivery (7-10 Working Days)
                   </p>
-                  <p className="text-[11px] text-gray-500 font-mono">
-                    Tracking ID: {completedOrder.trackingNumber}
+                  <p className="text-[11px] text-gray-500">
+                    Courier partner &amp; tracking ID will be emailed once dispatched.
                   </p>
                 </div>
               </div>
@@ -433,13 +433,6 @@ export const CheckoutPage: React.FC = () => {
                 className="flex-1 py-3.5 bg-[#F97316] hover:bg-[#EA580C] text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-all text-center shadow-md"
               >
                 Continue Shopping
-              </Link>
-
-              <Link
-                to={`/track-order?tracking=${completedOrder.trackingNumber}`}
-                className="flex-1 py-3.5 bg-[#081320] hover:bg-[#1C2541] text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors text-center shadow-md"
-              >
-                Track Your Package
               </Link>
 
               <a
@@ -614,7 +607,7 @@ export const CheckoutPage: React.FC = () => {
                             <RealisticTruckIcon size={22} />
                           </div>
                           <div className="text-[11px] text-gray-500 mt-0.5">
-                            Expected delivery: <strong className="text-[#F97316]">7-10 Days</strong>
+                            Expected delivery: <strong className="text-[#F97316]">7-10 Working Days</strong>
                           </div>
                         </div>
                       </label>
@@ -933,7 +926,7 @@ export const CheckoutPage: React.FC = () => {
                   )}
 
                   <div className="flex justify-between">
-                    <span>Delivery (Expected 7-10 Days)</span>
+                    <span>Delivery (Expected 7-10 Working Days)</span>
                     <span className={shippingFee === 0 ? 'text-emerald-600 font-bold' : 'text-gray-900'}>
                       {shippingFee === 0 ? 'FREE' : formatPKR(shippingFee)}
                     </span>

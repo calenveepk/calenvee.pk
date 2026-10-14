@@ -8,7 +8,7 @@ export const ShippingPolicyPage: React.FC = () => {
     <div className="min-h-screen py-6 sm:py-10 bg-white text-gray-900">
       <SEO
         title="Shipping Policy | Calenvee.pk"
-        description="Learn about Calenvee's nationwide Cash on Delivery shipping, 7-10 day delivery timeline, courier partners, and packaging standards across Pakistan."
+        description="Learn about Calenvee's nationwide Cash on Delivery shipping, 7-10 Working Days delivery timeline, courier partners, and packaging standards across Pakistan."
       />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -32,7 +32,7 @@ export const ShippingPolicyPage: React.FC = () => {
           <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 flex items-center space-x-3">
             <Clock className="w-6 h-6 text-[#F97316] flex-shrink-0" />
             <div>
-              <div className="text-xs font-bold text-gray-900">7 – 10 Business Days</div>
+              <div className="text-xs font-bold text-gray-900">7 – 10 Working Days</div>
               <div className="text-[11px] text-gray-500">Nationwide Delivery</div>
             </div>
           </div>
@@ -64,9 +64,9 @@ export const ShippingPolicyPage: React.FC = () => {
             </p>
             <ul className="list-disc pl-5 space-y-1.5 text-gray-700">
               <li><strong>Order Processing Time:</strong> Orders are verified and packaged within <strong>24 to 48 hours</strong> of placement.</li>
-              <li><strong>Transit Timeline:</strong> Standard nationwide delivery takes approximately <strong>7 to 10 business days</strong> depending on your city and regional courier route.</li>
+              <li><strong>Transit Timeline:</strong> Standard nationwide delivery takes approximately <strong>7 to 10 working days</strong> depending on your city and regional courier route.</li>
               <li><strong>Major Cities:</strong> Deliveries to Karachi, Lahore, Islamabad, and Rawalpindi typically arrive on the earlier side of this window.</li>
-              <li><strong>Remote / Rural Areas:</strong> Shipments to distant districts may take up to 10 business days.</li>
+              <li><strong>Remote / Rural Areas:</strong> Shipments to distant districts may take up to 10 working days.</li>
             </ul>
           </section>
 

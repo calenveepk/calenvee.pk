@@ -41,7 +41,7 @@ export const ContactPage: React.FC = () => {
   const faqs = [
     {
       q: 'What is the delivery timeline for orders across Pakistan?',
-      a: 'Nationwide deliveries across Pakistan arrive within 7 to 10 days via TCS Express and Trax Logistics with full Cash on Delivery (COD) tracking.',
+      a: 'Nationwide deliveries across Pakistan arrive within 7-10 Working Days via our courier partners with full Cash on Delivery (COD) service.',
     },
     {
       q: 'How does Cash on Delivery (COD) work?',
@@ -167,7 +167,7 @@ export const ContactPage: React.FC = () => {
                 100% Online Store
               </h3>
               <p className="text-xs text-gray-500 font-normal leading-relaxed">
-                Nationwide Cash on Delivery (7-10 Days) across Pakistan.
+                Nationwide Cash on Delivery (7-10 Working Days) across Pakistan.
               </p>
             </div>
             <span className="text-[11px] font-bold text-emerald-700 font-mono">
@@ -254,7 +254,7 @@ export const ContactPage: React.FC = () => {
                       onChange={(e) => setSubject(e.target.value)}
                       className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#F97316]"
                     >
-                      <option value="Order & Delivery Status">Order & Delivery Status (7-10 Days)</option>
+                      <option value="Order & Delivery Status">Order & Delivery Status (7-10 Working Days)</option>
                       <option value="Sizing & Strap Fitting">Sizing & Strap Fitting Advice</option>
                       <option value="Exchange Request">7-Day Exchange Request</option>
                       <option value="Payment Verification">Payment Slip Verification (WhatsApp)</option>

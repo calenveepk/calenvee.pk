@@ -476,7 +476,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="pt-4 border-t border-gray-100 text-xs text-gray-500 space-y-1">
               <p className="font-bold text-gray-800">Helpline &amp; WhatsApp</p>
               <p className="font-mono text-[#F97316]">+92 300 1234567</p>
-              <p className="text-[10px] text-gray-400">Nationwide Cash On Delivery (7-10 Days)</p>
+              <p className="text-[10px] text-gray-400">Nationwide Cash On Delivery (7-10 Working Days)</p>
             </div>
           </div>
         </div>

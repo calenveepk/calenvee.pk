@@ -333,7 +333,7 @@ export const CartDrawer: React.FC = () => {
 
               <div className="flex items-center justify-center space-x-2 text-[11px] text-gray-500 text-center pt-0.5">
                 <RealisticShieldIcon size={14} />
-                <span>Cash on Delivery (7-10 Days) & Instant Accounts</span>
+                <span>Cash on Delivery (7-10 Working Days) & Instant Accounts</span>
               </div>
             </div>
           )}

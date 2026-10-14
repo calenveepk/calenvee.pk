@@ -206,7 +206,7 @@ export const ProductDetailPage: React.FC = () => {
 
                 {/* Delivery Assurance */}
                 <div className="flex items-center space-x-2 text-xs pt-1 text-gray-500">
-                  <span className="font-semibold text-gray-800">Nationwide Cash on Delivery (7-10 Days)</span>
+                  <span className="font-semibold text-gray-800">Nationwide Cash on Delivery (7-10 Working Days)</span>
                   <span>•</span>
                   <span>7-Day Replacement Guarantee</span>
                 </div>
@@ -315,7 +315,7 @@ export const ProductDetailPage: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3 pt-1 text-xs text-gray-600 font-normal">
                   <div className="flex items-center space-x-2 p-2.5 rounded-lg bg-gray-50 border border-gray-200">
                     <RealisticTruckIcon size={18} />
-                    <span>COD: 7-10 Days Delivery</span>
+                    <span>COD: 7-10 Working Days Delivery</span>
                   </div>
                   <div className="flex items-center space-x-2 p-2.5 rounded-lg bg-gray-50 border border-gray-200">
                     <RealisticShieldIcon size={18} />

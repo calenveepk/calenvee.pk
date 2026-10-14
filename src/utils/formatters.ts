@@ -72,7 +72,7 @@ export const PHYSICAL_STORE_LOCATION = {
   supportEmail: "calenvee.pk@gmail.com",
   instagram: storeSettingsData.instagram || "@calenvee.pk",
   facebook: "calenvee.pk",
-  expectedDeliveryDays: "7-10 Days",
+  expectedDeliveryDays: "7-10 Working Days",
   slogan: storeSettingsData.storeSlogan || "SHOP SMART, LIVE BETTER",
 };
 

@@ -46,7 +46,7 @@ export const AboutPage: React.FC = () => {
           <div className="p-6 rounded-xl border border-gray-200 bg-white shadow-xs space-y-3">
             <RealisticTruckIcon size={32} />
             <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
-              Nationwide COD (7-10 Days)
+              Nationwide COD (7-10 Working Days)
             </h3>
             <p className="text-xs text-gray-500 font-normal leading-relaxed">
               We deliver to every corner of Pakistan. Pay securely with Cash on Delivery at your doorstep after inspecting the parcel exterior.

@@ -9,7 +9,7 @@ export const TermsPage: React.FC = () => {
   const faqs = [
     {
       q: 'How long does nationwide delivery take?',
-      a: 'Deliveries across Pakistan typically take between 7 to 10 business days from the dispatch date. Orders placed in major metropolitan hubs like Karachi, Lahore, and Islamabad/Rawalpindi often arrive sooner.',
+      a: 'Deliveries across Pakistan typically take between 7 to 10 working days from the dispatch date. Orders placed in major metropolitan hubs like Karachi, Lahore, and Islamabad/Rawalpindi often arrive sooner.',
     },
     {
       q: 'Is Cash on Delivery (COD) supported in my city?',

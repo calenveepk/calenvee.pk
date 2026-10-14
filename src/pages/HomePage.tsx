@@ -18,7 +18,7 @@ export const HomePage: React.FC = () => {
     <div className="min-h-screen bg-white">
       <SEO
         title="Calenvee.pk — Quality, Style, Everyday."
-        description="Calenvee.pk — Online store for premium watches, waterproof jewelry, sunglasses and accessories in Pakistan. Cash on Delivery nationwide (7-10 Days)."
+        description="Calenvee.pk — Online store for premium watches, waterproof jewelry, sunglasses and accessories in Pakistan. Cash on Delivery nationwide (7-10 Working Days)."
         keywords="Calenvee.pk, watches Pakistan, jewelry Pakistan, online store Pakistan, sunglasses Pakistan, COD Pakistan"
       />
 

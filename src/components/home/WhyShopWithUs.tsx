@@ -6,7 +6,7 @@ export const WhyShopWithUs: React.FC = () => {
     {
       icon: <Truck className="w-6 h-6 text-[#F97316]" />,
       title: 'Cash on Delivery',
-      subtitle: 'Nationwide Cash on Delivery across Pakistan (7-10 Days)',
+      subtitle: 'Nationwide Cash on Delivery across Pakistan (7-10 Working Days)',
     },
     {
       icon: <ShieldCheck className="w-6 h-6 text-[#F97316]" />,

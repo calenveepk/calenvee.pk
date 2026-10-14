@@ -4,7 +4,7 @@
  * ==============================================================================
  * Official Store Account: calenvee.pk@gmail.com
  * Website: https://calenvee.pk
- * Helpline: +923001234567 (Nationwide Cash on Delivery 7-10 Days)
+ * Helpline: +923001234567 (Nationwide Cash on Delivery 7-10 Working Days)
  * 
  * Features:
  * 1. Webhook API (doPost / doGet): Handles create_order, catalog sync, settings sync, status updates.
@@ -26,7 +26,7 @@ const STORE_CONFIG = {
   ownerEmail: "calenvee.pk@gmail.com",
   helplinePhone: "+923001234567",
   helplineWhatsAppRaw: "923001234567",
-  deliveryWindow: "Nationwide Cash on Delivery (7-10 Days)",
+  deliveryWindow: "Nationwide Cash on Delivery (7-10 Working Days)",
   brandNavy: "#0B132B",
   brandOrange: "#F97316"
 };
@@ -125,7 +125,7 @@ function setupSheet() {
       [
         "CAL-ORD-1000003", now, "Bilal Ahmed", "+923335551234", "calenvee.pk@gmail.com",
         "Islamabad", "F-7/2, Street 14", "COD", 3499, "Placed",
-        "Pending Verification", "N/A", "Azure Chronograph Edition (x1) - Rs. 3499", "Leave at reception", "No", "No", "N/A (Cash on Delivery)"
+        "-", "-", "Azure Chronograph Edition (x1) - Rs. 3499", "Leave at reception", "No", "No", "N/A (Cash on Delivery)"
       ]
     ];
     ordersSheet.getRange(2, 1, sampleOrders.length, sampleOrders[0].length).setValues(sampleOrders);
@@ -317,7 +317,7 @@ function createExecutiveDashboard() {
     .setVerticalAlignment("middle");
 
   dash.getRange("B3:M3").merge()
-    .setValue("SHOP SMART, LIVE BETTER  |  Official Store: " + STORE_CONFIG.ownerEmail + "  |  Nationwide Cash on Delivery (7-10 Days)")
+    .setValue("SHOP SMART, LIVE BETTER  |  Official Store: " + STORE_CONFIG.ownerEmail + "  |  Nationwide Cash on Delivery (7-10 Working Days)")
     .setBackground("#1E293B")
     .setFontColor(STORE_CONFIG.brandOrange)
     .setFontWeight("bold")
@@ -923,8 +923,8 @@ function handleCreateOrder(payload) {
     ? `=HYPERLINK("${receiptUrl}", "View Receipt 🧾")`
     : (paymentMethodUpper === "COD" ? "N/A (Cash on Delivery)" : "No Screenshot Uploaded");
 
-  const initialTracking = "N/A";
-  const initialCourier = order.courier || "Pending Dispatch (TCS Express)";
+  const initialTracking = "-";
+  const initialCourier = "-";
 
   // Append with status "Placed" (Internal management team will verify and transition to "Confirmed")
   ordersSheet.appendRow([
@@ -938,8 +938,8 @@ function handleCreateOrder(payload) {
     paymentMethodUpper,
     total,
     "Placed", // Order status is Placed upon checkout!
-    initialCourier,
-    initialTracking,
+    initialCourier, // Unassigned on placement (-)
+    initialTracking, // Unassigned on placement (-)
     itemsSummary,
     order.notes || "None",
     "No", // Confirmation Email Sent: No (will become Yes when status is set to Confirmed)
@@ -980,7 +980,7 @@ function handleCreateOrder(payload) {
 
   // Send store owner instant alert email to calenvee.pk@gmail.com
   try {
-    sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl);
+    sendOwnerNewOrderAlertEmail(order);
   } catch (ownerMailErr) {
     Logger.log("Owner alert email error: " + ownerMailErr.toString());
   }
@@ -1539,7 +1539,7 @@ function generateCustomerInvoiceEmailHtml(order, stage) {
   const statusSubtitle = isConfirmed ? "YOUR ORDER HAS BEEN CONFIRMED!" : "THANK YOU FOR YOUR ORDER!";
   const statusNoticeText = isConfirmed 
     ? "Great news! Your order has been verified and confirmed by our team. It is now being carefully prepared and packaged for courier dispatch."
-    : "Your order has been placed successfully and is pending internal verification. Our management team will verify and confirm your order shortly. Nationwide delivery in 7-10 days.";
+    : "Your order has been placed successfully and is pending internal verification. Our management team will verify and confirm your order shortly. Nationwide delivery in 7-10 Working Days.";
 
   return `
 <!DOCTYPE html>
@@ -1891,79 +1891,32 @@ function sendCustomerDispatchEmail(dispatchData) {
 }
 
 /**
- * 7. STORE OWNER NOTIFICATION EMAIL (WITH ATTACHED PAYMENT RECEIPT)
+ * 7. STORE OWNER NOTIFICATION EMAIL
+ * Alerts store management with customer and payment details.
+ * Item list and payment attachments are omitted as per store configuration.
  */
-function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
+function sendOwnerNewOrderAlertEmail(order) {
   const cfg = getDynamicStoreSettings();
-  const isPrepaid = (order.paymentMethod || "cod").toLowerCase() !== "cod";
-  const hasReceipt = !!receiptBlob;
-  
-  let subjectPrefix = "📦 [NEW ORDER PLACED]";
-  if (hasReceipt) {
-    subjectPrefix = "🧾 [PAYMENT RECEIPT ATTACHED]";
-  } else if (isPrepaid) {
-    subjectPrefix = "⚠️ [UNVERIFIED PREPAID]";
-  } else {
-    subjectPrefix = "💵 [COD ORDER PLACED]";
-  }
+  const paymentMethodUpper = (order.paymentMethod || "cod").toUpperCase();
+  const subject = `[NEW ORDER PLACED] #${order.orderId} - Rs. ${Number(order.total || 0).toLocaleString()} (${order.customerName}, ${order.city})`;
 
-  const subject = `${subjectPrefix} Order #${order.orderId} — Rs. ${Number(order.total || 0).toLocaleString()} (${order.customerName}, ${order.city})`;
-
-  const itemsHtml = (order.items || []).map(item => {
-    const itemName = item.name || (item.product && item.product.name) || "Calenvee Product";
-    const itemQty = Number(item.quantity || 1);
-    const itemPrice = Number(item.price || (item.product && item.product.price) || 0);
-
-    return `
-      <tr>
-        <td style="padding: 10px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px; color: #1E293B;">
-          <strong>${itemName}</strong>
-          ${item.selectedColor ? `<br><span style="font-size: 11px; color: #64748B;">Color: ${item.selectedColor.name}</span>` : ""}
-        </td>
-        <td style="padding: 10px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px; color: #475569; text-align: center;">x${itemQty}</td>
-        <td style="padding: 10px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px; color: #0F172A; text-align: right; font-weight: bold;">Rs. ${(itemPrice * itemQty).toLocaleString()}</td>
-      </tr>
-    `;
-  }).join("");
-
-  let paymentVerificationCard = "";
-  if (hasReceipt) {
-    paymentVerificationCard = `
-      <div style="margin: 20px 0; padding: 16px; background-color: #ECFDF5; border: 1px solid #10B981; border-radius: 12px;">
-        <div style="margin-bottom: 6px;">
-          <strong style="color: #065F46; font-size: 13px;">🧾 PAYMENT PROOF ATTACHED (${order.receiptFileName || 'Slip'})</strong>
-        </div>
-        <p style="margin: 0 0 10px 0; font-size: 12px; color: #047857; line-height: 1.5;">
-          The customer uploaded a transaction screenshot during checkout. It is <strong>attached directly to this email</strong> and saved in your Google Drive.
-        </p>
-        ${receiptUrl && receiptUrl.startsWith("http") ? `
-          <a href="${receiptUrl}" target="_blank" style="display: inline-block; background-color: #0B132B; color: #FFFFFF; font-size: 11px; font-weight: bold; text-decoration: none; padding: 8px 14px; border-radius: 8px;">
-            Open High-Res Receipt in Google Drive ↗
-          </a>
-        ` : ""}
-      </div>
-    `;
-  } else if (isPrepaid) {
-    paymentVerificationCard = `
-      <div style="margin: 20px 0; padding: 16px; background-color: #FFFBEB; border: 1px solid #F59E0B; border-radius: 12px;">
-        <div style="margin-bottom: 6px;">
-          <strong style="color: #92400E; font-size: 13px;">⚠️ NO SCREENSHOT UPLOADED DURING CHECKOUT</strong>
-        </div>
-        <p style="margin: 0; font-size: 12px; color: #B45309; line-height: 1.5;">
-          Customer selected ${(order.paymentMethod || "").toUpperCase()} but did not attach a slip. Please verify payment on WhatsApp (${order.phone}) before dispatching.
-        </p>
-      </div>
-    `;
-  } else {
-    paymentVerificationCard = `
-      <div style="margin: 20px 0; padding: 14px; background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px;">
-        <strong style="color: #1E293B; font-size: 12px;">💵 CASH ON DELIVERY (COD)</strong>
-        <p style="margin: 4px 0 0 0; font-size: 11px; color: #64748B;">
-          Collect Rs. ${Number(order.total || 0).toLocaleString()} in cash at customer's doorstep via courier rider.
-        </p>
-      </div>
-    `;
-  }
+  const textBody = [
+    "New customer order received on Calenvee.pk!",
+    "",
+    `Order ID: ${order.orderId}`,
+    `Status: Placed (Awaiting Verification)`,
+    `Customer: ${order.customerName}`,
+    `Phone: ${order.phone}`,
+    `Email: ${order.email || 'N/A'}`,
+    `City: ${order.city}`,
+    `Address: ${order.address}`,
+    `Payment Method: ${paymentMethodUpper}`,
+    `Total Payable: Rs. ${Number(order.total || 0).toLocaleString()}`,
+    `Delivery Notes: ${order.notes && order.notes !== 'N/A' && order.notes !== 'None' ? order.notes : 'None'}`,
+    "",
+    "Manage all orders in your Google Sheet:",
+    SpreadsheetApp.getActiveSpreadsheet().getUrl()
+  ].join("\n");
 
   const htmlBody = `
     <!DOCTYPE html>
@@ -1975,7 +1928,7 @@ function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
         <tr>
           <td style="background-color: ${cfg.brandNavy}; padding: 24px 20px; text-align: center;">
             <img src="${cfg.logoUrl}" alt="${cfg.storeName}" style="max-height: 38px; margin-bottom: 8px;" />
-            <div style="color: #FFFFFF; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">🔥 NEW ORDER PLACED (PENDING CONFIRMATION)</div>
+            <div style="color: #FFFFFF; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">NEW ORDER PLACED (PENDING CONFIRMATION)</div>
             <div style="color: ${cfg.brandOrange}; font-size: 10px; font-weight: bold; margin-top: 4px; letter-spacing: 1.5px;">${cfg.storeTagline}</div>
           </td>
         </tr>
@@ -1997,38 +1950,21 @@ function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
               </tr>
             </table>
 
-            ${paymentVerificationCard}
-
             <!-- Customer Details Card -->
-            <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
-              <div style="font-size: 11px; font-weight: bold; color: #64748B; text-transform: uppercase; margin-bottom: 8px;">Customer Information</div>
-              <table width="100%" style="font-size: 12px; line-height: 1.8;">
+            <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px; margin-bottom: 20px;">
+              <div style="font-size: 11px; font-weight: bold; color: #64748B; text-transform: uppercase; margin-bottom: 10px;">Customer &amp; Delivery Information</div>
+              <table width="100%" style="font-size: 12px; line-height: 1.9;">
                 <tr><td width="30%" style="color: #64748B;">Name:</td><td style="font-weight: bold; color: #1E293B;">${order.customerName}</td></tr>
                 <tr><td style="color: #64748B;">Mobile (WhatsApp):</td><td><a href="https://wa.me/${(order.phone || '').replace(/[^0-9]/g, '')}" style="color: #2563EB; font-weight: bold; text-decoration: none;">${order.phone} 💬</a></td></tr>
                 <tr><td style="color: #64748B;">Email:</td><td style="color: #1E293B;">${order.email || 'N/A'}</td></tr>
                 <tr><td style="color: #64748B;">City:</td><td style="font-weight: bold; color: #1E293B;">${order.city}</td></tr>
                 <tr><td style="color: #64748B;">Address:</td><td style="color: #1E293B;">${order.address}</td></tr>
-                <tr><td style="color: #64748B;">Payment:</td><td style="font-weight: bold; color: #0B132B; text-transform: uppercase;">${order.paymentMethod || 'COD'}</td></tr>
+                <tr><td style="color: #64748B;">Payment:</td><td style="font-weight: bold; color: #0B132B; text-transform: uppercase;">${paymentMethodUpper}</td></tr>
                 ${order.notes && order.notes !== "None" && order.notes !== "N/A" ? `<tr><td style="color: #64748B;">Notes:</td><td style="color: #D97706; font-style: italic;">"${order.notes}"</td></tr>` : ""}
               </table>
             </div>
 
-            <!-- Ordered Items List -->
-            <div style="font-size: 11px; font-weight: bold; color: #64748B; text-transform: uppercase; margin-bottom: 8px;">Order Items</div>
-            <table width="100%" style="border-collapse: collapse; margin-bottom: 20px;">
-              <thead>
-                <tr style="border-bottom: 2px solid #E2E8F0;">
-                  <th align="left" style="padding-bottom: 8px; font-size: 11px; color: #64748B;">Product</th>
-                  <th align="center" style="padding-bottom: 8px; font-size: 11px; color: #64748B;">Qty</th>
-                  <th align="right" style="padding-bottom: 8px; font-size: 11px; color: #64748B;">Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${itemsHtml}
-              </tbody>
-            </table>
-
-            <!-- Quick Action Buttons -->
+            <!-- Quick Action Button -->
             <table width="100%" style="margin-top: 10px;">
               <tr>
                 <td align="center">
@@ -2052,16 +1988,10 @@ function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
     </html>
   `;
 
-  const mailOptions = {
+  GmailApp.sendEmail(cfg.ownerEmail, subject, textBody, {
     htmlBody: htmlBody,
     name: "Calenvee Order Bot"
-  };
-
-  if (receiptBlob) {
-    mailOptions.attachments = [receiptBlob];
-  }
-
-  GmailApp.sendEmail(cfg.ownerEmail, subject, "", mailOptions);
+  });
 }
 
 /**

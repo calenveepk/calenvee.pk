@@ -15,7 +15,7 @@ export const BestSellersPage: React.FC = () => {
     <div className="min-h-screen py-5 sm:py-7 bg-white text-gray-900">
       <SEO
         title="Best Sellers | Calenvee.pk"
-        description="Explore the most ordered and highly requested lifestyle pieces and timepieces at Calenvee.pk with Nationwide Cash on Delivery (7-10 Days)."
+        description="Explore the most ordered and highly requested lifestyle pieces and timepieces at Calenvee.pk with Nationwide Cash on Delivery (7-10 Working Days)."
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -26,7 +26,7 @@ export const BestSellersPage: React.FC = () => {
             <span className="block w-16 h-1 bg-[#F97316] mx-auto mt-2 rounded-full" />
           </h1>
           <p className="text-xs sm:text-sm text-gray-500 max-w-2xl mx-auto font-normal leading-relaxed pt-0.5">
-            Our most ordered timepieces, jewelry, and daily essentials across Pakistan. Delivered with Cash on Delivery in 7 to 10 days.
+            Our most ordered timepieces, jewelry, and daily essentials across Pakistan. Delivered with Cash on Delivery in 7-10 Working Days.
           </p>
         </div>
 

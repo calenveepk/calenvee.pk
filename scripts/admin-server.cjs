@@ -1822,7 +1822,7 @@ Ready to commit and deploy changes.</pre>
         document.getElementById('set_storeName').value = storeSettings.storeName || 'Calenvee.pk';
         document.getElementById('set_whatsappNumber').value = storeSettings.whatsappNumber || '+923001234567';
         document.getElementById('set_whatsappRaw').value = storeSettings.whatsappRaw || '923001234567';
-        document.getElementById('set_deliveryWindow').value = storeSettings.deliveryWindow || 'Nationwide Cash on Delivery (7-10 Days)';
+        document.getElementById('set_deliveryWindow').value = storeSettings.deliveryWindow || 'Nationwide Cash on Delivery (7-10 Working Days)';
         document.getElementById('set_instagram').value = storeSettings.instagram || '@calenvee.pk';
         document.getElementById('set_freeShippingThreshold').value = storeSettings.freeShippingThreshold || 2999;
         document.getElementById('set_standardShippingFee').value = storeSettings.standardShippingFee || 199;

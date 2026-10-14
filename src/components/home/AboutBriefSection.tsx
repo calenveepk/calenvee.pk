@@ -52,7 +52,7 @@ export const AboutBriefSection: React.FC = () => {
             <div className="flex flex-col items-center text-center p-3.5 rounded-xl bg-gray-50 border border-gray-100">
               <CheckCircle2 className="w-5 h-5 text-[#F97316] mb-1.5" />
               <div className="text-xs font-bold text-gray-900">Doorstep COD</div>
-              <div className="text-[11px] text-gray-500 mt-0.5">7-10 Days across Pakistan</div>
+              <div className="text-[11px] text-gray-500 mt-0.5">7-10 Working Days across Pakistan</div>
             </div>
           </div>
 

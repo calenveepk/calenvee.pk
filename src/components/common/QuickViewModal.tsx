@@ -89,7 +89,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
                 <div className="flex items-center space-x-2 text-[11px] text-gray-500 font-medium uppercase tracking-wider">
                   <span className="text-[#F97316] font-bold">{product.categoryLabel}</span>
                   <span>•</span>
-                  <span className="text-gray-600 font-semibold">Nationwide COD (7-10 Days)</span>
+                  <span className="text-gray-600 font-semibold">Nationwide COD (7-10 Working Days)</span>
                 </div>
 
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">
@@ -201,7 +201,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
 
                 <span className="text-gray-500 flex items-center gap-1.5 font-medium">
                   <RealisticTruckIcon size={16} />
-                  <span>Cash on Delivery (7-10 Days)</span>
+                  <span>Cash on Delivery (7-10 Working Days)</span>
                 </span>
               </div>
             </div>
