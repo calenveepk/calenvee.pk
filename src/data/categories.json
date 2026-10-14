@@ -1,64 +1,81 @@
 [
   {
-    "id": "women",
-    "name": "Women",
-    "slug": "women",
-    "description": "Luxury leather handbags, structured tote bags, elegant jewelry, and refined accessories tailored for the modern woman.",
-    "shortDescription": "Designer handbags, jewelry & fashion accessories",
-    "image": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80",
+    "id": "watches",
+    "name": "Watches",
+    "slug": "watches",
+    "description": "Precision chronographs, sapphire crystal dress timepieces, and automatic watches engineered for lasting distinction.",
+    "shortDescription": "Luxury chronographs & dress timepieces",
+    "image": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80",
+    "badge": "Signature",
+    "itemCount": 16,
+    "featured": true,
+    "seoKeywords": [
+      "watches Pakistan",
+      "chronograph watch Lahore",
+      "mens watches Karachi",
+      "luxury timepieces Islamabad"
+    ]
+  },
+  {
+    "id": "jewelry",
+    "name": "Jewelry",
+    "slug": "jewelry",
+    "description": "18K Gold plated Cuban link chains, waterproof stainless steel rings, compass pendants, and couple bracelets.",
+    "shortDescription": "Waterproof chains, signet rings & pendants",
+    "image": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
     "badge": "Trending",
     "itemCount": 18,
     "featured": true,
     "seoKeywords": [
-      "women fashion Pakistan",
-      "handbags online Pakistan",
-      "ladies jewelry Lahore",
-      "women watches Pakistan"
+      "cuban chain Pakistan",
+      "waterproof jewelry Lahore",
+      "gold pendant chain",
+      "mens ring Karachi"
     ]
   },
   {
-    "id": "men",
-    "name": "Men",
-    "slug": "men",
-    "description": "Precision chronographs, stainless steel Cuban link chains, architectural sunglasses, and minimalist genuine leather cardholders.",
-    "shortDescription": "Luxury chronographs, chains & leather wallets",
-    "image": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80",
-    "badge": "Signature",
-    "itemCount": 24,
-    "featured": true,
-    "seoKeywords": [
-      "men watches Pakistan",
-      "cuban chains men Lahore",
-      "minimalist wallets Karachi",
-      "sunglasses for men Pakistan"
-    ]
-  },
-  {
-    "id": "home-living",
-    "name": "Home & Living",
-    "slug": "home-living",
-    "description": "Minimalist architectural decor, ceramic display vases, ambient studio accents, and modern lifestyle essentials for refined spaces.",
-    "shortDescription": "Modern decor, ceramic vases & lifestyle accents",
-    "image": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80",
-    "badge": "New Drop",
+    "id": "women",
+    "name": "Women",
+    "slug": "women",
+    "description": "Luxury structured leather handbags, everyday canvas totes, and elegant fashion accessories for the modern woman.",
+    "shortDescription": "Designer handbags, totes & accessories",
+    "image": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80",
+    "badge": "Top Rated",
     "itemCount": 14,
     "featured": true,
     "seoKeywords": [
-      "home decor Pakistan",
-      "ceramic vases online",
-      "minimalist interior Lahore",
-      "modern home essentials Islamabad"
+      "handbags online Pakistan",
+      "women tote bag Lahore",
+      "ladies purse Karachi",
+      "women fashion accessories"
+    ]
+  },
+  {
+    "id": "sunglasses",
+    "name": "Sunglasses",
+    "slug": "sunglasses",
+    "description": "UV400 polarized shades, acetate noir square frames, cyberpunk shields, and golden hour wire aviators.",
+    "shortDescription": "UV400 polarized shades & acetate frames",
+    "image": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80",
+    "badge": "Bestseller",
+    "itemCount": 12,
+    "featured": true,
+    "seoKeywords": [
+      "sunglasses Pakistan",
+      "polarized shades Lahore",
+      "black square frames",
+      "designer eyewear Karachi"
     ]
   },
   {
     "id": "beauty",
-    "name": "Beauty",
+    "name": "Fragrances",
     "slug": "beauty",
-    "description": "High-projection long-wear Extrait de Parfum and premium personal care formulated with imported French fragrance essences.",
-    "shortDescription": "Extrait de Parfum, French oils & self-care",
+    "description": "High-projection Extrait de Parfum and Eau de Parfum infused with imported French fragrance essences.",
+    "shortDescription": "French essence Extrait de Parfum",
     "image": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80",
     "badge": "Top Rated",
-    "itemCount": 12,
+    "itemCount": 10,
     "featured": true,
     "seoKeywords": [
       "perfumes online Pakistan",
@@ -69,19 +86,19 @@
   },
   {
     "id": "electronics",
-    "name": "Electronics",
+    "name": "Tech Essentials",
     "slug": "electronics",
-    "description": "Smart Watch Pro series, ergonomic high-fidelity studio headphones, magnetic charging docks, and modern tech accessories.",
-    "shortDescription": "Smart Watch Pro, studio audio & smart gadgets",
+    "description": "Smart Watch Pro series, titanium key organizers, MagSafe cardholders, and alpine magnetic watch loops.",
+    "shortDescription": "Smart Watch Pro & modern tech essentials",
     "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
     "badge": "Best Seller",
-    "itemCount": 16,
+    "itemCount": 15,
     "featured": true,
     "seoKeywords": [
       "smart watch Pakistan",
-      "wireless headphones Lahore",
-      "fitness tracker Pakistan COD",
-      "gadgets online Karachi"
+      "magsafe wallet Lahore",
+      "titanium key organizer",
+      "watch strap Pakistan"
     ]
   }
 ]

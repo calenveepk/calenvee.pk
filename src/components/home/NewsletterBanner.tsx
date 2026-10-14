@@ -8,7 +8,6 @@ export const NewsletterBanner: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Security Honeypot check: If bot filled the hidden input, ignore
     if (honeypot) return;
 
     if (email.trim()) {
@@ -21,38 +20,39 @@ export const NewsletterBanner: React.FC = () => {
   };
 
   return (
-    <section className="bg-white py-5 sm:py-7">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="bg-white py-6 sm:py-10">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         
-        {/* Banner matching announcement bar midnight color #081320 — Centered */}
-        <div className="rounded-2xl bg-gradient-to-r from-[#081320] via-[#0E1E32] to-[#081320] p-6 sm:p-8 lg:p-9 shadow-xl border border-slate-800 text-center">
-          <div className="flex flex-col items-center justify-center text-center gap-5 max-w-2xl mx-auto">
+        {/* Banner matching reference mockup: Warm, clean container with envelope visual */}
+        <div className="rounded-2xl bg-[#FAF7F2] p-6 sm:p-8 lg:p-10 border border-stone-200/80 shadow-2xs">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-8">
             
-            {/* Centered Icon & Text */}
-            <div className="flex flex-col items-center text-center space-y-2.5">
-              <div className="w-12 h-12 rounded-xl bg-[#F97316] flex items-center justify-center flex-shrink-0 shadow-lg text-white">
-                <Mail className="w-6 h-6" />
+            {/* Left: Envelope Graphic + Text */}
+            <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-4 max-w-xl">
+              {/* Envelope Icon Badge */}
+              <div className="w-14 h-14 rounded-2xl bg-[#081320] text-white flex items-center justify-center flex-shrink-0 shadow-md">
+                <Mail className="w-7 h-7 text-[#F97316]" />
               </div>
+
               <div className="space-y-1">
-                <h3 className="text-lg sm:text-2xl font-bold text-white tracking-tight">
-                  Get Exclusive Offers &amp; Updates
+                <h3 className="text-xl sm:text-2xl font-black text-[#0B132B] tracking-tight">
+                  Stay in the Loop
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-300 font-normal">
-                  Sign up now and get <strong className="text-[#F97316]">10% OFF</strong> on your first order!
+                <p className="text-xs sm:text-sm text-gray-600 font-normal">
+                  Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.
                 </p>
               </div>
             </div>
 
-            {/* Email Input & Subscribe Button — Centered */}
-            <div className="w-full flex justify-center">
+            {/* Right: Email Input & Subscribe Button */}
+            <div className="w-full lg:w-auto flex-1 max-w-md">
               {isSubscribed ? (
-                <div className="inline-flex items-center space-x-2 bg-slate-900/90 border border-[#F97316] text-orange-200 px-5 py-3 rounded-xl text-xs font-semibold">
-                  <CheckCircle2 className="w-4 h-4 text-[#F97316]" />
-                  <span>Welcome to Calenvee VIP! Your 10% coupon code is: <strong>CALENVEE10</strong></span>
+                <div className="inline-flex items-center space-x-2 bg-emerald-50 border border-emerald-300 text-emerald-800 px-5 py-3 rounded-xl text-xs font-bold w-full justify-center">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>VIP Subscribed! Use code <strong>CALENVEE10</strong> for 10% off.</span>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center justify-center gap-2.5 w-full max-w-md">
-                  {/* Invisible Honeypot anti-spam field */}
+                <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center gap-2.5 w-full">
                   <input
                     type="text"
                     name="website_hp"
@@ -66,16 +66,16 @@ export const NewsletterBanner: React.FC = () => {
                   <input
                     type="email"
                     required
-                    placeholder="Enter your email address"
+                    placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full sm:w-80 px-4 py-3 bg-white text-gray-900 placeholder-gray-400 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#F97316] shadow-inner text-center sm:text-left"
+                    className="w-full sm:flex-1 px-4 py-3 bg-white text-gray-900 placeholder-gray-400 rounded-xl text-xs sm:text-sm font-medium border border-gray-200 focus:outline-none focus:border-[#081320] shadow-2xs"
                   />
                   <button
                     type="submit"
-                    className="w-full sm:w-auto px-7 py-3 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all duration-150 shadow-md active:scale-95 flex-shrink-0"
+                    className="w-full sm:w-auto px-7 py-3 bg-[#081320] hover:bg-[#F97316] text-white rounded-xl text-xs sm:text-sm font-extrabold uppercase tracking-wider transition-all duration-200 shadow-sm active:scale-95 flex-shrink-0"
                   >
-                    SUBSCRIBE
+                    Subscribe
                   </button>
                 </form>
               )}

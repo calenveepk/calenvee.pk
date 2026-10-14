@@ -5,47 +5,48 @@ import { CATEGORIES } from '../../data/categories';
 
 export const TrendingCategories: React.FC = () => {
   return (
-    <section className="bg-white py-5 sm:py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="bg-white py-6 sm:py-10 border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         
-        {/* Section Heading matching reference design */}
-        <div className="text-center mb-4 sm:mb-7">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B132B] tracking-tight">
-            Shop By Category
+        {/* Section Header: Left Title & Right "View all categories →" */}
+        <div className="flex items-center justify-between mb-5 sm:mb-8">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-[#0B132B] tracking-tight">
+            Shop by Category
           </h2>
+          <Link
+            to="/shop"
+            className="inline-flex items-center space-x-1 text-xs sm:text-sm font-bold text-gray-600 hover:text-[#F97316] transition-colors group"
+          >
+            <span>View all categories</span>
+            <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+          </Link>
         </div>
 
-        {/* Single Row Scrollable on Mobile, Responsive 5-Card Grid on Tablet/Desktop */}
-        <div className="flex overflow-x-auto scrollbar-none snap-x snap-mandatory gap-3 pb-2 sm:pb-0 sm:grid sm:grid-cols-3 lg:grid-cols-5 sm:gap-5">
-          {CATEGORIES.slice(0, 5).map((cat) => (
+        {/* Circular / Soft-Rounded Categories Row (Scrollable on mobile, flex grid on desktop) */}
+        <div className="flex overflow-x-auto scrollbar-none snap-x snap-mandatory gap-4 sm:gap-6 pb-2 sm:pb-0 justify-start sm:justify-between items-start">
+          {CATEGORIES.map((cat) => (
             <div
               key={cat.id}
-              className="flex-shrink-0 w-[145px] sm:w-full snap-start"
+              className="flex-shrink-0 w-24 sm:w-28 lg:w-32 snap-center text-center"
             >
               <Link
                 to={`/category/${cat.slug}`}
-                className="group flex flex-col items-center bg-gray-50/60 hover:bg-white rounded-2xl p-2.5 sm:p-3 border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300 w-full"
+                className="group flex flex-col items-center space-y-2.5"
               >
-                {/* Image Container with Soft Rounded Corners */}
-                <div className="w-full aspect-[4/5] rounded-xl overflow-hidden bg-gray-100 relative">
+                {/* Circular Image Container matching reference */}
+                <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full overflow-hidden bg-gray-50 border-2 border-gray-100 group-hover:border-[#F97316] group-hover:shadow-md transition-all duration-300 p-1 flex items-center justify-center">
                   <img
                     src={cat.image}
                     alt={cat.name}
-                    className="w-full h-full object-cover object-center transform transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full rounded-full object-cover transform transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"
                   />
                 </div>
 
-                {/* Category Name & "Shop Now →" Link */}
-                <div className="mt-3.5 mb-1 text-center space-y-1">
-                  <h3 className="text-xs sm:text-sm font-bold text-gray-900 group-hover:text-[#F97316] transition-colors">
-                    {cat.name}
-                  </h3>
-                  <span className="inline-flex items-center space-x-1 text-[11px] font-semibold text-gray-500 group-hover:text-[#F97316] transition-colors">
-                    <span>Shop Now</span>
-                    <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                  </span>
-                </div>
+                {/* Category Name */}
+                <span className="text-xs sm:text-sm font-bold text-gray-800 group-hover:text-[#F97316] transition-colors leading-tight line-clamp-1">
+                  {cat.name}
+                </span>
               </Link>
             </div>
           ))}

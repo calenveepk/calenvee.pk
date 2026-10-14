@@ -1,50 +1,56 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SEO } from '../components/common/SEO';
 import { HeroSection } from '../components/home/HeroSection';
-import { ValuePropsBar } from '../components/home/ValuePropsBar';
 import { TrendingCategories } from '../components/home/TrendingCategories';
-import { FeaturedDrops } from '../components/home/FeaturedDrops';
-import { SpecialOfferBanner } from '../components/home/SpecialOfferBanner';
-import { AboutBriefSection } from '../components/home/AboutBriefSection';
-import { WhyShopWithUs } from '../components/home/WhyShopWithUs';
+import { PromotionalTrioBanners } from '../components/home/PromotionalTrioBanners';
+import { TrendingNowSection } from '../components/home/TrendingNowSection';
+import { ValuePropsBar } from '../components/home/ValuePropsBar';
+import { RecommendedSection } from '../components/home/RecommendedSection';
 import { CustomerReviewsMarquee } from '../components/home/CustomerReviewsMarquee';
 import { NewsletterBanner } from '../components/home/NewsletterBanner';
+import { QuickViewModal } from '../components/common/QuickViewModal';
+import { Product } from '../types';
 
 export const HomePage: React.FC = () => {
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+
   return (
     <div className="min-h-screen bg-white">
       <SEO
-        title="Calenvee.pk"
+        title="Calenvee.pk — Quality, Style, Everyday."
         description="Calenvee.pk — Online store for premium watches, waterproof jewelry, sunglasses and accessories in Pakistan. Cash on Delivery nationwide (7-10 Days)."
         keywords="Calenvee.pk, watches Pakistan, jewelry Pakistan, online store Pakistan, sunglasses Pakistan, COD Pakistan"
       />
 
-      {/* 1. Hero Section matching reference image */}
+      {/* 1. Hero Section matching reference mockup */}
       <HeroSection />
 
-      {/* 2. 4-Column Value Propositions Bar below hero */}
-      <ValuePropsBar />
-
-      {/* 3. Shop By Category (5 Cards) */}
+      {/* 2. Shop By Category (Circular thumbnails, no Home & Living, no Baby Kids, no Grocery) */}
       <TrendingCategories />
 
-      {/* 4. Deal of the Day (Flash Countdown Banner) */}
-      <SpecialOfferBanner />
+      {/* 3. 3-Card Banner Row (Deal of the Day with Top Selling Watch + Fresh Finds + Member Exclusive) */}
+      <PromotionalTrioBanners />
 
-      {/* 5. New Arrivals (4-Column Grid) */}
-      <FeaturedDrops />
+      {/* 4. Trending Now (Top selling products last 1 week strictly from Calenvee categories) */}
+      <TrendingNowSection onQuickView={setQuickViewProduct} />
 
-      {/* 6. About Calenvee Brief Brand Intro */}
-      <AboutBriefSection />
+      {/* 5. 4-Column Value Propositions Bar (Free Shipping, Easy Returns, Secure Payments, 24/7 Support) */}
+      <ValuePropsBar />
 
-      {/* 7. Why Shop With Us? 4 trust guarantees */}
-      <WhyShopWithUs />
+      {/* 6. Recommended for You (Curated products strictly relating to Calenvee categories) */}
+      <RecommendedSection onQuickView={setQuickViewProduct} />
 
-      {/* 8. Customer Reviews Across All Categories (Slow Marquee) */}
+      {/* 7. Customer Reviews Social Proof Marquee */}
       <CustomerReviewsMarquee />
 
-      {/* 9. Newsletter Email Signup Banner */}
+      {/* 8. Stay in the Loop — Newsletter Email Signup Banner */}
       <NewsletterBanner />
+
+      {/* Quick View Modal */}
+      <QuickViewModal
+        product={quickViewProduct}
+        onClose={() => setQuickViewProduct(null)}
+      />
     </div>
   );
 };
