@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   ShoppingBag,
@@ -7,15 +7,13 @@ import {
   Menu,
   X,
   ChevronDown,
-  Flame,
   ArrowRight,
-  ShieldCheck,
-  Headphones,
-  Truck,
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { CATEGORIES } from '../../data/categories';
+import { PRODUCTS } from '../../data/products';
+import { formatPKR } from '../../utils/formatters';
 
 interface NavbarProps {
   onOpenSearch: () => void;
@@ -31,6 +29,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [isScrolled, setIsScrolled] = useState(false);
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
+  const [isLiveSearchOpen, setIsLiveSearchOpen] = useState(false);
+
+  const desktopSearchRef = useRef<HTMLDivElement>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -48,16 +51,52 @@ export const Navbar: React.FC<NavbarProps> = ({
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setIsCategoryDropdownOpen(false);
+    setIsLiveSearchOpen(false);
   }, [location.pathname, setIsMobileMenuOpen]);
+
+  // Click outside listener to close live search dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        desktopSearchRef.current &&
+        !desktopSearchRef.current.contains(event.target as Node) &&
+        mobileSearchRef.current &&
+        !mobileSearchRef.current.contains(event.target as Node)
+      ) {
+        setIsLiveSearchOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Live matching products as user types
+  const matchingProducts = useMemo(() => {
+    const q = searchInput.trim().toLowerCase();
+    if (!q || q.length < 1) return [];
+
+    return PRODUCTS.filter((p) => {
+      const matchName = p.name.toLowerCase().includes(q);
+      const matchCat = p.category.toLowerCase().includes(q) ||
+        (p.categoryLabel && p.categoryLabel.toLowerCase().includes(q));
+      const matchTags = Array.isArray(p.tags) && p.tags.some((t) => t.toLowerCase().includes(q));
+      const matchDesc = p.description.toLowerCase().includes(q);
+      return matchName || matchCat || matchTags || matchDesc;
+    }).slice(0, 5); // Show top 5 instant results
+  }, [searchInput]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchInput.trim()) {
+      setIsLiveSearchOpen(false);
       navigate(`/shop?search=${encodeURIComponent(searchInput.trim())}`);
-      setSearchInput('');
-    } else {
-      onOpenSearch();
     }
+  };
+
+  const handleSelectProduct = (slug: string) => {
+    setIsLiveSearchOpen(false);
+    setSearchInput('');
+    navigate(`/product/${slug}`);
   };
 
   return (
@@ -87,14 +126,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               </Link>
             </div>
 
-            {/* Center: Search Bar matching reference mockup */}
-            <div className="flex-1 max-w-2xl mx-auto hidden md:block">
+            {/* Center: Desktop Search Bar with Live Suggestions Dropdown */}
+            <div ref={desktopSearchRef} className="flex-1 max-w-2xl mx-auto hidden md:block relative">
               <form onSubmit={handleSearchSubmit} className="relative flex items-center">
                 <input
                   type="text"
                   placeholder="Search products, brands and more..."
                   value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
+                  onChange={(e) => {
+                    setSearchInput(e.target.value);
+                    setIsLiveSearchOpen(true);
+                  }}
+                  onFocus={() => {
+                    if (searchInput.trim()) setIsLiveSearchOpen(true);
+                  }}
                   className="w-full pl-4 pr-12 py-2.5 text-xs sm:text-sm bg-gray-50/80 border border-gray-200 rounded-lg focus:outline-none focus:border-[#081320] focus:bg-white text-gray-800 placeholder-gray-400 transition-colors"
                 />
                 <button
@@ -105,20 +150,61 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <Search className="w-4 h-4" />
                 </button>
               </form>
+
+              {/* Desktop Live Search Dropdown */}
+              {isLiveSearchOpen && searchInput.trim().length > 0 && (
+                <div className="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-150">
+                  {matchingProducts.length > 0 ? (
+                    <div className="divide-y divide-gray-50">
+                      <div className="px-4 py-2 bg-gray-50/70 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                        Matching Products
+                      </div>
+                      {matchingProducts.map((p) => (
+                        <div
+                          key={p.id}
+                          onClick={() => handleSelectProduct(p.slug)}
+                          className="px-4 py-2.5 hover:bg-orange-50/60 cursor-pointer flex items-center justify-between group transition-colors"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <img
+                              src={p.images[0]}
+                              alt={p.name}
+                              className="w-10 h-10 object-contain rounded-md bg-gray-50 p-0.5 border border-gray-100"
+                            />
+                            <div>
+                              <div className="text-xs font-bold text-gray-900 group-hover:text-[#F97316] transition-colors line-clamp-1">
+                                {p.name}
+                              </div>
+                              <div className="text-[10px] text-gray-400">
+                                {p.categoryLabel}
+                              </div>
+                            </div>
+                          </div>
+                          <span className="text-xs font-extrabold text-[#0B132B]">
+                            {formatPKR(p.price)}
+                          </span>
+                        </div>
+                      ))}
+                      <div
+                        onClick={handleSearchSubmit}
+                        className="px-4 py-2.5 bg-gray-50 hover:bg-orange-50 text-center text-xs font-bold text-[#F97316] cursor-pointer flex items-center justify-center space-x-1"
+                      >
+                        <span>View all matching results for "{searchInput}"</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center text-xs text-gray-500">
+                      No products found for "{searchInput}". Press enter to view all items.
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Right: Actions (Wishlist & Cart only — NO account button) */}
+            {/* Right: Actions (Wishlist & Cart only — NO duplicate search button, NO account button) */}
             <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
               
-              {/* Mobile Search Icon */}
-              <button
-                onClick={onOpenSearch}
-                className="md:hidden p-2 text-gray-700 hover:text-[#F97316] hover:bg-gray-100 rounded-full transition-colors"
-                aria-label="Search"
-              >
-                <Search className="w-5 h-5" />
-              </button>
-
               {/* Wishlist Button */}
               <Link
                 to="/wishlist"
@@ -161,14 +247,20 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           </div>
 
-          {/* Mobile Search Input Bar */}
-          <div className="mt-2 md:hidden">
+          {/* Mobile Full-Width Search Input Bar with Live Suggestions Dropdown (Only One Search Option in Mobile) */}
+          <div ref={mobileSearchRef} className="mt-2 md:hidden relative">
             <form onSubmit={handleSearchSubmit} className="relative flex items-center">
               <input
                 type="text"
                 placeholder="Search products, brands and more..."
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                onChange={(e) => {
+                  setSearchInput(e.target.value);
+                  setIsLiveSearchOpen(true);
+                }}
+                onFocus={() => {
+                  if (searchInput.trim()) setIsLiveSearchOpen(true);
+                }}
                 className="w-full pl-3.5 pr-10 py-2 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-[#081320] text-gray-800 placeholder-gray-400"
               />
               <button
@@ -179,10 +271,60 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <Search className="w-3.5 h-3.5" />
               </button>
             </form>
+
+            {/* Mobile Live Search Dropdown */}
+            {isLiveSearchOpen && searchInput.trim().length > 0 && (
+              <div className="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
+                {matchingProducts.length > 0 ? (
+                  <div className="divide-y divide-gray-50 max-h-[60vh] overflow-y-auto">
+                    <div className="px-3.5 py-1.5 bg-gray-50 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                      Matching Products
+                    </div>
+                    {matchingProducts.map((p) => (
+                      <div
+                        key={p.id}
+                        onClick={() => handleSelectProduct(p.slug)}
+                        className="px-3.5 py-2.5 hover:bg-orange-50/60 cursor-pointer flex items-center justify-between group"
+                      >
+                        <div className="flex items-center space-x-2.5">
+                          <img
+                            src={p.images[0]}
+                            alt={p.name}
+                            className="w-9 h-9 object-contain rounded-md bg-gray-50 p-0.5 border border-gray-100"
+                          />
+                          <div>
+                            <div className="text-xs font-bold text-gray-900 line-clamp-1">
+                              {p.name}
+                            </div>
+                            <div className="text-[10px] text-gray-400">
+                              {p.categoryLabel}
+                            </div>
+                          </div>
+                        </div>
+                        <span className="text-xs font-extrabold text-[#0B132B]">
+                          {formatPKR(p.price)}
+                        </span>
+                      </div>
+                    ))}
+                    <div
+                      onClick={handleSearchSubmit}
+                      className="px-3.5 py-2 bg-gray-50 text-center text-xs font-bold text-[#F97316] cursor-pointer flex items-center justify-center space-x-1"
+                    >
+                      <span>View all results for "{searchInput}"</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-3 text-center text-xs text-gray-500">
+                    No products found for "{searchInput}".
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Secondary Category Sub-Navbar (Desktop) matching reference design */}
+        {/* Secondary Category Sub-Navbar (Desktop) */}
         <div className="hidden lg:block border-t border-gray-100 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center space-x-7 text-xs font-semibold text-gray-700 py-2.5">
@@ -254,7 +396,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 Best Sellers
               </Link>
 
-              {/* Dynamic Category Shortcuts strictly from Calenvee */}
+              {/* Dynamic Category Shortcuts */}
               {CATEGORIES.map((cat) => (
                 <Link
                   key={cat.id}
