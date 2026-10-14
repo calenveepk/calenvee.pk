@@ -99,7 +99,7 @@ export interface OrderDetails {
   shippingFee: number;
   total: number;
   promoCode?: string;
-  status: 'confirmed' | 'processing' | 'shipped' | 'delivered';
+  status: 'placed' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'returned';
   trackingNumber: string;
   courier: string;
   createdAt: string;

@@ -324,11 +324,13 @@ function getAdminHtml() {
 
           <select id="orderStatusFilter" onchange="filterOrders()" class="py-2 px-3 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-[#F97316]">
             <option value="all">All Statuses</option>
+            <option value="Placed">Placed (New)</option>
             <option value="Confirmed">Confirmed</option>
             <option value="In Processing">In Processing</option>
             <option value="Dispatched">Dispatched</option>
             <option value="Delivered">Delivered</option>
             <option value="Cancelled">Cancelled</option>
+            <option value="Returned">Returned (RTO)</option>
           </select>
         </div>
 
@@ -1306,10 +1308,12 @@ Ready to commit and deploy changes.</pre>
         <div>
           <label class="block font-semibold text-slate-700 mb-1">Order Status *</label>
           <select id="disp_status" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-semibold focus:outline-none focus:border-[#F97316]">
-            <option value="Confirmed">Confirmed (Order Received)</option>
+            <option value="Placed">Placed (New Order - Pending Call/Verification)</option>
+            <option value="Confirmed">Confirmed (Verified & Approved)</option>
             <option value="In Processing">In Processing (Packing parcel)</option>
             <option value="Dispatched" selected>Dispatched (Handed to Courier)</option>
             <option value="Delivered">Delivered (Rider collected cash)</option>
+            <option value="Returned">Returned (RTO to Inventory)</option>
             <option value="Cancelled">Cancelled</option>
           </select>
         </div>
@@ -1609,10 +1613,13 @@ Ready to commit and deploy changes.</pre>
 
       container.innerHTML = ordersToRender.map(o => {
         let statusColor = 'bg-blue-500/10 text-blue-600 border-blue-500/20';
-        if (o.status === 'In Processing') statusColor = 'bg-amber-500/10 text-amber-600 border-amber-500/20';
-        else if (o.status === 'Dispatched') statusColor = 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20';
-        else if (o.status === 'Delivered') statusColor = 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
-        else if (o.status === 'Cancelled') statusColor = 'bg-red-500/10 text-red-600 border-red-500/20';
+        if (o.status === 'Placed') statusColor = 'bg-purple-500/15 text-purple-700 border-purple-500/30 font-bold';
+        else if (o.status === 'Confirmed') statusColor = 'bg-blue-500/15 text-blue-700 border-blue-500/30';
+        else if (o.status === 'In Processing') statusColor = 'bg-amber-500/15 text-amber-700 border-amber-500/30';
+        else if (o.status === 'Dispatched') statusColor = 'bg-indigo-500/15 text-indigo-700 border-indigo-500/30';
+        else if (o.status === 'Delivered') statusColor = 'bg-emerald-500/15 text-emerald-700 border-emerald-500/30';
+        else if (o.status === 'Cancelled') statusColor = 'bg-red-500/15 text-red-600 border-red-500/30';
+        else if (o.status === 'Returned') statusColor = 'bg-rose-500/15 text-rose-700 border-rose-500/30 font-bold';
 
         const phoneClean = (o.phone || '').replace(/[^0-9]/g, '');
         const dateFormatted = o.timestamp ? new Date(o.timestamp).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Recent';
@@ -1626,7 +1633,7 @@ Ready to commit and deploy changes.</pre>
               <div class="flex flex-wrap items-center gap-2">
                 <span class="font-mono font-bold text-sm text-[#0B132B]">#\${o.orderId}</span>
                 <span class="text-[11px] text-slate-400">&bull; \${dateFormatted}</span>
-                <span class="py-0.5 px-2.5 rounded-full text-[10px] font-bold border \${statusColor}">\${o.status}</span>
+                <span class="py-0.5 px-2.5 rounded-full text-[10px] font-bold border \${statusColor}">● \${o.status}</span>
                 <span class="py-0.5 px-2 rounded-md bg-slate-100 text-slate-600 text-[10px] font-bold uppercase">\${o.paymentMethod || 'COD'}</span>
               </div>
 
@@ -1659,10 +1666,17 @@ Ready to commit and deploy changes.</pre>
                 \` : (isCOD ? '<span class="text-[10px] text-slate-400">Cash on Delivery</span>' : '<span class="text-[10px] text-amber-500">Unverified Prepaid</span>')}
               </div>
 
-              <button onclick="openDispatchModal('\${o.orderId}')" class="bg-[#0B132B] hover:bg-slate-800 text-white font-bold text-xs py-2 px-4 rounded-xl shadow transition flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path></svg>
-                <span>Dispatch &amp; Track 🚚</span>
-              </button>
+              <div class="flex items-center gap-2">
+                \${o.status === 'Placed' ? \`
+                  <button onclick="quickConfirmOrder('\${o.orderId}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-3 rounded-xl shadow transition flex items-center gap-1" title="Confirm customer order">
+                    <span>✓ Confirm</span>
+                  </button>
+                \` : ''}
+                <button onclick="openDispatchModal('\${o.orderId}')" class="bg-[#0B132B] hover:bg-slate-800 text-white font-bold text-xs py-2 px-3.5 rounded-xl shadow transition flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path></svg>
+                  <span>Dispatch 🚚</span>
+                </button>
+              </div>
             </div>
 
           </div>
@@ -1686,6 +1700,26 @@ Ready to commit and deploy changes.</pre>
       });
 
       renderOrders(filtered);
+    }
+
+    async function quickConfirmOrder(orderId) {
+      if (!confirm('Verify & Confirm Order #' + orderId + '?\nStatus will change from Placed to Confirmed.')) return;
+      try {
+        const res = await fetch('/api/orders/update-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId, status: 'Confirmed', sendEmail: true })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('✓ Order #' + orderId + ' marked Confirmed!');
+          await loadOrders();
+        } else {
+          showToast('Failed to confirm: ' + (data.message || 'Error'), true);
+        }
+      } catch (e) {
+        showToast('Error confirming order: ' + e.message, true);
+      }
     }
 
     function openDispatchModal(orderId) {

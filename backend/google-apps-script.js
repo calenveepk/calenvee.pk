@@ -1,27 +1,29 @@
 /**
  * ==============================================================================
- * CALENVEE.PK — OFFICIAL BACKEND AUTOMATION SCRIPT
+ * CALENVEE.PK — OFFICIAL BACKEND AUTOMATION SCRIPT (ENTERPRISE EDITION)
  * ==============================================================================
  * Official Store Account: calenvee.pk@gmail.com
  * Website: https://calenvee.pk
  * Helpline: +923001234567 (Nationwide Cash on Delivery 7-10 Days)
  * 
  * Features:
- * 1. Webhook API (doPost): Logs orders from the checkout page directly to Google Sheets.
- * 2. Customer Order Confirmation Email: Sends luxury HTML receipt with order summary.
- * 3. Store Owner Instant Alert: Sends notification to calenvee.pk@gmail.com.
- * 4. Dispatch Tracking Email (onEdit / Menu): Automatically sends courier tracking details.
- * 5. One-Click Setup (setupSheet): Auto-creates tabs, headers, dropdowns & colors.
- * 6. Test Suite: Click "testOrderEmail" in the editor to test instantly!
+ * 1. Webhook API (doPost / doGet): Handles create_order, catalog sync, settings sync, status updates.
+ * 2. Order Placement & Invoice Email: Sends customer the official luxury invoice with status "Placed".
+ * 3. Manual Order Confirmation: Internal team verifies order, status moves to "Confirmed", sending confirmation email.
+ * 4. Dispatch Tracking Email: Sends courier details and optional tracking ID when dispatched.
+ * 5. Executive Dashboard: Tier 1 & Tier 2 KPI cards (Profit, Shipping, RTO Return Rate), 7-status pipeline,
+ *    Top cities, 12-Month Trends with Returns, and 5 interactive charts including Month-Wise Return Analysis.
+ * 6. Sequential Order IDs: Guaranteed CAL-ORD-1000001, CAL-ORD-1000002... formatting.
+ * 7. Anti-Ghost Filter & Strict Validation: Only verified real orders are logged.
  * ==============================================================================
  */
 
 // OFFICIAL STORE CONFIGURATION
 const STORE_CONFIG = {
   storeName: "Calenvee.pk",
-  storeTagline: "SHOP SMART, LIVE BETTER", // Official Store Slogan
-  logoUrl: "https://calenvee.pk/logo-white.png", // Store Logo
-  ownerEmail: "calenvee.pk@gmail.com", // Official Store Gmail
+  storeTagline: "SHOP SMART, LIVE BETTER",
+  logoUrl: "https://calenvee.pk/logo-white.png",
+  ownerEmail: "calenvee.pk@gmail.com",
   helplinePhone: "+923001234567",
   helplineWhatsAppRaw: "923001234567",
   deliveryWindow: "Nationwide Cash on Delivery (7-10 Days)",
@@ -30,9 +32,8 @@ const STORE_CONFIG = {
 };
 
 /**
- * 1. ONE-TIME SETUP FUNCTION (Run this once)
- * Creates "Executive Dashboard", "Orders", and "OrderItems" sheets with professional styling, 
- * frozen rows, auto-column widths, sample starter data, KPI formulas, and visual charts.
+ * 1. ONE-TIME SETUP FUNCTION (Run this once or via custom menu)
+ * Creates "Executive Dashboard", "Orders", "OrderItems", "Inventory", and "Store Settings" sheets.
  */
 function setupSheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -73,9 +74,9 @@ function setupSheet() {
   ordersSheet.setFrozenRows(1);
   ordersSheet.setRowHeight(1, 35);
 
-  // Status Dropdown validation for Column J (Order Status)
+  // Status Dropdown validation for Column J (Order Status) with 7 distinct statuses including "Placed" & "Returned"
   const statusRule = SpreadsheetApp.newDataValidation()
-    .requireValueInList(["Confirmed", "In Processing", "Dispatched", "Delivered", "Cancelled"], true)
+    .requireValueInList(["Placed", "Confirmed", "In Processing", "Dispatched", "Delivered", "Cancelled", "Returned"], true)
     .setAllowInvalid(false)
     .build();
   ordersSheet.getRange("J2:J5000").setDataValidation(statusRule);
@@ -123,8 +124,8 @@ function setupSheet() {
       ],
       [
         "CAL-ORD-1000003", now, "Bilal Ahmed", "+923335551234", "calenvee.pk@gmail.com",
-        "Islamabad", "F-7/2, Street 14", "COD", 3499, "Confirmed",
-        "Pending Dispatch (TCS Express)", "N/A", "Azure Chronograph Edition (x1) - Rs. 3499", "Leave at reception", "Yes", "No", "N/A (Cash on Delivery)"
+        "Islamabad", "F-7/2, Street 14", "COD", 3499, "Placed",
+        "Pending Verification", "N/A", "Azure Chronograph Edition (x1) - Rs. 3499", "Leave at reception", "No", "No", "N/A (Cash on Delivery)"
       ]
     ];
     ordersSheet.getRange(2, 1, sampleOrders.length, sampleOrders[0].length).setValues(sampleOrders);
@@ -137,7 +138,7 @@ function setupSheet() {
     itemsSheet.getRange(2, 1, sampleItems.length, sampleItems[0].length).setValues(sampleItems);
   }
 
-  // Tab 3: Inventory (Real-Time Catalog Sync from Local Web App)
+  // Tab 3: Inventory (Real-Time Catalog Sync)
   let invSheet = ss.getSheetByName("Inventory");
   if (!invSheet) {
     invSheet = ss.insertSheet("Inventory");
@@ -157,7 +158,7 @@ function setupSheet() {
   invSheet.setFrozenRows(1);
   invSheet.setRowHeight(1, 35);
 
-  // Tab 4: Store Settings (Dynamic Store Configuration from Local Web App)
+  // Tab 4: Store Settings (Dynamic Store Configuration)
   let settingsSheet = ss.getSheetByName("Store Settings");
   if (!settingsSheet) {
     settingsSheet = ss.insertSheet("Store Settings");
@@ -194,7 +195,7 @@ function setupSheet() {
     settingsSheet.getRange(2, 1, defaultSettingsRows.length, defaultSettingsRows[0].length).setValues(defaultSettingsRows);
   }
 
-  // Auto-generate the Executive Dashboard tab!
+  // Auto-generate the Executive Dashboard tab
   createExecutiveDashboard();
 }
 
@@ -245,9 +246,16 @@ function getDynamicStoreSettings() {
 }
 
 /**
- * 1B. EXECUTIVE DASHBOARD GENERATOR
- * Creates/Refreshes the "Executive Dashboard" tab with KPI cards, Month Filter,
- * Status Pipeline, Payment Flow, City Demand, 12-Month Trends, and Embedded Charts.
+ * 1B. EXECUTIVE DASHBOARD GENERATOR (ENTERPRISE EDITION)
+ * Features:
+ * - Dynamic Month Selector Filter (Cell C4)
+ * - Tier 1 KPI Cards: Total Revenue, Total Orders, AOV, Fulfillment Rate, Placed Orders (Action Needed), COD Share
+ * - Tier 2 KPI Cards: Total Estimated Profit (PKR), Total Shipping Expense (PKR), Returned Orders (RTO), Return Rate %
+ * - Order Pipeline & Fulfillment Status (Placed, Confirmed, In Processing, Dispatched, Delivered, Returned, Cancelled)
+ * - Payment Gateway Breakdown (COD, EasyPaisa, JazzCash, Bank Transfer)
+ * - Top Pakistan Cities Flow
+ * - 12-Month Performance Trend with Delivered, Returned, and Return Rate %
+ * - 5 Embedded Analytics Charts (Status Donut, 12-Month Bar, Payment Split, City Demands, and Month-Wise Return Analysis)
  */
 function createExecutiveDashboard() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -256,7 +264,6 @@ function createExecutiveDashboard() {
   if (!dash) {
     dash = ss.insertSheet("Executive Dashboard", 0);
   } else {
-    // If it already exists, move to tab 1 and clear previous layout/charts
     ss.setActiveSheet(dash);
     ss.moveActiveSheet(1);
     dash.clear();
@@ -266,7 +273,6 @@ function createExecutiveDashboard() {
     }
   }
 
-  // Ensure gridlines are visible for clean card borders
   dash.setHiddenGridlines(false);
 
   // Professional Column Widths
@@ -275,14 +281,14 @@ function createExecutiveDashboard() {
   dash.setColumnWidth(3, 110);  // C - Month dropdown / Count
   dash.setColumnWidth(4, 110);  // D - Orders / Share %
   dash.setColumnWidth(5, 120);  // E - Revenue / KPI
-  dash.setColumnWidth(6, 160);  // F - Action / Courier
+  dash.setColumnWidth(6, 170);  // F - Action / Courier
   dash.setColumnWidth(7, 25);   // G - Separator
-  dash.setColumnWidth(8, 180);  // H - Gateway / Month
-  dash.setColumnWidth(9, 120);  // I - Channel / Orders
+  dash.setColumnWidth(8, 170);  // H - Gateway / Month
+  dash.setColumnWidth(9, 110);  // I - Channel / Orders
   dash.setColumnWidth(10, 100); // J - Count / Delivered
-  dash.setColumnWidth(11, 130); // K - Share / Revenue
-  dash.setColumnWidth(12, 130); // L - Total / AOV
-  dash.setColumnWidth(13, 110); // M - Risk / Fulfillment %
+  dash.setColumnWidth(11, 100); // K - Share / Returned
+  dash.setColumnWidth(12, 130); // L - Revenue (PKR)
+  dash.setColumnWidth(13, 110); // M - Return Rate %
 
   // Professional Row Heights
   dash.setRowHeight(1, 12);
@@ -293,10 +299,12 @@ function createExecutiveDashboard() {
   dash.setRowHeight(6, 22);
   dash.setRowHeight(7, 32);
   dash.setRowHeight(8, 20);
-  dash.setRowHeight(9, 14);
-  dash.setRowHeight(10, 10);
-  dash.setRowHeight(11, 28);
-  dash.setRowHeight(12, 24);
+  dash.setRowHeight(9, 22);
+  dash.setRowHeight(10, 32);
+  dash.setRowHeight(11, 20);
+  dash.setRowHeight(12, 12);
+  dash.setRowHeight(13, 26);
+  dash.setRowHeight(14, 24);
 
   // Header Banner (Rows 2 & 3)
   dash.getRange("B2:M2").merge()
@@ -356,10 +364,9 @@ function createExecutiveDashboard() {
     .setHorizontalAlignment("right")
     .setVerticalAlignment("middle");
 
-  // Pin frozen rows up to filter bar
   dash.setFrozenRows(4);
 
-  // Helper formatting for KPI Card
+  // Dynamic KPI Card Formatter
   function formatKpiCard(rangeTitle, rangeVal, rangeSub, titleText, formulaVal, numFormat, subText, themeBg, accentColor) {
     dash.getRange(rangeTitle).merge()
       .setValue(titleText)
@@ -388,13 +395,13 @@ function createExecutiveDashboard() {
       .setHorizontalAlignment("center")
       .setVerticalAlignment("middle");
 
-    const colStart = rangeTitle.split(":")[0].substring(0, 1);
-    const colEnd = rangeTitle.split(":")[1].substring(0, 1);
-    dash.getRange(`${colStart}6:${colEnd}8`)
+    const startCell = rangeTitle.split(":")[0];
+    const endCell = rangeSub.split(":")[1];
+    dash.getRange(`${startCell}:${endCell}`)
       .setBorder(true, true, true, true, false, false, "#CBD5E1", SpreadsheetApp.BorderStyle.SOLID);
   }
 
-  // --- KPI CARDS (Rows 6-8) ---
+  // --- TIER 1 KPI CARDS (Rows 6-8) ---
   // Card 1: Total Revenue (B6:C8)
   formatKpiCard(
     "B6:C6", "B7:C7", "B8:C8",
@@ -435,17 +442,17 @@ function createExecutiveDashboard() {
     "#EEF2FF", "#4338CA"
   );
 
-  // Card 5: Pending Orders (J6:K8)
+  // Card 5: Placed Orders - Needs Action (J6:K8)
   formatKpiCard(
     "J6:K6", "J7:K7", "J8:K8",
-    "PENDING ACTION",
-    '=IF(C4="All Time", COUNTIF(Orders!J2:J, "Confirmed") + COUNTIF(Orders!J2:J, "In Processing"), IFERROR(ROWS(FILTER(Orders!A2:A, Orders!B2:B<>"", TEXT(Orders!B2:B,"mmmm")=C4, (Orders!J2:J="Confirmed") + (Orders!J2:J="In Processing"))), 0))',
+    "NEW ORDERS (PLACED)",
+    '=IF(C4="All Time", COUNTIF(Orders!J2:J, "Placed"), IFERROR(ROWS(FILTER(Orders!A2:A, Orders!B2:B<>"", TEXT(Orders!B2:B,"mmmm")=C4, Orders!J2:J="Placed")), 0))',
     '#,##0',
-    "Confirmed & Processing",
-    "#FEF2F2", "#DC2626"
+    "Needs Phone Verification 📞",
+    "#FEF3C7", "#D97706"
   );
 
-  // Card 6: COD Share (L6:M8)
+  // Card 6: Cash on Delivery Share (L6:M8)
   formatKpiCard(
     "L6:M6", "L7:M7", "L8:M8",
     "CASH ON DELIVERY (COD)",
@@ -455,8 +462,49 @@ function createExecutiveDashboard() {
     "#F0FDFA", "#0F766E"
   );
 
-  // --- SECTION HEADERS (Row 11) ---
-  dash.getRange("B11:F11").merge()
+  // --- TIER 2 KPI CARDS (Rows 9-11) ---
+  // Card 7: Total Estimated Profit (B9:D11)
+  formatKpiCard(
+    "B9:D9", "B10:D10", "B11:D11",
+    "TOTAL ESTIMATED PROFIT",
+    '=IF(C4="All Time", IFERROR(SUMIF(Orders!$J$2:$J, "Delivered", Orders!$I$2:$I)*0.45, 0), IFERROR(SUM(FILTER(Orders!$I$2:$I, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=C4, Orders!$J$2:$J="Delivered"))*0.45, 0))',
+    '"Rs. " #,##0',
+    "Net Est. Margin (45% on Delivered)",
+    "#ECFDF5", "#047857"
+  );
+
+  // Card 8: Total Shipping Expense (E9:G11)
+  formatKpiCard(
+    "E9:G9", "E10:G10", "E11:G11",
+    "TOTAL SHIPPING EXPENSE",
+    '=IF(C4="All Time", IFERROR((COUNTIF(Orders!$J$2:$J, "Delivered") + COUNTIF(Orders!$J$2:$J, "Dispatched") + COUNTIF(Orders!$J$2:$J, "Returned")) * 250, 0), IFERROR(ROWS(FILTER(Orders!$A$2:$A, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=C4, (Orders!$J$2:$J="Delivered") + (Orders!$J$2:$J="Dispatched") + (Orders!$J$2:$J="Returned"))) * 250, 0))',
+    '"Rs. " #,##0',
+    "Courier Freight (Rs. 250/parcel)",
+    "#FFF7ED", "#EA580C"
+  );
+
+  // Card 9: Returned Orders (H9:J11)
+  formatKpiCard(
+    "H9:J9", "H10:J10", "H11:J11",
+    "RETURNED ORDERS (RTO)",
+    '=IF(C4="All Time", COUNTIF(Orders!$J$2:$J, "Returned"), IFERROR(ROWS(FILTER(Orders!$A$2:$A, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=C4, Orders!$J$2:$J="Returned")), 0))',
+    '#,##0',
+    "Customer Refused / Undelivered",
+    "#FEF2F2", "#DC2626"
+  );
+
+  // Card 10: RTO Return Rate % (K9:M11)
+  formatKpiCard(
+    "K9:M9", "K10:M10", "K11:M11",
+    "RTO RETURN RATE %",
+    '=IFERROR(H10/D7, 0)',
+    '0.0%',
+    "Returned vs Total Orders",
+    "#FFF1F2", "#BE123C"
+  );
+
+  // --- SECTION HEADERS 1 (Row 13) ---
+  dash.getRange("B13:F13").merge()
     .setValue("📦 ORDER PIPELINE & FULFILLMENT STATUS")
     .setBackground(STORE_CONFIG.brandNavy)
     .setFontColor("#FFFFFF")
@@ -464,7 +512,7 @@ function createExecutiveDashboard() {
     .setFontSize(10)
     .setVerticalAlignment("middle");
 
-  dash.getRange("H11:M11").merge()
+  dash.getRange("H13:M13").merge()
     .setValue("💳 PAYMENT GATEWAY PERFORMANCE")
     .setBackground(STORE_CONFIG.brandNavy)
     .setFontColor("#FFFFFF")
@@ -472,21 +520,23 @@ function createExecutiveDashboard() {
     .setFontSize(10)
     .setVerticalAlignment("middle");
 
-  // Table 1 Headers (Row 12)
-  dash.getRange("B12:F12").setValues([["Order Status", "Orders", "Share %", "Revenue (PKR)", "Action Needed"]])
+  // Table 1 Headers (Row 14)
+  dash.getRange("B14:F14").setValues([["Order Status", "Orders", "Share %", "Revenue (PKR)", "Action Needed"]])
     .setBackground("#F1F5F9").setFontWeight("bold").setFontColor("#334155").setFontSize(9);
 
-  // Table 1 Rows (Rows 13 to 17)
+  // Table 1 Rows: 7 Distinct Statuses (Rows 15 to 21)
   const statuses = [
-    { name: "Confirmed", action: "Call customer & verify" },
-    { name: "In Processing", action: "Pack in premium box" },
-    { name: "Dispatched", action: "In transit with courier" },
-    { name: "Delivered", action: "Payment collected ✅" },
-    { name: "Cancelled", action: "Return to inventory" }
+    { name: "Placed", action: "New booking — Call customer & confirm 📞" },
+    { name: "Confirmed", action: "Order verified — Ready to pack 📦" },
+    { name: "In Processing", action: "Pack in premium box & seal 🏷️" },
+    { name: "Dispatched", action: "In transit with courier rider 🚚" },
+    { name: "Delivered", action: "Payment collected & completed ✅" },
+    { name: "Returned", action: "RTO — Returned to inventory ⚠️" },
+    { name: "Cancelled", action: "Cancelled by customer/fake ❌" }
   ];
 
   for (let i = 0; i < statuses.length; i++) {
-    const row = 13 + i;
+    const row = 15 + i;
     const st = statuses[i];
     dash.getRange(row, 2).setValue(st.name).setFontWeight("bold").setFontColor("#1E293B");
     dash.getRange(row, 3).setFormula(`=IF($C$4="All Time", COUNTIF(Orders!$J$2:$J, "${st.name}"), IFERROR(ROWS(FILTER(Orders!$A$2:$A, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=$C$4, Orders!$J$2:$J="${st.name}")), 0))`);
@@ -495,16 +545,16 @@ function createExecutiveDashboard() {
     dash.getRange(row, 6).setValue(st.action).setFontColor("#64748B").setFontSize(8);
   }
 
-  // Table 1 Total (Row 18)
-  dash.getRange("B18").setValue("Total Pipeline").setFontWeight("bold").setFontColor(STORE_CONFIG.brandNavy);
-  dash.getRange("C18").setFormula("=SUM(C13:C17)").setFontWeight("bold");
-  dash.getRange("D18").setFormula("=SUM(D13:D17)").setFontWeight("bold").setNumberFormat("0.0%");
-  dash.getRange("E18").setFormula("=SUM(E13:E17)").setFontWeight("bold").setNumberFormat('"Rs. " #,##0');
-  dash.getRange("F18").setValue("-").setFontColor("#94A3B8");
-  dash.getRange("B18:F18").setBackground("#F8FAFC").setBorder(true, false, true, false, false, false, "#94A3B8", SpreadsheetApp.BorderStyle.DOUBLE);
+  // Table 1 Total (Row 22)
+  dash.getRange("B22").setValue("Total Pipeline").setFontWeight("bold").setFontColor(STORE_CONFIG.brandNavy);
+  dash.getRange("C22").setFormula("=SUM(C15:C21)").setFontWeight("bold");
+  dash.getRange("D22").setFormula("=SUM(D15:D21)").setFontWeight("bold").setNumberFormat("0.0%");
+  dash.getRange("E22").setFormula("=SUM(E15:E21)").setFontWeight("bold").setNumberFormat('"Rs. " #,##0');
+  dash.getRange("F22").setValue("-").setFontColor("#94A3B8");
+  dash.getRange("B22:F22").setBackground("#F8FAFC").setBorder(true, false, true, false, false, false, "#94A3B8", SpreadsheetApp.BorderStyle.DOUBLE);
 
-  // Table 2 Headers (Row 12, Cols H to M)
-  dash.getRange("H12:M12").setValues([["Payment Method", "Channel", "Orders", "Share %", "Revenue (PKR)", "Settlement Risk"]])
+  // Table 2 Headers (Row 14, Cols H to M)
+  dash.getRange("H14:M14").setValues([["Payment Method", "Channel", "Orders", "Share %", "Revenue (PKR)", "Settlement Risk"]])
     .setBackground("#F1F5F9").setFontWeight("bold").setFontColor("#334155").setFontSize(9);
 
   const payments = [
@@ -515,7 +565,7 @@ function createExecutiveDashboard() {
   ];
 
   for (let i = 0; i < payments.length; i++) {
-    const row = 13 + i;
+    const row = 15 + i;
     const pm = payments[i];
     dash.getRange(row, 8).setValue(pm.label).setFontWeight("bold").setFontColor("#1E293B");
     dash.getRange(row, 9).setValue(pm.channel).setFontColor("#64748B").setFontSize(8);
@@ -525,17 +575,17 @@ function createExecutiveDashboard() {
     dash.getRange(row, 13).setValue(pm.risk).setFontColor("#059669").setFontSize(8);
   }
 
-  // Table 2 Total (Row 17)
-  dash.getRange("H17").setValue("Total Payment Volume").setFontWeight("bold").setFontColor(STORE_CONFIG.brandNavy);
-  dash.getRange("I17").setValue("-").setFontColor("#94A3B8");
-  dash.getRange("J17").setFormula("=SUM(J13:J16)").setFontWeight("bold");
-  dash.getRange("K17").setFormula("=SUM(K13:K16)").setFontWeight("bold").setNumberFormat("0.0%");
-  dash.getRange("L17").setFormula("=SUM(L13:L16)").setFontWeight("bold").setNumberFormat('"Rs. " #,##0');
-  dash.getRange("M17").setValue("-").setFontColor("#94A3B8");
-  dash.getRange("H17:M17").setBackground("#F8FAFC").setBorder(true, false, true, false, false, false, "#94A3B8", SpreadsheetApp.BorderStyle.DOUBLE);
+  // Table 2 Total (Row 19)
+  dash.getRange("H19").setValue("Total Payment Volume").setFontWeight("bold").setFontColor(STORE_CONFIG.brandNavy);
+  dash.getRange("I19").setValue("-").setFontColor("#94A3B8");
+  dash.getRange("J19").setFormula("=SUM(J15:J18)").setFontWeight("bold");
+  dash.getRange("K19").setFormula("=SUM(K15:K18)").setFontWeight("bold").setNumberFormat("0.0%");
+  dash.getRange("L19").setFormula("=SUM(L15:L18)").setFontWeight("bold").setNumberFormat('"Rs. " #,##0');
+  dash.getRange("M19").setValue("-").setFontColor("#94A3B8");
+  dash.getRange("H19:M19").setBackground("#F8FAFC").setBorder(true, false, true, false, false, false, "#94A3B8", SpreadsheetApp.BorderStyle.DOUBLE);
 
-  // --- SECTION HEADERS 2 (Row 20) ---
-  dash.getRange("B20:F20").merge()
+  // --- SECTION HEADERS 2 (Row 24) ---
+  dash.getRange("B24:F24").merge()
     .setValue("🏙️ TOP PAKISTAN CITIES BY DEMAND")
     .setBackground(STORE_CONFIG.brandNavy)
     .setFontColor("#FFFFFF")
@@ -543,21 +593,21 @@ function createExecutiveDashboard() {
     .setFontSize(10)
     .setVerticalAlignment("middle");
 
-  dash.getRange("H20:M20").merge()
-    .setValue("📅 12-MONTH REVENUE & PERFORMANCE TREND")
+  dash.getRange("H24:M24").merge()
+    .setValue("📅 12-MONTH REVENUE & RETURN PERFORMANCE TREND")
     .setBackground(STORE_CONFIG.brandNavy)
     .setFontColor("#FFFFFF")
     .setFontWeight("bold")
     .setFontSize(10)
     .setVerticalAlignment("middle");
 
-  // Table 3 Headers (Row 21)
-  dash.getRange("B21:F21").setValues([["Destination City", "Orders", "Share %", "Revenue (PKR)", "Courier Service"]])
+  // Table 3 Headers (Row 25)
+  dash.getRange("B25:F25").setValues([["Destination City", "Orders", "Share %", "Revenue (PKR)", "Courier Service"]])
     .setBackground("#F1F5F9").setFontWeight("bold").setFontColor("#334155").setFontSize(9);
 
   const cities = ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar"];
   for (let i = 0; i < cities.length; i++) {
-    const row = 22 + i;
+    const row = 26 + i;
     const city = cities[i];
     dash.getRange(row, 2).setValue(city).setFontWeight("bold").setFontColor("#1E293B");
     dash.getRange(row, 3).setFormula(`=IF($C$4="All Time", COUNTIF(Orders!$F$2:$F, "*${city}*"), IFERROR(ROWS(FILTER(Orders!$A$2:$A, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=$C$4, REGEXMATCH(Orders!$F$2:$F, "(?i)${city}"))), 0))`);
@@ -566,23 +616,23 @@ function createExecutiveDashboard() {
     dash.getRange(row, 6).setValue("TCS Express (Nationwide)").setFontColor("#64748B").setFontSize(8);
   }
 
-  // Row 29: Other Cities
-  dash.getRange("B29").setValue("Other Pakistan Cities").setFontWeight("bold").setFontColor("#64748B");
-  dash.getRange("C29").setFormula("=IFERROR(MAX(0, D7 - SUM(C22:C28)), 0)");
-  dash.getRange("D29").setFormula("=IFERROR(C29/$D$7, 0)").setNumberFormat("0.0%");
-  dash.getRange("E29").setFormula("=IFERROR(MAX(0, B7 - SUM(E22:E28)), 0)").setNumberFormat('"Rs. " #,##0');
-  dash.getRange("F29").setValue("Standard Postal / TCS").setFontColor("#64748B").setFontSize(8);
+  // Row 33: Other Pakistan Cities
+  dash.getRange("B33").setValue("Other Pakistan Cities").setFontWeight("bold").setFontColor("#64748B");
+  dash.getRange("C33").setFormula("=IFERROR(MAX(0, D7 - SUM(C26:C32)), 0)");
+  dash.getRange("D33").setFormula("=IFERROR(C33/$D$7, 0)").setNumberFormat("0.0%");
+  dash.getRange("E33").setFormula("=IFERROR(MAX(0, B7 - SUM(E26:E32)), 0)").setNumberFormat('"Rs. " #,##0');
+  dash.getRange("F33").setValue("Standard Postal / TCS").setFontColor("#64748B").setFontSize(8);
 
-  // Row 30: Total Regional Flow
-  dash.getRange("B30").setValue("Total Cities Flow").setFontWeight("bold").setFontColor(STORE_CONFIG.brandNavy);
-  dash.getRange("C30").setFormula("=SUM(C22:C29)").setFontWeight("bold");
-  dash.getRange("D30").setFormula("=SUM(D22:D29)").setFontWeight("bold").setNumberFormat("0.0%");
-  dash.getRange("E30").setFormula("=SUM(E22:E29)").setFontWeight("bold").setNumberFormat('"Rs. " #,##0');
-  dash.getRange("F30").setValue("-").setFontColor("#94A3B8");
-  dash.getRange("B30:F30").setBackground("#F8FAFC").setBorder(true, false, true, false, false, false, "#94A3B8", SpreadsheetApp.BorderStyle.DOUBLE);
+  // Row 34: Total Cities Flow
+  dash.getRange("B34").setValue("Total Cities Flow").setFontWeight("bold").setFontColor(STORE_CONFIG.brandNavy);
+  dash.getRange("C34").setFormula("=SUM(C26:C33)").setFontWeight("bold");
+  dash.getRange("D34").setFormula("=SUM(D26:D33)").setFontWeight("bold").setNumberFormat("0.0%");
+  dash.getRange("E34").setFormula("=SUM(E26:E33)").setFontWeight("bold").setNumberFormat('"Rs. " #,##0');
+  dash.getRange("F34").setValue("-").setFontColor("#94A3B8");
+  dash.getRange("B34:F34").setBackground("#F8FAFC").setBorder(true, false, true, false, false, false, "#94A3B8", SpreadsheetApp.BorderStyle.DOUBLE);
 
-  // Table 4 Headers (Row 21, Cols H to M)
-  dash.getRange("H21:M21").setValues([["Month", "Orders", "Delivered", "Revenue (PKR)", "AOV (PKR)", "Delivery Rate"]])
+  // Table 4 Headers (Row 25, Cols H to M): Includes Delivered, Returned, and Return Rate %
+  dash.getRange("H25:M25").setValues([["Month", "Orders", "Delivered", "Returned", "Revenue (PKR)", "Return Rate"]])
     .setBackground("#F1F5F9").setFontWeight("bold").setFontColor("#334155").setFontSize(9);
 
   const months = [
@@ -591,59 +641,59 @@ function createExecutiveDashboard() {
   ];
 
   for (let i = 0; i < months.length; i++) {
-    const row = 22 + i;
+    const row = 26 + i;
     const m = months[i];
     dash.getRange(row, 8).setValue(m).setFontWeight("bold").setFontColor("#1E293B");
     dash.getRange(row, 9).setFormula(`=IFERROR(ROWS(FILTER(Orders!$A$2:$A, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=$H${row})), 0)`);
     dash.getRange(row, 10).setFormula(`=IFERROR(ROWS(FILTER(Orders!$A$2:$A, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=$H${row}, Orders!$J$2:$J="Delivered")), 0)`);
-    dash.getRange(row, 11).setFormula(`=IFERROR(SUM(FILTER(Orders!$I$2:$I, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=$H${row})), 0)`).setNumberFormat('"Rs. " #,##0');
-    dash.getRange(row, 12).setFormula(`=IFERROR(K${row}/I${row}, 0)`).setNumberFormat('"Rs. " #,##0');
-    dash.getRange(row, 13).setFormula(`=IFERROR(J${row}/I${row}, 0)`).setNumberFormat("0.0%");
+    dash.getRange(row, 11).setFormula(`=IFERROR(ROWS(FILTER(Orders!$A$2:$A, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=$H${row}, Orders!$J$2:$J="Returned")), 0)`);
+    dash.getRange(row, 12).setFormula(`=IFERROR(SUM(FILTER(Orders!$I$2:$I, Orders!$B$2:$B<>"", TEXT(Orders!$B$2:$B,"mmmm")=$H${row})), 0)`).setNumberFormat('"Rs. " #,##0');
+    dash.getRange(row, 13).setFormula(`=IFERROR(K${row}/I${row}, 0)`).setNumberFormat("0.0%");
   }
 
-  // Row 34: Annual Total YTD
-  dash.getRange("H34").setValue("Annual Total YTD").setFontWeight("bold").setFontColor(STORE_CONFIG.brandNavy);
-  dash.getRange("I34").setFormula("=SUM(I22:I33)").setFontWeight("bold");
-  dash.getRange("J34").setFormula("=SUM(J22:J33)").setFontWeight("bold");
-  dash.getRange("K34").setFormula("=SUM(K22:K33)").setFontWeight("bold").setNumberFormat('"Rs. " #,##0');
-  dash.getRange("L34").setFormula("=IFERROR(K34/I34, 0)").setFontWeight("bold").setNumberFormat('"Rs. " #,##0');
-  dash.getRange("M34").setFormula("=IFERROR(J34/I34, 0)").setFontWeight("bold").setNumberFormat("0.0%");
-  dash.getRange("H34:M34").setBackground("#F8FAFC").setBorder(true, false, true, false, false, false, "#94A3B8", SpreadsheetApp.BorderStyle.DOUBLE);
+  // Row 38: Annual Total YTD
+  dash.getRange("H38").setValue("Annual Total YTD").setFontWeight("bold").setFontColor(STORE_CONFIG.brandNavy);
+  dash.getRange("I38").setFormula("=SUM(I26:I37)").setFontWeight("bold");
+  dash.getRange("J38").setFormula("=SUM(J26:J37)").setFontWeight("bold");
+  dash.getRange("K38").setFormula("=SUM(K26:K37)").setFontWeight("bold");
+  dash.getRange("L38").setFormula("=SUM(L26:L37)").setFontWeight("bold").setNumberFormat('"Rs. " #,##0');
+  dash.getRange("M38").setFormula("=IFERROR(K38/I38, 0)").setFontWeight("bold").setNumberFormat("0.0%");
+  dash.getRange("H38:M38").setBackground("#F8FAFC").setBorder(true, false, true, false, false, false, "#94A3B8", SpreadsheetApp.BorderStyle.DOUBLE);
 
-  // --- EMBEDDED VISUAL CHARTS ---
+  // --- EMBEDDED VISUAL CHARTS (5 CHARTS) ---
   try {
-    // Chart 1: Order Pipeline Status Donut Chart (Placed at Row 36, Col B)
+    // Chart 1: Order Pipeline Status Donut Chart (Row 41, Col B)
     const chartStatus = dash.newChart()
       .setChartType(Charts.ChartType.PIE)
-      .addRange(dash.getRange("B12:C17"))
-      .setPosition(36, 2, 5, 5)
+      .addRange(dash.getRange("B14:C21"))
+      .setPosition(41, 2, 5, 5)
       .setOption('title', '📦 Order Pipeline Status Distribution')
       .setOption('pieHole', 0.4)
-      .setOption('colors', ['#3B82F6', '#8B5CF6', '#F59E0B', '#10B981', '#EF4444'])
+      .setOption('colors', ['#8B5CF6', '#3B82F6', '#F59E0B', '#06B6D4', '#10B981', '#DC2626', '#64748B'])
       .setOption('legend', { position: 'right' })
       .setOption('width', 490)
       .setOption('height', 310)
       .build();
     dash.insertChart(chartStatus);
 
-    // Chart 2: 12-Month Performance Column Chart (Placed at Row 36, Col H)
+    // Chart 2: 12-Month Performance Trend Column Chart (Row 41, Col H)
     const chartMonthly = dash.newChart()
       .setChartType(Charts.ChartType.COLUMN)
-      .addRange(dash.getRange("H21:K33"))
-      .setPosition(36, 8, 5, 5)
-      .setOption('title', '📊 12-Month Orders & Delivered Volume')
-      .setOption('colors', ['#2563EB', '#10B981', '#F97316'])
+      .addRange(dash.getRange("H25:K37"))
+      .setPosition(41, 8, 5, 5)
+      .setOption('title', '📊 12-Month Orders, Delivered & Returned Volume')
+      .setOption('colors', ['#2563EB', '#10B981', '#DC2626'])
       .setOption('legend', { position: 'bottom' })
       .setOption('width', 540)
       .setOption('height', 310)
       .build();
     dash.insertChart(chartMonthly);
 
-    // Chart 3: Payment Method Share (Placed at Row 53, Col B)
+    // Chart 3: Payment Method Split (Row 58, Col B)
     const chartPayment = dash.newChart()
       .setChartType(Charts.ChartType.PIE)
-      .addRange(dash.getRange("H12:J16"))
-      .setPosition(53, 2, 5, 5)
+      .addRange(dash.getRange("H14:J18"))
+      .setPosition(58, 2, 5, 5)
       .setOption('title', '💳 Payment Method Split (COD vs Prepaid)')
       .setOption('colors', ['#0D9488', '#10B981', '#EC4899', '#3B82F6'])
       .setOption('legend', { position: 'right' })
@@ -652,11 +702,11 @@ function createExecutiveDashboard() {
       .build();
     dash.insertChart(chartPayment);
 
-    // Chart 4: Top Pakistan Cities Bar Chart (Placed at Row 53, Col H)
+    // Chart 4: Top Pakistan Cities Bar Chart (Row 58, Col H)
     const chartCities = dash.newChart()
       .setChartType(Charts.ChartType.BAR)
-      .addRange(dash.getRange("B21:C28"))
-      .setPosition(53, 8, 5, 5)
+      .addRange(dash.getRange("B25:C32"))
+      .setPosition(58, 8, 5, 5)
       .setOption('title', '🏙️ Regional Demand by Pakistan City')
       .setOption('colors', ['#0B132B'])
       .setOption('legend', { position: 'none' })
@@ -664,30 +714,37 @@ function createExecutiveDashboard() {
       .setOption('height', 300)
       .build();
     dash.insertChart(chartCities);
+
+    // Chart 5: Month-Wise Order Return Analysis (RTO Trend) (Row 75, Col B)
+    const chartReturns = dash.newChart()
+      .setChartType(Charts.ChartType.COLUMN)
+      .addRange(dash.getRange("H25:H37"))
+      .addRange(dash.getRange("K25:K37"))
+      .setPosition(75, 2, 5, 5)
+      .setOption('title', '🚨 Month-Wise Order Return Analysis (RTO Volume & Trend)')
+      .setOption('colors', ['#DC2626'])
+      .setOption('legend', { position: 'none' })
+      .setOption('width', 1040)
+      .setOption('height', 310)
+      .build();
+    dash.insertChart(chartReturns);
+
   } catch (chartErr) {
     Logger.log("Chart generation note: " + chartErr.toString());
   }
 
-  // Activate the Executive Dashboard
   ss.setActiveSheet(dash);
-  SpreadsheetApp.getUi().alert("✅ Executive Dashboard ready!\n\nUse the 'Select Month' dropdown in Cell C4 to filter your store's live performance, or leave it as 'All Time'.");
+  SpreadsheetApp.getUi().alert("✅ Executive Dashboard ready!\n\nAll Tier 1 & Tier 2 KPI cards, Returned Order metrics, and Month-Wise Return Analysis chart have been built successfully.");
 }
 
 /**
  * 2. UNIFIED WEBHOOK RECEIVER (doPost)
- * Receives multi-action payloads from Calenvee Storefront & Local Management App:
- * - action: "create_order" (checkout placement)
- * - action: "sync_catalog" (sync products to Inventory tab)
- * - action: "sync_settings" (sync store settings to Store Settings tab)
- * - action: "update_order_status" (order dispatch & tracking email)
- * - action: "get_orders" (fetch all orders)
  */
 function doPost(e) {
   try {
     const rawData = (e && e.postData && e.postData.contents) ? e.postData.contents : "{}";
     const payload = JSON.parse(rawData);
     
-    // STRICT ACTION DISPATCH: Only recognize explicit valid actions (NEVER default to create_order!)
     const action = payload.action || (payload.order ? 'create_order' : null);
 
     if (!action) {
@@ -723,13 +780,11 @@ function doPost(e) {
 }
 
 /**
- * Generates the next sequential Order ID in format CAL-ORD-1000001, CAL-ORD-1000002...
- * Scans Orders sheet and ScriptProperties to guarantee strictly increasing sequential IDs.
+ * Generates sequential Order ID: CAL-ORD-1000001, CAL-ORD-1000002...
  */
 function getNextSequentialOrderId(ordersSheet, requestedId) {
   let highestNum = 1000000;
   
-  // 1. Read persistent counter from Script Properties
   try {
     const props = PropertiesService.getScriptProperties();
     const savedLast = props.getProperty("LAST_ORDER_SEQ");
@@ -743,7 +798,6 @@ function getNextSequentialOrderId(ordersSheet, requestedId) {
     Logger.log("ScriptProperties read error: " + propErr.toString());
   }
 
-  // 2. Scan Orders sheet Column A for highest CAL-ORD- number
   if (ordersSheet && ordersSheet.getLastRow() > 1) {
     const ids = ordersSheet.getRange(2, 1, ordersSheet.getLastRow() - 1, 1).getValues();
     for (let i = 0; i < ids.length; i++) {
@@ -758,7 +812,6 @@ function getNextSequentialOrderId(ordersSheet, requestedId) {
     }
   }
 
-  // 3. If client already generated a valid sequential ID that doesn't conflict, validate it
   if (requestedId && typeof requestedId === 'string') {
     const reqMatch = requestedId.trim().match(/^CAL-ORD-(\d+)$/i);
     if (reqMatch) {
@@ -783,13 +836,13 @@ function getNextSequentialOrderId(ordersSheet, requestedId) {
 
 /**
  * 2A. ORDER CREATION HANDLER
- * Enforces strict validation: Only REAL placed orders with verified customer name,
- * phone, items list, and total > 0 are logged to Orders & OrderItems tabs.
+ * - Logs order with status "Placed" (NOT automatically "Confirmed")
+ * - Sends official luxury invoice email (Order Placed) to customer
+ * - Sends alert notification with attached payment proof to store owner
  */
 function handleCreateOrder(payload) {
   const order = payload.order || payload;
 
-  // STRICT VALIDATION GUARD: Reject any malformed, empty, or ghost orders
   const customerName = String(order.customerName || '').trim();
   const phone = String(order.phone || '').trim();
   const address = String(order.address || '').trim();
@@ -821,14 +874,18 @@ function handleCreateOrder(payload) {
   const ordersSheet = ss.getSheetByName("Orders") || ss.getActiveSheet();
   const itemsSheet = ss.getSheetByName("OrderItems");
 
-  // Generate authoritative sequential Order ID (e.g. CAL-ORD-1000001, CAL-ORD-1000002...)
   const finalOrderId = getNextSequentialOrderId(ordersSheet, order.orderId);
   order.orderId = finalOrderId;
 
-  const itemsSummary = itemsList.map(item => `${item.name} (x${item.quantity}) - Rs. ${item.price}`).join("; ");
+  const itemsSummary = itemsList.map(item => {
+    const itemName = item.name || (item.product && item.product.name) || "Calenvee Product";
+    const itemQty = item.quantity || 1;
+    const itemPrice = item.price || (item.product && item.product.price) || 0;
+    return `${itemName} (x${itemQty}) - Rs. ${itemPrice}`;
+  }).join("; ");
+
   const timestamp = order.createdAt ? new Date(order.createdAt) : new Date();
 
-  // Process payment receipt attachment (if customer uploaded screenshot)
   let receiptBlob = null;
   let receiptUrl = "N/A";
   const paymentMethodUpper = (order.paymentMethod || "cod").toUpperCase();
@@ -846,7 +903,6 @@ function handleCreateOrder(payload) {
 
       receiptBlob = Utilities.newBlob(decodedBytes, mimeType, fileName);
 
-      // Store into dedicated Google Drive folder
       let folder;
       const folders = DriveApp.getFoldersByName("Calenvee Payment Receipts");
       if (folders.hasNext()) {
@@ -867,11 +923,10 @@ function handleCreateOrder(payload) {
     ? `=HYPERLINK("${receiptUrl}", "View Receipt 🧾")`
     : (paymentMethodUpper === "COD" ? "N/A (Cash on Delivery)" : "No Screenshot Uploaded");
 
-  // Initial tracking number is ALWAYS "N/A" on initial placement (DO NOT auto-generate fake tracking!)
   const initialTracking = "N/A";
   const initialCourier = order.courier || "Pending Dispatch (TCS Express)";
 
-  // Append strictly verified order to Orders tab
+  // Append with status "Placed" (Internal management team will verify and transition to "Confirmed")
   ordersSheet.appendRow([
     order.orderId,
     timestamp,
@@ -882,51 +937,64 @@ function handleCreateOrder(payload) {
     address,
     paymentMethodUpper,
     total,
-    "Confirmed",
+    "Placed", // Order status is Placed upon checkout!
     initialCourier,
     initialTracking,
     itemsSummary,
     order.notes || "None",
-    order.email && order.email.includes("@") ? "Yes" : "No Email",
-    "No",
+    "No", // Confirmation Email Sent: No (will become Yes when status is set to Confirmed)
+    "No", // Dispatch Email Sent: No
     receiptProofCell
   ]);
 
-  // Append items to OrderItems tab with the exact sequential orderId
+  // Append items to OrderItems tab
   if (itemsSheet && itemsList.length > 0) {
     itemsList.forEach(item => {
+      const itemName = item.name || (item.product && item.product.name) || "Calenvee Product";
+      const itemPrice = item.price || (item.product && item.product.price) || 0;
+      const itemQty = item.quantity || 1;
+      const itemColor = (item.selectedColor && item.selectedColor.name) || item.color || "Standard";
+      const itemSize = (item.selectedSize && item.selectedSize.name) || item.size || "Standard";
+
       itemsSheet.appendRow([
         order.orderId,
         timestamp,
-        item.name,
-        item.quantity,
-        item.price,
-        item.price * item.quantity,
-        item.selectedColor?.name || "Standard",
-        item.selectedSize?.label || "Standard"
+        itemName,
+        itemQty,
+        itemPrice,
+        itemPrice * itemQty,
+        itemColor,
+        itemSize
       ]);
     });
   }
 
-  // Send customer order confirmation email with official invoice (if email was provided)
+  // Send customer order placement email with official luxury invoice
   if (order.email && order.email.includes("@") && order.email !== "N/A") {
-    sendCustomerOrderConfirmationEmail(order);
+    try {
+      sendCustomerOrderPlacedEmail(order);
+    } catch (mailErr) {
+      Logger.log("Order placed email error: " + mailErr.toString());
+    }
   }
 
-  // Send store owner instant notification with attached receipt to calenvee.pk@gmail.com
-  sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl);
+  // Send store owner instant alert email to calenvee.pk@gmail.com
+  try {
+    sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl);
+  } catch (ownerMailErr) {
+    Logger.log("Owner alert email error: " + ownerMailErr.toString());
+  }
 
   return ContentService.createTextOutput(JSON.stringify({
     success: true,
     orderId: order.orderId,
-    message: `Order #${order.orderId} verified and recorded successfully in Calenvee database.`
+    status: "Placed",
+    message: `Order #${order.orderId} placed successfully. Pending manual verification.`
   })).setMimeType(ContentService.MimeType.JSON);
 }
 
 /**
  * 2B. INVENTORY / CATALOG SYNC HANDLER
- * Keeps Google Sheets "Inventory" tab 100% updated with products, stock, prices & variants
- * saved in the Store Data and Management Local Web app.
  */
 function handleSyncCatalog(payload) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -994,8 +1062,6 @@ function handleSyncCatalog(payload) {
 
 /**
  * 2C. STORE SETTINGS & PAYMENT GATEWAY SYNC HANDLER
- * Keeps Google Sheets "Store Settings" tab synchronized with helpline, WhatsApp,
- * shipping policies, and Easypaisa / Jazzcash / Bank account details.
  */
 function handleSyncSettings(payload) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1028,7 +1094,6 @@ function handleSyncSettings(payload) {
     ["deliveryFee", s.deliveryFee !== undefined ? s.deliveryFee : 250, "Shipping", now],
     ["freeShippingThreshold", s.freeShippingThreshold !== undefined ? s.freeShippingThreshold : 3500, "Shipping", now],
     ["storeNotice", s.storeNotice || "", "Announcement", now],
-    // Payments
     ["easypaisaTitle", (p.easypaisa && p.easypaisa.accountTitle) || "", "Payments", now],
     ["easypaisaNumber", (p.easypaisa && p.easypaisa.accountNumber) || "", "Payments", now],
     ["jazzcashTitle", (p.jazzcash && p.jazzcash.accountTitle) || "", "Payments", now],
@@ -1053,7 +1118,6 @@ function handleSyncSettings(payload) {
 
 /**
  * 2D. ORDERS FEED (GET LIVE ORDERS)
- * Fetches all orders from Google Sheets so the Local Web App can display and manage them.
  */
 function handleGetOrders() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1093,8 +1157,8 @@ function handleGetOrders() {
       address: String(row[6] || ""),
       paymentMethod: String(row[7] || "COD"),
       total: Number(row[8] || 0),
-      status: String(row[9] || "Confirmed"),
-      courier: String(row[10] || "TCS Express"),
+      status: String(row[9] || "Placed"),
+      courier: String(row[10] || "Pending Dispatch (TCS Express)"),
       trackingNumber: String(row[11] || "N/A"),
       itemsSummary: String(row[12] || ""),
       notes: String(row[13] || ""),
@@ -1107,18 +1171,19 @@ function handleGetOrders() {
   return ContentService.createTextOutput(JSON.stringify({
     success: true,
     count: orders.length,
-    orders: orders.reverse() // latest orders first
+    orders: orders.reverse()
   })).setMimeType(ContentService.MimeType.JSON);
 }
 
 /**
- * 2E. ORDER STATUS & DISPATCH TRACKING UPDATE HANDLER
- * Updates status in Google Sheets, saves courier & tracking ID,
- * and automatically sends customer dispatch email.
+ * 2E. ORDER STATUS & DISPATCH / CONFIRMATION UPDATE HANDLER
+ * - Supports transitioning to "Confirmed", "Dispatched", "Delivered", "Returned", etc.
+ * - If status is "Confirmed", sends confirmation email to customer.
+ * - If status is "Dispatched", sends dispatch email (optional tracking ID).
  */
 function handleUpdateOrderStatus(payload) {
   const orderId = payload.orderId;
-  const newStatus = payload.status || "Dispatched";
+  const newStatus = payload.status || "Confirmed";
   const courier = payload.courier || "TCS Express";
   const rawTracking = payload.trackingNumber;
   const trackingNumber = (rawTracking && String(rawTracking).trim() !== '' && String(rawTracking).trim().toUpperCase() !== 'N/A')
@@ -1162,7 +1227,7 @@ function handleUpdateOrderStatus(payload) {
     })).setMimeType(ContentService.MimeType.JSON);
   }
 
-  // Update Status (Col 10), Courier (Col 11), Tracking (Col 12)
+  // Update Status (Col 10)
   sheet.getRange(foundRow, 10).setValue(newStatus);
   if (courier) sheet.getRange(foundRow, 11).setValue(courier);
   if (trackingNumber) sheet.getRange(foundRow, 12).setValue(trackingNumber);
@@ -1170,7 +1235,30 @@ function handleUpdateOrderStatus(payload) {
   let emailSent = false;
   const customerEmail = String(orderData[4] || "");
   const customerName = String(orderData[2] || "");
+  const phone = String(orderData[3] || "");
+  const city = String(orderData[5] || "");
+  const total = Number(orderData[8] || 0);
 
+  // 1. Status transition: Confirmed
+  if (newStatus === "Confirmed" && sendEmail && customerEmail && customerEmail.includes("@")) {
+    try {
+      sendCustomerOrderConfirmationEmail({
+        orderId: orderId,
+        customerName: customerName,
+        email: customerEmail,
+        phone: phone,
+        city: city,
+        total: total,
+        itemsSummary: String(orderData[12] || "")
+      });
+      sheet.getRange(foundRow, 15).setValue("Yes");
+      emailSent = true;
+    } catch (mailErr) {
+      Logger.log("Confirmation email error: " + mailErr.toString());
+    }
+  }
+
+  // 2. Status transition: Dispatched
   if (newStatus === "Dispatched" && sendEmail && customerEmail && customerEmail.includes("@")) {
     try {
       sendCustomerDispatchEmail({
@@ -1194,7 +1282,7 @@ function handleUpdateOrderStatus(payload) {
     courier: courier,
     trackingNumber: trackingNumber,
     emailSent: emailSent,
-    message: `Order #${orderId} status updated to ${newStatus}${emailSent ? ' & dispatch email sent to customer' : ''}.`
+    message: `Order #${orderId} status updated to ${newStatus}${emailSent ? ' & email sent to customer' : ''}.`
   })).setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -1284,8 +1372,9 @@ function doGet(e) {
 }
 
 /**
- * 4. ON-EDIT TRIGGER (Automated Dispatch Email)
- * When you change the status in Column J to "Dispatched", this sends the tracking email!
+ * 4. ON-EDIT TRIGGER (Automated Email Sync on Sheet Edit)
+ * - Changing Column J to "Confirmed" sends confirmation email and updates Column 15 to "Yes"
+ * - Changing Column J to "Dispatched" sends dispatch email and updates Column 16 to "Yes"
  */
 function onEdit(e) {
   const sheet = e.range.getSheet();
@@ -1296,37 +1385,64 @@ function onEdit(e) {
 
   // Column 10 is "Order Status"
   if (col === 10 && row > 1) {
-    const newStatus = e.value;
-    const values = sheet.getRange(row, 1, 1, 16).getValues()[0];
+    const newStatus = String(e.value || "").trim();
+    const values = sheet.getRange(row, 1, 1, 17).getValues()[0];
 
     const orderId = values[0];
     const customerName = values[2];
     const email = values[4];
+    const phone = values[3];
+    const city = values[5];
+    const total = Number(values[8] || 0);
     const courier = values[10] || "TCS Express";
-    const trackingNumber = values[11] || "TRK-" + Math.floor(10000000 + Math.random() * 90000000);
+    const trackingNumber = values[11] || "N/A";
+    const confirmationEmailSent = values[14];
     const dispatchEmailSent = values[15];
 
+    // Trigger 1: Status changed to Confirmed
+    if (newStatus === "Confirmed" && confirmationEmailSent !== "Yes" && email && email.includes("@")) {
+      try {
+        sendCustomerOrderConfirmationEmail({
+          orderId: orderId,
+          customerName: customerName,
+          email: email,
+          phone: phone,
+          city: city,
+          total: total,
+          itemsSummary: String(values[12] || "")
+        });
+        sheet.getRange(row, 15).setValue("Yes");
+      } catch (err) {
+        Logger.log("onEdit confirmation err: " + err.toString());
+      }
+    }
+
+    // Trigger 2: Status changed to Dispatched
     if (newStatus === "Dispatched" && dispatchEmailSent !== "Yes" && email && email.includes("@")) {
-      sendCustomerDispatchEmail({
-        orderId: orderId,
-        customerName: customerName,
-        email: email,
-        courier: courier,
-        trackingNumber: trackingNumber
-      });
-      sheet.getRange(row, 16).setValue("Yes");
+      try {
+        sendCustomerDispatchEmail({
+          orderId: orderId,
+          customerName: customerName,
+          email: email,
+          courier: courier,
+          trackingNumber: trackingNumber
+        });
+        sheet.getRange(row, 16).setValue("Yes");
+      } catch (err) {
+        Logger.log("onEdit dispatch err: " + err.toString());
+      }
     }
   }
 }
 
 /**
- * 5. OFFICIAL LUXURY HTML INVOICE: CUSTOMER ORDER CONFIRMATION
- * Matches Calenvee's official high-resolution invoice template.
+ * 5A. OFFICIAL LUXURY HTML INVOICE: CUSTOMER ORDER PLACED EMAIL
+ * Matches the official Luxury Invoice layout in Image 2.
  */
-function sendCustomerOrderConfirmationEmail(order) {
+function sendCustomerOrderPlacedEmail(order) {
   const cfg = getDynamicStoreSettings();
-  const subject = `Invoice & Order Confirmation: #${order.orderId} | ${cfg.storeName}`;
-  const htmlBody = generateCustomerInvoiceEmailHtml(order);
+  const subject = `Order Placed: #${order.orderId} | Official Invoice — ${cfg.storeName}`;
+  const htmlBody = generateCustomerInvoiceEmailHtml(order, "placed");
 
   GmailApp.sendEmail(order.email, subject, "", {
     htmlBody: htmlBody,
@@ -1334,27 +1450,51 @@ function sendCustomerOrderConfirmationEmail(order) {
   });
 }
 
-function generateCustomerInvoiceEmailHtml(order) {
+/**
+ * 5B. OFFICIAL LUXURY HTML INVOICE: CUSTOMER ORDER CONFIRMATION EMAIL
+ * Sent once internal management verifies and marks the order as "Confirmed".
+ */
+function sendCustomerOrderConfirmationEmail(order) {
   const cfg = getDynamicStoreSettings();
+  const subject = `Order Confirmed: #${order.orderId} | Ready for Packing — ${cfg.storeName}`;
+  const htmlBody = generateCustomerInvoiceEmailHtml(order, "confirmed");
+
+  GmailApp.sendEmail(order.email, subject, "", {
+    htmlBody: htmlBody,
+    name: cfg.storeName
+  });
+}
+
+/**
+ * GENERATES HIGH-RESOLUTION LUXURY HTML INVOICE EMAIL
+ * Supports both stage = "placed" and stage = "confirmed"
+ */
+function generateCustomerInvoiceEmailHtml(order, stage) {
+  const cfg = getDynamicStoreSettings();
+  const isConfirmed = stage === "confirmed";
+
   const dateStr = order.createdAt 
     ? Utilities.formatDate(new Date(order.createdAt), "Asia/Karachi", "dd MMM yyyy")
     : Utilities.formatDate(new Date(), "Asia/Karachi", "dd MMM yyyy");
 
-  const itemsList = order.items || [];
+  const itemsList = Array.isArray(order.items) && order.items.length > 0 
+    ? order.items 
+    : [{ name: order.itemsSummary || "Calenvee Product", quantity: 1, price: order.total || 0 }];
+
   const rowsHtml = itemsList.map((item, idx) => {
     const itemName = item.name || (item.product && item.product.name) || "Calenvee Product";
     let itemImage = (item.product && item.product.images && item.product.images[0]) || item.image || "https://calenvee.pk/hero/hero_podium_collection.jpg";
     if (itemImage && !itemImage.startsWith("http")) {
       itemImage = "https://calenvee.pk" + (itemImage.startsWith("/") ? "" : "/") + itemImage;
     }
-    const itemPrice = item.price || (item.product && item.product.price) || 0;
-    const itemQty = item.quantity || 1;
+    const itemPrice = Number(item.price || (item.product && item.product.price) || 0);
+    const itemQty = Number(item.quantity || 1);
     const itemColor = (item.selectedColor && item.selectedColor.name) || item.color || "";
     const itemSize = (item.selectedSize && item.selectedSize.name) || item.size || "";
     
     let variantDetails = [];
-    if (itemSize) variantDetails.push(`Size: ${itemSize}`);
-    if (itemColor) variantDetails.push(`Color: ${itemColor}`);
+    if (itemSize && itemSize !== "Standard") variantDetails.push(`Size: ${itemSize}`);
+    if (itemColor && itemColor !== "Standard") variantDetails.push(`Color: ${itemColor}`);
     const variantStr = variantDetails.join(" | ");
 
     return `
@@ -1388,12 +1528,18 @@ function generateCustomerInvoiceEmailHtml(order) {
     `;
   }).join("");
 
-  const subtotal = order.subtotal || order.total || 0;
+  const subtotal = Number(order.subtotal || order.total || 0);
   const shippingFeeStr = order.shippingFee === 0 ? "FREE" : (order.shippingFee ? order.shippingFee.toLocaleString() : "250");
-  const totalStr = (order.total || 0).toLocaleString();
+  const totalStr = Number(order.total || 0).toLocaleString();
   const paymentMethodLabel = (order.paymentMethod === "cod" || !order.paymentMethod)
     ? "Cash on Delivery (COD)"
-    : order.paymentMethod.toUpperCase();
+    : String(order.paymentMethod).toUpperCase();
+
+  const statusHeadline = isConfirmed ? "ORDER CONFIRMED" : "INVOICE";
+  const statusSubtitle = isConfirmed ? "YOUR ORDER HAS BEEN CONFIRMED!" : "THANK YOU FOR YOUR ORDER!";
+  const statusNoticeText = isConfirmed 
+    ? "Great news! Your order has been verified and confirmed by our team. It is now being carefully prepared and packaged for courier dispatch."
+    : "Your order has been placed successfully and is pending internal verification. Our management team will verify and confirm your order shortly. Nationwide delivery in 7-10 days.";
 
   return `
 <!DOCTYPE html>
@@ -1401,7 +1547,7 @@ function generateCustomerInvoiceEmailHtml(order) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice #${order.orderId}</title>
+  <title>${statusHeadline} #${order.orderId}</title>
 </head>
 <body style="margin: 0; padding: 20px 10px; background-color: #F3F4F6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #111827;">
   <table align="center" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 660px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E5E7EB; overflow: hidden; margin: 0 auto; box-shadow: 0 4px 16px rgba(0,0,0,0.06);">
@@ -1442,15 +1588,13 @@ function generateCustomerInvoiceEmailHtml(order) {
       <td style="padding: 10px 30px 20px 30px;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top: 1px solid #F1F5F9; padding-top: 20px;">
           <tr>
-            <!-- Left: Title & Subtitle -->
             <td style="vertical-align: top;">
-              <h1 style="margin: 0; font-size: 32px; font-weight: 900; color: #111827; letter-spacing: 0.5px; line-height: 1.1;">INVOICE</h1>
-              <div style="margin-top: 6px; font-size: 13px; font-weight: 800; color: #111827; letter-spacing: 0.5px; text-transform: uppercase;">THANK YOU FOR YOUR ORDER!</div>
+              <h1 style="margin: 0; font-size: 30px; font-weight: 900; color: #111827; letter-spacing: 0.5px; line-height: 1.1;">${statusHeadline}</h1>
+              <div style="margin-top: 6px; font-size: 13px; font-weight: 800; color: ${isConfirmed ? '#059669' : '#111827'}; letter-spacing: 0.5px; text-transform: uppercase;">${statusSubtitle}</div>
               <p style="margin: 6px 0 0 0; font-size: 12px; color: #6B7280; line-height: 1.5;">
-                We truly appreciate your trust in CALENVEE.<br>Here's a summary of your order details.
+                We truly appreciate your trust in CALENVEE.<br>Here is a summary of your official order details.
               </p>
             </td>
-            <!-- Right: Order Date & Order Number Cards -->
             <td style="text-align: right; vertical-align: top; width: 230px;">
               <table cellpadding="0" cellspacing="0" border="0" align="right" style="margin-top: 4px;">
                 <tr>
@@ -1512,7 +1656,7 @@ function generateCustomerInvoiceEmailHtml(order) {
                 </tr>
                 <tr>
                   <td style="font-weight: 600; color: #6B7280; vertical-align: top;">Address</td>
-                  <td style="font-weight: 500; color: #111827; line-height: 1.4;">: ${order.address}, ${order.city}, Pakistan</td>
+                  <td style="font-weight: 500; color: #111827; line-height: 1.4;">: ${order.address || ''}${order.city ? ', ' + order.city : ''}, Pakistan</td>
                 </tr>
               </table>
             </td>
@@ -1558,7 +1702,7 @@ function generateCustomerInvoiceEmailHtml(order) {
                   </td>
                   <td style="padding-left: 10px; vertical-align: top;">
                     <p style="margin: 0; font-size: 12px; color: #334155; line-height: 1.5; font-weight: 500;">
-                      Your order is being prepared with care and will be shipped soon. We'll keep you updated!
+                      ${statusNoticeText}
                     </p>
                     <div style="width: 36px; height: 3px; background-color: #F97316; border-radius: 2px; margin-top: 8px;"></div>
                   </td>
@@ -1575,7 +1719,7 @@ function generateCustomerInvoiceEmailHtml(order) {
                 ${order.discount ? `
                 <tr>
                   <td style="color: #059669; font-weight: 500;">Discount</td>
-                  <td style="text-align: right; font-weight: 700; color: #059669;">- ${order.discount.toLocaleString()}</td>
+                  <td style="text-align: right; font-weight: 700; color: #059669;">- ${Number(order.discount).toLocaleString()}</td>
                 </tr>` : ""}
                 <tr>
                   <td style="color: #6B7280; font-weight: 500;">Shipping Fee</td>
@@ -1616,7 +1760,7 @@ function generateCustomerInvoiceEmailHtml(order) {
                   ${paymentMethodLabel}
                 </div>
                 <div style="font-size: 10px; color: #6B7280; line-height: 1.4;">
-                  ${order.paymentMethod === 'cod' ? 'You can pay at the time of delivery.' : 'Receipt verified & confirmed.'}
+                  ${order.paymentMethod === 'cod' || !order.paymentMethod ? 'You can pay at the time of delivery.' : 'Receipt verified & confirmed.'}
                 </div>
               </div>
             </td>
@@ -1627,7 +1771,7 @@ function generateCustomerInvoiceEmailHtml(order) {
                   📝 Order Notes
                 </div>
                 <div style="font-size: 10px; color: #6B7280; line-height: 1.4;">
-                  ${order.notes && order.notes !== 'N/A' && order.notes !== 'None' ? order.notes : 'Please inspect your order at the time of delivery. In case of any issue, contact us within 24 hours.'}
+                  ${order.notes && order.notes !== 'N/A' && order.notes !== 'None' ? order.notes : 'Please inspect your parcel at the time of delivery. In case of any query, contact us within 24 hours.'}
                 </div>
               </div>
             </td>
@@ -1754,29 +1898,34 @@ function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
   const isPrepaid = (order.paymentMethod || "cod").toLowerCase() !== "cod";
   const hasReceipt = !!receiptBlob;
   
-  let subjectPrefix = "📦 [NEW ORDER]";
+  let subjectPrefix = "📦 [NEW ORDER PLACED]";
   if (hasReceipt) {
     subjectPrefix = "🧾 [PAYMENT RECEIPT ATTACHED]";
   } else if (isPrepaid) {
     subjectPrefix = "⚠️ [UNVERIFIED PREPAID]";
   } else {
-    subjectPrefix = "💵 [COD ORDER]";
+    subjectPrefix = "💵 [COD ORDER PLACED]";
   }
 
-  const subject = `${subjectPrefix} Order #${order.orderId} — Rs. ${order.total.toLocaleString()} (${order.customerName}, ${order.city})`;
+  const subject = `${subjectPrefix} Order #${order.orderId} — Rs. ${Number(order.total || 0).toLocaleString()} (${order.customerName}, ${order.city})`;
 
-  const itemsHtml = (order.items || []).map(item => `
-    <tr>
-      <td style="padding: 10px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px; color: #1E293B;">
-        <strong>${item.name}</strong>
-        ${item.selectedColor ? `<br><span style="font-size: 11px; color: #64748B;">Color: ${item.selectedColor.name}</span>` : ""}
-      </td>
-      <td style="padding: 10px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px; color: #475569; text-align: center;">x${item.quantity}</td>
-      <td style="padding: 10px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px; color: #0F172A; text-align: right; font-weight: bold;">Rs. ${(item.price * item.quantity).toLocaleString()}</td>
-    </tr>
-  `).join("");
+  const itemsHtml = (order.items || []).map(item => {
+    const itemName = item.name || (item.product && item.product.name) || "Calenvee Product";
+    const itemQty = Number(item.quantity || 1);
+    const itemPrice = Number(item.price || (item.product && item.product.price) || 0);
 
-  // Payment status card
+    return `
+      <tr>
+        <td style="padding: 10px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px; color: #1E293B;">
+          <strong>${itemName}</strong>
+          ${item.selectedColor ? `<br><span style="font-size: 11px; color: #64748B;">Color: ${item.selectedColor.name}</span>` : ""}
+        </td>
+        <td style="padding: 10px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px; color: #475569; text-align: center;">x${itemQty}</td>
+        <td style="padding: 10px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px; color: #0F172A; text-align: right; font-weight: bold;">Rs. ${(itemPrice * itemQty).toLocaleString()}</td>
+      </tr>
+    `;
+  }).join("");
+
   let paymentVerificationCard = "";
   if (hasReceipt) {
     paymentVerificationCard = `
@@ -1810,7 +1959,7 @@ function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
       <div style="margin: 20px 0; padding: 14px; background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px;">
         <strong style="color: #1E293B; font-size: 12px;">💵 CASH ON DELIVERY (COD)</strong>
         <p style="margin: 4px 0 0 0; font-size: 11px; color: #64748B;">
-          Collect Rs. ${order.total.toLocaleString()} in cash at customer's doorstep via courier rider.
+          Collect Rs. ${Number(order.total || 0).toLocaleString()} in cash at customer's doorstep via courier rider.
         </p>
       </div>
     `;
@@ -1826,7 +1975,7 @@ function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
         <tr>
           <td style="background-color: ${cfg.brandNavy}; padding: 24px 20px; text-align: center;">
             <img src="${cfg.logoUrl}" alt="${cfg.storeName}" style="max-height: 38px; margin-bottom: 8px;" />
-            <div style="color: #FFFFFF; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">🔥 NEW ORDER RECEIVED</div>
+            <div style="color: #FFFFFF; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">🔥 NEW ORDER PLACED (PENDING CONFIRMATION)</div>
             <div style="color: ${cfg.brandOrange}; font-size: 10px; font-weight: bold; margin-top: 4px; letter-spacing: 1.5px;">${cfg.storeTagline}</div>
           </td>
         </tr>
@@ -1839,15 +1988,15 @@ function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
                 <td>
                   <span style="font-size: 11px; color: #64748B; text-transform: uppercase; font-family: monospace;">Order ID</span>
                   <div style="font-size: 20px; font-weight: bold; color: #0B132B; font-family: monospace;">#${order.orderId}</div>
+                  <div style="font-size: 11px; font-weight: bold; color: #D97706; margin-top: 2px;">Status: PLACED (Call customer to confirm)</div>
                 </td>
                 <td style="text-align: right;">
                   <span style="font-size: 11px; color: #64748B; text-transform: uppercase;">Total Payable</span>
-                  <div style="font-size: 22px; font-weight: 800; color: ${cfg.brandOrange};">Rs. ${order.total.toLocaleString()}</div>
+                  <div style="font-size: 22px; font-weight: 800; color: ${cfg.brandOrange};">Rs. ${Number(order.total || 0).toLocaleString()}</div>
                 </td>
               </tr>
             </table>
 
-            <!-- Payment Proof Alert / Status Card -->
             ${paymentVerificationCard}
 
             <!-- Customer Details Card -->
@@ -1924,14 +2073,56 @@ function onOpen() {
     .addItem("📊 1. Build / Refresh Executive Dashboard", "createExecutiveDashboard")
     .addItem("⚙️ 2. Setup All Sheets (Dashboard + Orders + OrderItems + Inventory + Settings)", "setupSheet")
     .addSeparator()
-    .addItem("✉️ 3. Send Dispatch Email for Selected Row", "sendDispatchEmailForSelectedRow")
-    .addItem("🧹 4. Clean Ghost / Empty Orders (Remove Blank Rows)", "cleanGhostOrders")
-    .addItem("🧪 5. Send Test Email to Store Owner", "testOrderEmail")
+    .addItem("✉️ 3. Confirm Selected Order & Send Email", "confirmSelectedOrderRow")
+    .addItem("🚚 4. Dispatch Selected Order & Send Email", "sendDispatchEmailForSelectedRow")
     .addSeparator()
-    .addItem("🗑️ 6. Reset All Dummy Orders (Fresh Store)", "resetDummyData")
+    .addItem("🧹 5. Clean Ghost / Empty Orders (Remove Blank Rows)", "cleanGhostOrders")
+    .addItem("🧪 6. Send Test Email to Store Owner", "testOrderEmail")
+    .addItem("🗑️ 7. Reset All Dummy Orders (Fresh Store)", "resetDummyData")
     .addToUi();
 }
 
+/**
+ * 8A. Confirm Selected Order from Sheet Menu
+ */
+function confirmSelectedOrderRow() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const row = sheet.getActiveCell().getRow();
+  if (row <= 1) {
+    SpreadsheetApp.getUi().alert("Please select a customer order row first.");
+    return;
+  }
+
+  const values = sheet.getRange(row, 1, 1, 17).getValues()[0];
+  const orderId = values[0];
+  const customerName = values[2];
+  const email = values[4];
+  const phone = values[3];
+  const city = values[5];
+  const total = Number(values[8] || 0);
+
+  sheet.getRange(row, 10).setValue("Confirmed");
+
+  if (email && email.includes("@") && email !== "N/A") {
+    sendCustomerOrderConfirmationEmail({
+      orderId: orderId,
+      customerName: customerName,
+      email: email,
+      phone: phone,
+      city: city,
+      total: total,
+      itemsSummary: String(values[12] || "")
+    });
+    sheet.getRange(row, 15).setValue("Yes");
+    SpreadsheetApp.getUi().alert(`✅ Order #${orderId} marked Confirmed!\nConfirmation email sent to ${customerName} (${email}).`);
+  } else {
+    SpreadsheetApp.getUi().alert(`✅ Order #${orderId} marked Confirmed! (No email on file)`);
+  }
+}
+
+/**
+ * 8B. Dispatch Selected Order from Sheet Menu
+ */
 function sendDispatchEmailForSelectedRow() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   const row = sheet.getActiveCell().getRow();
@@ -1952,7 +2143,6 @@ function sendDispatchEmailForSelectedRow() {
     return;
   }
 
-  // Tracking number is OPTIONAL! If empty or N/A, keep it as N/A
   if (!trackingNumber || trackingNumber === "") {
     trackingNumber = "N/A";
   }
@@ -1972,9 +2162,7 @@ function sendDispatchEmailForSelectedRow() {
 }
 
 /**
- * 11. CLEAN GHOST / EMPTY ORDERS
- * Safely removes any erroneous empty rows (e.g. rows created with missing customer details,
- * or 0 total) from both Orders and OrderItems tabs.
+ * 9. CLEAN GHOST / EMPTY ORDERS
  */
 function cleanGhostOrders() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1993,7 +2181,6 @@ function cleanGhostOrders() {
   }
   
   const deletedOrders = [];
-  // Loop from bottom to top so index shifts do not affect row deletion
   for (let r = lastRow; r >= 2; r--) {
     const row = ordersSheet.getRange(r, 1, 1, 17).getValues()[0];
     const orderId = String(row[0] || "").trim();
@@ -2001,7 +2188,6 @@ function cleanGhostOrders() {
     const phone = String(row[3] || "").trim();
     const total = Number(row[8] || 0);
     
-    // Ghost row criteria: customer name is empty or "N/A", and total is 0 or phone is empty/"N/A"
     const isGhost = (!customerName || customerName.toUpperCase() === "N/A") && (total === 0 || !phone || phone.toUpperCase() === "N/A");
     
     if (isGhost) {
@@ -2010,7 +2196,6 @@ function cleanGhostOrders() {
     }
   }
   
-  // Clean corresponding OrderItems for deleted ghost orders or blank items
   if (itemsSheet && itemsSheet.getLastRow() > 1) {
     const itemsLastRow = itemsSheet.getLastRow();
     for (let r = itemsLastRow; r >= 2; r--) {
@@ -2023,7 +2208,6 @@ function cleanGhostOrders() {
     }
   }
   
-  // Refresh Dashboard
   if (typeof createExecutiveDashboard === 'function') {
     try { createExecutiveDashboard(); } catch (_) {}
   }
@@ -2034,13 +2218,13 @@ function cleanGhostOrders() {
 }
 
 /**
- * 9. TEST FUNCTION (Run this in script editor to test right now!)
+ * 10. TEST ORDER EMAIL FUNCTION
  */
 function testOrderEmail() {
   const sampleOrder = {
     orderId: "CV-999001",
     customerName: "Zohaib Saleem",
-    email: STORE_CONFIG.ownerEmail, // Sends test to calenvee.pk@gmail.com
+    email: STORE_CONFIG.ownerEmail,
     phone: "+923001234567",
     city: "Lahore",
     address: "Model Town, Block C",
@@ -2055,44 +2239,38 @@ function testOrderEmail() {
         name: "Obsidian Chronograph Edition",
         quantity: 1,
         price: 3899,
+        image: "https://calenvee.pk/hero/hero_podium_collection.jpg",
         selectedColor: { name: "Matte Stealth Black" }
       }
     ]
   };
 
-  // Create a sample test receipt text blob to demonstrate attachment
   const testBlob = Utilities.newBlob("CALENVEE TEST RECEIPT - EASYPAISA TRANSACTION ID: 882910405", "text/plain", "easypaisa_receipt_sample.txt");
 
-  sendCustomerOrderConfirmationEmail(sampleOrder);
+  sendCustomerOrderPlacedEmail(sampleOrder);
   sendOwnerNewOrderAlertEmail(sampleOrder, testBlob, "https://drive.google.com");
   Logger.log("Test emails with sample receipt sent to " + STORE_CONFIG.ownerEmail);
 }
 
 /**
- * 10. RESET DUMMY DATA FUNCTION
- * Clears all sample/starter orders and line items from "Orders" and "OrderItems" sheets,
- * preserving header Row 1 and updating the Executive Dashboard to fresh zero state.
+ * 11. RESET DUMMY DATA FUNCTION
  */
 function resetDummyData() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-  // 1. Clear Orders tab (keep header row 1)
   const ordersSheet = ss.getSheetByName("Orders");
   if (ordersSheet && ordersSheet.getLastRow() > 1) {
     ordersSheet.deleteRows(2, ordersSheet.getLastRow() - 1);
   }
 
-  // 2. Clear OrderItems tab (keep header row 1)
   const itemsSheet = ss.getSheetByName("OrderItems");
   if (itemsSheet && itemsSheet.getLastRow() > 1) {
     itemsSheet.deleteRows(2, itemsSheet.getLastRow() - 1);
   }
 
-  // 3. Refresh Dashboard KPIs
   if (typeof createExecutiveDashboard === 'function') {
     createExecutiveDashboard();
   }
 
   Logger.log("✅ All dummy orders cleared successfully. Sheet is ready for real live customer orders!");
 }
-
