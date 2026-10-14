@@ -23,18 +23,18 @@ export const NewsletterBanner: React.FC = () => {
     <section className="bg-white py-6 sm:py-10">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         
-        {/* Banner matching reference mockup: Warm, clean container with envelope visual */}
+        {/* Banner matching reference mockup: Center aligned on mobile */}
         <div className="rounded-2xl bg-[#FAF7F2] p-6 sm:p-8 lg:p-10 border border-stone-200/80 shadow-2xs">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-8">
+          <div className="flex flex-col lg:flex-row items-center justify-between text-center lg:text-left gap-6 lg:gap-8">
             
-            {/* Left: Envelope Graphic + Text */}
-            <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-4 max-w-xl">
+            {/* Left: Envelope Graphic + Text (Centered on mobile) */}
+            <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-4 max-w-xl mx-auto lg:mx-0">
               {/* Envelope Icon Badge */}
-              <div className="w-14 h-14 rounded-2xl bg-[#081320] text-white flex items-center justify-center flex-shrink-0 shadow-md">
+              <div className="w-14 h-14 rounded-2xl bg-[#081320] text-white flex items-center justify-center flex-shrink-0 shadow-md mx-auto sm:mx-0">
                 <Mail className="w-7 h-7 text-[#F97316]" />
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1 text-center sm:text-left">
                 <h3 className="text-xl sm:text-2xl font-black text-[#0B132B] tracking-tight">
                   Stay in the Loop
                 </h3>
@@ -45,14 +45,14 @@ export const NewsletterBanner: React.FC = () => {
             </div>
 
             {/* Right: Email Input & Subscribe Button */}
-            <div className="w-full lg:w-auto flex-1 max-w-md">
+            <div className="w-full lg:w-auto flex-1 max-w-md mx-auto lg:mx-0">
               {isSubscribed ? (
                 <div className="inline-flex items-center space-x-2 bg-emerald-50 border border-emerald-300 text-emerald-800 px-5 py-3 rounded-xl text-xs font-bold w-full justify-center">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                   <span>VIP Subscribed! Use code <strong>CALENVEE10</strong> for 10% off.</span>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center gap-2.5 w-full">
+                <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center justify-center gap-2.5 w-full">
                   <input
                     type="text"
                     name="website_hp"
@@ -69,7 +69,7 @@ export const NewsletterBanner: React.FC = () => {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full sm:flex-1 px-4 py-3 bg-white text-gray-900 placeholder-gray-400 rounded-xl text-xs sm:text-sm font-medium border border-gray-200 focus:outline-none focus:border-[#081320] shadow-2xs"
+                    className="w-full sm:flex-1 px-4 py-3 bg-white text-gray-900 placeholder-gray-400 rounded-xl text-xs sm:text-sm font-medium border border-gray-200 focus:outline-none focus:border-[#081320] shadow-2xs text-center sm:text-left"
                   />
                   <button
                     type="submit"

@@ -15,7 +15,7 @@ export const Footer: React.FC = () => {
       {/* Main Footer Container with broad mobile width */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-8">
         
-        {/* Top Grid: Brand Section (Centered in mobile) + 3 Nav Columns Side-by-Side in Mobile */}
+        {/* Top Grid: Brand Section (Centered in mobile) + 3 Nav Columns Side-by-Side in Mobile (Centered) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 pb-8 border-b border-slate-800">
           
           {/* Brand Info (4 cols on desktop, centered on mobile) */}
@@ -28,7 +28,7 @@ export const Footer: React.FC = () => {
               />
             </Link>
 
-            <p className="text-xs text-slate-400 leading-relaxed max-w-sm mx-auto lg:mx-0">
+            <p className="text-xs text-slate-400 leading-relaxed max-w-sm mx-auto lg:mx-0 text-center lg:text-left">
               Your trusted store for premium timepieces, waterproof jewelry, and modern lifestyle essentials across Pakistan. Shop smart, live better.
             </p>
 
@@ -66,15 +66,15 @@ export const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* 3 Nav Columns Side by Side in Single Row on Mobile & Desktop (8 cols on desktop) */}
+          {/* 3 Nav Columns Side by Side in Single Row on Mobile & Desktop (Center aligned on mobile) */}
           <div className="lg:col-span-8 grid grid-cols-3 gap-2 sm:gap-6 lg:gap-8 pt-2 lg:pt-0 text-center sm:text-left">
             
             {/* Col 1: Shop */}
-            <div className="space-y-2.5">
-              <h4 className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white whitespace-nowrap">
+            <div className="space-y-2.5 flex flex-col items-center sm:items-start text-center sm:text-left">
+              <h4 className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white whitespace-nowrap text-center sm:text-left">
                 Shop
               </h4>
-              <ul className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-slate-400">
+              <ul className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-slate-400 flex flex-col items-center sm:items-start text-center sm:text-left">
                 <li>
                   <Link to="/shop" className="hover:text-white transition-colors">
                     All Items
@@ -109,11 +109,11 @@ export const Footer: React.FC = () => {
             </div>
 
             {/* Col 2: Customer Service */}
-            <div className="space-y-2.5">
-              <h4 className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white whitespace-nowrap">
+            <div className="space-y-2.5 flex flex-col items-center sm:items-start text-center sm:text-left">
+              <h4 className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white whitespace-nowrap text-center sm:text-left">
                 Customer Care
               </h4>
-              <ul className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-slate-400">
+              <ul className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-slate-400 flex flex-col items-center sm:items-start text-center sm:text-left">
                 <li>
                   <Link to="/contact" className="hover:text-white transition-colors">
                     Help Center
@@ -149,11 +149,11 @@ export const Footer: React.FC = () => {
             </div>
 
             {/* Col 3: About Calenvee */}
-            <div className="space-y-2.5">
-              <h4 className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white whitespace-nowrap">
+            <div className="space-y-2.5 flex flex-col items-center sm:items-start text-center sm:text-left">
+              <h4 className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white whitespace-nowrap text-center sm:text-left">
                 About Us
               </h4>
-              <ul className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-slate-400">
+              <ul className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-slate-400 flex flex-col items-center sm:items-start text-center sm:text-left">
                 <li>
                   <Link to="/about" className="hover:text-white transition-colors">
                     About Us
@@ -217,7 +217,7 @@ export const Footer: React.FC = () => {
         {/* Bottom Copyright & Legal */}
         <div className="pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2 text-center sm:text-left">
           <p>© 2026 Calenvee. All rights reserved. Shop Smart, Live Better.</p>
-          <div className="flex items-center space-x-4 text-[11px]">
+          <div className="flex items-center space-x-4 text-[11px] justify-center">
             <Link to="/privacy-policy" className="hover:text-slate-300 transition-colors">Privacy Policy</Link>
             <Link to="/terms-and-conditions" className="hover:text-slate-300 transition-colors">Terms of Service</Link>
           </div>

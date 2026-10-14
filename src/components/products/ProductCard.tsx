@@ -42,7 +42,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     if (onQuickView) onQuickView(product);
   };
 
-  // Format review count (e.g., 845 or 1.2k)
   const formatReviews = (count: number) => {
     if (count >= 1000) return `${(count / 1000).toFixed(1)}k`;
     return count.toString();
@@ -61,7 +60,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       {/* Product Image Frame */}
       <div className="relative aspect-square w-full overflow-hidden bg-gray-50/70 flex items-center justify-center p-3 sm:p-4">
         
-        {/* Top-Left Badge (if applicable) */}
+        {/* Top-Left Badge */}
         {showBadge && (product.isBestSeller || product.discountPercentage > 0 || product.isNewDrop) && (
           <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10 pointer-events-none">
             {product.isBestSeller ? (
@@ -114,23 +113,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </Link>
       </div>
 
-      {/* Product Information matching reference design */}
-      <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between space-y-2 bg-white text-left">
-        <div className="space-y-1">
+      {/* Product Information — Center-aligned in mobile view, left-aligned on desktop */}
+      <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between space-y-2 bg-white text-center sm:text-left items-center sm:items-start">
+        <div className="space-y-1 w-full flex flex-col items-center sm:items-start">
           {/* Title */}
-          <Link to={`/product/${product.slug}`} className="block">
-            <h3 className="text-xs sm:text-sm font-bold text-gray-900 group-hover:text-[#F97316] line-clamp-1 transition-colors">
+          <Link to={`/product/${product.slug}`} className="block w-full text-center sm:text-left">
+            <h3 className="text-xs sm:text-sm font-bold text-gray-900 group-hover:text-[#F97316] line-clamp-1 transition-colors text-center sm:text-left">
               {product.name}
             </h3>
           </Link>
 
           {/* Category Label */}
-          <div className="text-[11px] text-gray-400 font-medium">
+          <div className="text-[11px] text-gray-400 font-medium text-center sm:text-left">
             {product.categoryLabel || product.category}
           </div>
 
-          {/* Star Rating with Count (★★★★★ (845)) */}
-          <div className="flex items-center space-x-1 pt-0.5">
+          {/* Star Rating with Count (Centered on mobile) */}
+          <div className="flex items-center justify-center sm:justify-start space-x-1 pt-0.5">
             <div className="flex items-center text-amber-400">
               {[...Array(5)].map((_, i) => (
                 <Star
@@ -149,9 +148,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         </div>
 
-        {/* Bottom Row: Pricing on Left + Cart Button on Right */}
-        <div className="flex items-center justify-between pt-1 border-t border-gray-50">
-          <div className="flex items-baseline space-x-1.5">
+        {/* Bottom Row: Pricing & Cart Button (Centered on mobile) */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0 pt-2 border-t border-gray-50 w-full">
+          <div className="flex items-baseline justify-center sm:justify-start space-x-1.5">
             <span className="text-xs sm:text-sm font-extrabold text-[#0B132B]">
               {formatPKR(product.price)}
             </span>
@@ -162,14 +161,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             )}
           </div>
 
-          {/* Square Quick Add Cart Button */}
+          {/* Quick Add Cart Button: Full-width friendly on mobile, square button on desktop */}
           <button
             onClick={handleQuickAdd}
-            className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-lg border border-gray-200 hover:border-[#F97316] hover:bg-[#F97316] text-gray-700 hover:text-white flex items-center justify-center transition-all duration-200 active:scale-95 shadow-2xs"
+            className="w-full sm:w-8.5 h-8 sm:h-8.5 rounded-lg border border-gray-200 hover:border-[#F97316] hover:bg-[#F97316] text-gray-700 hover:text-white flex items-center justify-center transition-all duration-200 active:scale-95 shadow-2xs space-x-1.5 sm:space-x-0"
             title="Add to cart"
             aria-label="Add to cart"
           >
             <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="text-[11px] font-bold uppercase sm:hidden">Add to Cart</span>
           </button>
         </div>
       </div>

@@ -8,8 +8,8 @@ export const TrendingCategories: React.FC = () => {
     <section className="bg-white py-6 sm:py-10 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         
-        {/* Section Header: Left Title & Right "View all categories →" */}
-        <div className="flex items-center justify-between mb-5 sm:mb-8">
+        {/* Section Header: Center aligned on mobile, space-between on desktop */}
+        <div className="flex flex-col sm:flex-row items-center justify-between text-center sm:text-left gap-1.5 sm:gap-0 mb-5 sm:mb-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-[#0B132B] tracking-tight">
             Shop by Category
           </h2>
@@ -31,10 +31,10 @@ export const TrendingCategories: React.FC = () => {
             >
               <Link
                 to={`/category/${cat.slug}`}
-                className="group flex flex-col items-center space-y-2.5"
+                className="group flex flex-col items-center space-y-2.5 text-center"
               >
-                {/* Circular Image Container matching reference */}
-                <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full overflow-hidden bg-gray-50 border-2 border-gray-100 group-hover:border-[#F97316] group-hover:shadow-md transition-all duration-300 p-1 flex items-center justify-center">
+                {/* Circular Image Container */}
+                <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full overflow-hidden bg-gray-50 border-2 border-gray-100 group-hover:border-[#F97316] group-hover:shadow-md transition-all duration-300 p-1 flex items-center justify-center mx-auto">
                   <img
                     src={cat.image}
                     alt={cat.name}
@@ -44,7 +44,7 @@ export const TrendingCategories: React.FC = () => {
                 </div>
 
                 {/* Category Name */}
-                <span className="text-xs sm:text-sm font-bold text-gray-800 group-hover:text-[#F97316] transition-colors leading-tight line-clamp-1">
+                <span className="text-xs sm:text-sm font-bold text-gray-800 group-hover:text-[#F97316] transition-colors leading-tight line-clamp-1 text-center">
                   {cat.name}
                 </span>
               </Link>
