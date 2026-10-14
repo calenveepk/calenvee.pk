@@ -1388,29 +1388,16 @@ function onEdit(e) {
     const newStatus = String(e.value || "").trim();
     const values = sheet.getRange(row, 1, 1, 17).getValues()[0];
 
-    const orderId = values[0];
-    const customerName = values[2];
-    const email = values[4];
-    const phone = values[3];
-    const city = values[5];
-    const total = Number(values[8] || 0);
-    const courier = values[10] || "TCS Express";
-    const trackingNumber = values[11] || "N/A";
+    const orderId = String(values[0] || "").trim();
+    const email = String(values[4] || "").trim();
     const confirmationEmailSent = values[14];
     const dispatchEmailSent = values[15];
 
     // Trigger 1: Status changed to Confirmed
     if (newStatus === "Confirmed" && confirmationEmailSent !== "Yes" && email && email.includes("@")) {
       try {
-        sendCustomerOrderConfirmationEmail({
-          orderId: orderId,
-          customerName: customerName,
-          email: email,
-          phone: phone,
-          city: city,
-          total: total,
-          itemsSummary: String(values[12] || "")
-        });
+        const orderData = getOrderDetailsFromSheet(orderId, values);
+        sendCustomerOrderConfirmationEmail(orderData);
         sheet.getRange(row, 15).setValue("Yes");
       } catch (err) {
         Logger.log("onEdit confirmation err: " + err.toString());
@@ -1420,9 +1407,11 @@ function onEdit(e) {
     // Trigger 2: Status changed to Dispatched
     if (newStatus === "Dispatched" && dispatchEmailSent !== "Yes" && email && email.includes("@")) {
       try {
+        const courier = values[10] || "TCS Express";
+        const trackingNumber = values[11] || "-";
         sendCustomerDispatchEmail({
           orderId: orderId,
-          customerName: customerName,
+          customerName: values[2],
           email: email,
           courier: courier,
           trackingNumber: trackingNumber
@@ -1436,15 +1425,143 @@ function onEdit(e) {
 }
 
 /**
+ * UNIVERSAL EMAIL HEADER
+ * Standardized across all customer emails (Order Placed, Order Confirmed, Order Dispatched, Order Cancelled):
+ * - No top WhatsApp bar
+ * - Official white logo wrapped in anchor with pointer-events: none (prevents Gmail hover download overlay)
+ * - Store Slogan in brand orange: "SHOP SMART, LIVE BETTER"
+ */
+function getUniversalEmailHeader(cfg) {
+  return `
+    <!-- Universal Luxury Brand Header -->
+    <tr>
+      <td style="background-color: ${cfg.brandNavy}; padding: 32px 20px 28px 20px; text-align: center;">
+        <div style="margin: 0 auto 10px auto; text-align: center;">
+          <a href="https://calenvee.pk" target="_blank" style="text-decoration: none; display: inline-block; outline: none; border: none; cursor: default;">
+            <img src="${cfg.logoUrl}" alt="${cfg.storeName}" width="140" style="width: 140px; max-width: 140px; height: auto; display: block; margin: 0 auto; border: 0; outline: none; text-decoration: none; pointer-events: none;" />
+          </a>
+        </div>
+        <p style="color: ${cfg.brandOrange}; font-size: 11px; margin: 0; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+          ${cfg.storeTagline}
+        </p>
+      </td>
+    </tr>
+  `;
+}
+
+/**
+ * UNIVERSAL EMAIL FOOTER
+ * Standardized across all customer emails:
+ * - Help prompt
+ * - Prominent green WhatsApp Helpline button (+923001234567)
+ * - Official brand copyright notice
+ */
+function getUniversalEmailFooter(cfg) {
+  return `
+    <!-- Universal Luxury Branded Footer -->
+    <tr>
+      <td style="background-color: #F8FAFC; padding: 24px 20px; text-align: center; border-top: 1px solid #E2E8F0;">
+        <p style="margin: 0; font-size: 13px; color: #475569; font-weight: 500;">
+          Have questions or need assistance with your order?
+        </p>
+        <p style="margin: 12px 0 0 0;">
+          <a href="https://wa.me/${cfg.helplineWhatsAppRaw}" target="_blank" style="display: inline-block; background-color: #25D366; color: #FFFFFF; font-weight: 700; font-size: 12px; padding: 10px 22px; border-radius: 8px; text-decoration: none; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.25);">
+            WhatsApp Helpline: ${cfg.helplinePhone}
+          </a>
+        </p>
+        <p style="margin: 16px 0 0 0; font-size: 11px; color: #94A3B8; line-height: 1.5;">
+          &copy; 2026 ${cfg.storeName} (${cfg.ownerEmail}). 100% Online Store Serving All Pakistan Cities.
+        </p>
+      </td>
+    </tr>
+  `;
+}
+
+/**
+ * Helper: Fetches complete order line items, subtotal, shipping fee, payment method,
+ * and delivery address by joining the Orders sheet row with the OrderItems sheet.
+ */
+function getOrderDetailsFromSheet(orderId, orderRowValues) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const itemsSheet = ss.getSheetByName("OrderItems");
+  
+  let items = [];
+  let subtotal = 0;
+
+  if (itemsSheet && itemsSheet.getLastRow() > 1) {
+    const itemData = itemsSheet.getRange(2, 1, itemsSheet.getLastRow() - 1, 8).getValues();
+    itemData.forEach(row => {
+      if (String(row[0]).trim().toUpperCase() === String(orderId).trim().toUpperCase()) {
+        const qty = Number(row[3]) || 1;
+        const unitPrice = Number(row[4]) || 0;
+        const lineTotal = Number(row[5]) || (qty * unitPrice);
+        subtotal += lineTotal;
+        items.push({
+          name: String(row[2] || "Calenvee Product"),
+          quantity: qty,
+          price: unitPrice,
+          color: String(row[6] || ""),
+          size: String(row[7] || "")
+        });
+      }
+    });
+  }
+
+  const total = Number(orderRowValues[8] || 0);
+
+  // Fallback: If no items found in OrderItems sheet, parse itemsSummary
+  if (items.length === 0 && orderRowValues[12]) {
+    const summaryStr = String(orderRowValues[12]).trim();
+    const parts = summaryStr.split(";").map(s => s.trim()).filter(Boolean);
+    parts.forEach(part => {
+      const match = part.match(/^(.*?)(?:\s*\(x(\d+)\))?(?:\s*-\s*Rs\.?\s*(\d+))?$/i);
+      if (match) {
+        const name = match[1].trim();
+        const qty = match[2] ? Number(match[2]) : 1;
+        const price = match[3] ? Number(match[3]) : 0;
+        subtotal += (price * qty);
+        items.push({ name, quantity: qty, price, color: "", size: "" });
+      } else {
+        items.push({ name: part, quantity: 1, price: total, color: "", size: "" });
+      }
+    });
+  }
+
+  // Calculate delivery fee accurately
+  let shippingFee = 0;
+  if (subtotal > 0 && total >= subtotal) {
+    shippingFee = total - subtotal;
+  } else if (subtotal === 0) {
+    subtotal = total;
+    shippingFee = 0;
+  }
+
+  return {
+    orderId: String(orderRowValues[0] || orderId).trim(),
+    customerName: String(orderRowValues[2] || "").trim(),
+    phone: String(orderRowValues[3] || "").trim(),
+    email: String(orderRowValues[4] || "").trim(),
+    city: String(orderRowValues[5] || "").trim(),
+    address: String(orderRowValues[6] || "").trim(),
+    paymentMethod: String(orderRowValues[7] || "COD").trim(),
+    total: total,
+    subtotal: subtotal,
+    shippingFee: shippingFee,
+    items: items,
+    itemsSummary: String(orderRowValues[12] || "")
+  };
+}
+
+/**
  * 5A. OFFICIAL LUXURY HTML EMAIL: CUSTOMER ORDER PLACED EMAIL
  * Matches the official sleek card template with:
- * - Official white logo header with "SHOP SMART, LIVE BETTER" slogan (No "CALENVEE" text)
+ * - Official white logo header with "SHOP SMART, LIVE BETTER" slogan (No "CALENVEE" plain text, no download overlay)
  * - Green checkmark circle with order reference badge
- * - Order Summary table with clean item lines and variants
+ * - Order Summary table with clean item lines and variants (no product images)
  * - Strictly "Total Amount: Rs. ..." (never "Total Payable (COD)")
  * - "CUSTOMER DETAILS" box (never "Shipping Details")
  * - Strictly "Expected Delivery: 7-10 Working Days"
- * - WhatsApp helpline support button
+ * - Universal branded footer with WhatsApp helpline button
  */
 function sendCustomerOrderPlacedEmail(order) {
   const cfg = getDynamicStoreSettings();
@@ -1473,13 +1590,35 @@ function sendCustomerOrderConfirmationEmail(order) {
 }
 
 /**
- * GENERATES HIGH-RESOLUTION CUSTOMER ORDER EMAIL (OFFICIAL CARD TEMPLATE)
- * Supports both stage = "placed" and stage = "confirmed"
- * - Responsive 100% fluid container for mobile Gmail (no compressed layout)
- * - Zero raw emojis (no corrupted diamond question marks)
- * - Zero item images in item summary (clean text layout)
- * - WhatsApp helpline number at the top
- * - Customer details with Name:, Phone: labels attached to colons
+ * 5C. OFFICIAL LUXURY HTML EMAIL: CUSTOMER ORDER CANCELLED EMAIL
+ * Sent when order is cancelled by customer or internal management during verification.
+ * Includes user-provided cancellation reason and refund notice if paid via advance payment.
+ */
+function sendCustomerOrderCancelledEmail(order, reason) {
+  const cfg = getDynamicStoreSettings();
+  const subject = `Order Cancelled: ${order.orderId} | ${cfg.storeName}`;
+  const htmlBody = generateCustomerOrderCancelledEmailHtml(order, reason);
+
+  GmailApp.sendEmail(order.email, subject, "", {
+    htmlBody: htmlBody,
+    name: cfg.storeName
+  });
+}
+
+/**
+ * GENERATES HIGH-RESOLUTION CUSTOMER ORDER EMAIL (OFFICIAL LUXURY CARD)
+ * Supports stage = "placed" and stage = "confirmed"
+ * - Responsive 580px container
+ * - Universal Header with logo and slogan (no top WhatsApp bar, no hover download icon)
+ * - Zero raw emojis / corrupted symbols (clean ASCII/HTML entities)
+ * - Clean items summary without images
+ * - Correct Item Price & Delivery Fee breakdown (never sum of price + delivery as item price)
+ * - Strictly "Total Amount: Rs. ..." (never "Total Payable (COD)")
+ * - Strictly "CUSTOMER DETAILS" (never "SHIPPING DETAILS")
+ * - Strictly "Expected Delivery: 7-10 Working Days"
+ * - Accurate Payment Method (e.g. BANK TRANSFER, EASYPAISA, JAZZCASH, CASH ON DELIVERY)
+ * - Accurate Delivery Address (no "undefined")
+ * - Universal Footer with WhatsApp Helpline button
  */
 function generateCustomerOrderEmailHtml(order, stage) {
   const cfg = getDynamicStoreSettings();
@@ -1487,9 +1626,9 @@ function generateCustomerOrderEmailHtml(order, stage) {
 
   const itemsList = Array.isArray(order.items) && order.items.length > 0 
     ? order.items 
-    : [{ name: order.itemsSummary || "Calenvee Product", quantity: 1, price: order.total || 0 }];
+    : [{ name: order.itemsSummary || "Calenvee Product", quantity: 1, price: order.subtotal || order.total || 0 }];
 
-  // Item summary without images (Point 7)
+  // Item summary without images (clean text layout)
   const itemsHtml = itemsList.map(item => {
     const itemName = item.name || (item.product && item.product.name) || "Calenvee Product";
     const itemQty = Number(item.quantity || 1);
@@ -1504,24 +1643,53 @@ function generateCustomerOrderEmailHtml(order, stage) {
 
     return `
       <tr>
-        <td style="padding: 10px 8px; border-bottom: 1px solid #E5E7EB; font-size: 13px; color: #111827; text-align: left;">
+        <td style="padding: 12px 10px; border-bottom: 1px solid #E5E7EB; font-size: 13px; color: #111827; text-align: left;">
           <div style="font-weight: 700; color: #111827; line-height: 1.3;">${itemName}</div>
-          ${variantStr ? `<div style="font-size: 11px; color: #6B7280; margin-top: 2px;">${variantStr}</div>` : ""}
+          ${variantStr ? `<div style="font-size: 11px; color: #6B7280; margin-top: 3px;">${variantStr}</div>` : ""}
         </td>
-        <td style="padding: 10px 6px; border-bottom: 1px solid #E5E7EB; font-size: 13px; text-align: center; color: #374151; vertical-align: middle;">
+        <td style="padding: 12px 6px; border-bottom: 1px solid #E5E7EB; font-size: 13px; text-align: center; color: #374151; vertical-align: middle;">
           ${itemQty}
         </td>
-        <td style="padding: 10px 8px; border-bottom: 1px solid #E5E7EB; font-size: 13px; text-align: right; color: #111827; font-weight: 700; vertical-align: middle; white-space: nowrap;">
+        <td style="padding: 12px 10px; border-bottom: 1px solid #E5E7EB; font-size: 13px; text-align: right; color: #111827; font-weight: 700; vertical-align: middle; white-space: nowrap;">
           Rs. ${(itemPrice * itemQty).toLocaleString()}
         </td>
       </tr>
     `;
   }).join("");
 
-  const subtotal = Number(order.subtotal || order.total || 0);
-  const shippingFeeStr = order.shippingFee === 0 ? "FREE" : (order.shippingFee ? "Rs. " + Number(order.shippingFee).toLocaleString() : "FREE");
-  const totalStr = Number(order.total || 0).toLocaleString();
-  const paymentMethodUpper = String(order.paymentMethod || "cod").toUpperCase();
+  // Subtotal & Shipping fee calculations
+  let subtotal = Number(order.subtotal || 0);
+  if (!subtotal) {
+    subtotal = itemsList.reduce((sum, it) => sum + (Number(it.price || 0) * Number(it.quantity || 1)), 0);
+  }
+  if (!subtotal) {
+    subtotal = Number(order.total || 0);
+  }
+
+  let shippingFee = order.shippingFee !== undefined && order.shippingFee !== null ? Number(order.shippingFee) : (Number(order.total || 0) - subtotal);
+  if (shippingFee < 0) shippingFee = 0;
+  const shippingFeeStr = shippingFee === 0 ? "FREE" : `Rs. ${shippingFee.toLocaleString()}`;
+  const totalStr = Number(order.total || (subtotal + shippingFee)).toLocaleString();
+
+  // Payment method format
+  let paymentDisplay = "CASH ON DELIVERY (COD)";
+  const rawPm = String(order.paymentMethod || "cod").trim().toUpperCase();
+  if (rawPm.includes("BANK")) {
+    paymentDisplay = "BANK TRANSFER";
+  } else if (rawPm.includes("EASYPAISA")) {
+    paymentDisplay = "EASYPAISA";
+  } else if (rawPm.includes("JAZZCASH")) {
+    paymentDisplay = "JAZZCASH";
+  } else if (rawPm.includes("COD") || rawPm === "CASH ON DELIVERY") {
+    paymentDisplay = "CASH ON DELIVERY (COD)";
+  } else {
+    paymentDisplay = rawPm;
+  }
+
+  // Clean formatted address (no "undefined")
+  const cleanAddress = String(order.address || "").replace(/undefined/gi, "").trim();
+  const cleanCity = String(order.city || "").replace(/undefined/gi, "").trim();
+  const displayAddress = [cleanAddress, cleanCity].filter(Boolean).join(", ") || "Address provided during checkout";
 
   const heroTitle = isConfirmed ? "Your Order is Confirmed!" : "Thank You For Your Order!";
   const heroSubtitle = isConfirmed
@@ -1547,26 +1715,9 @@ function generateCustomerOrderEmailHtml(order, stage) {
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9FAFB; margin: 0; padding: 18px 10px; color: #111827;">
       <table align="center" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 580px; width: 100%; background-color: #FFFFFF; border-radius: 14px; border: 1px solid #E5E7EB; overflow: hidden; margin: 0 auto;">
         
-        <!-- Top Bar: WhatsApp Helpline (Point 8) -->
-        <tr>
-          <td style="background-color: #060B18; padding: 10px 16px; text-align: center; font-size: 11px; color: #94A3B8;">
-            WhatsApp Helpline: <a href="https://wa.me/${cfg.helplineWhatsAppRaw}" style="color: #25D366; font-weight: bold; text-decoration: none;">${cfg.helplinePhone}</a>
-          </td>
-        </tr>
-
-        <!-- Header with Official Logo & Slogan (No "CALENVEE" plain text) -->
-        <tr>
-          <td style="background-color: ${cfg.brandNavy}; padding: 32px 20px; text-align: center;">
-            <div style="margin-bottom: 10px;">
-              <img src="${cfg.logoUrl}" alt="${cfg.storeName}" style="max-height: 48px; width: auto; display: block; margin: 0 auto; border: 0;" />
-            </div>
-            <p style="color: ${cfg.brandOrange}; font-size: 11px; margin: 0; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; text-align: center;">
-              ${cfg.storeTagline}
-            </p>
-          </td>
-        </tr>
+        ${getUniversalEmailHeader(cfg)}
         
-        <!-- Hero Confirmation (Clean checkmark icon, ZERO emojis - Point 6) -->
+        <!-- Hero Confirmation (Clean checkmark icon, ZERO emojis) -->
         <tr>
           <td style="padding: 28px 20px 20px 20px; text-align: center;">
             <div style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 50%; background-color: #ECFDF5; color: #059669; font-size: 20px; font-weight: bold; margin-bottom: 12px; text-align: center;">
@@ -1583,7 +1734,7 @@ function generateCustomerOrderEmailHtml(order, stage) {
           </td>
         </tr>
 
-        <!-- Order Items Table (No images - Point 7) -->
+        <!-- Order Items Table (No images) -->
         <tr>
           <td style="padding: 0 20px 20px 20px;">
             <div style="font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: #374151; font-weight: 800; margin-bottom: 10px; border-bottom: 2px solid ${cfg.brandOrange}; padding-bottom: 6px;">
@@ -1602,7 +1753,7 @@ function generateCustomerOrderEmailHtml(order, stage) {
               </tbody>
             </table>
 
-            <!-- Totals (Strictly "Total Amount", NOT "Total Payable (COD)") -->
+            <!-- Pricing Breakdown (Strictly "Total Amount", NEVER "Total Payable (COD)") -->
             <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top: 14px; font-size: 13px; width: 100%;">
               <tr>
                 <td style="color: #6B7280; padding: 4px 0;">Subtotal:</td>
@@ -1625,7 +1776,7 @@ function generateCustomerOrderEmailHtml(order, stage) {
           </td>
         </tr>
 
-        <!-- Customer Details Box (Colons attached to headings - Point 9) -->
+        <!-- Customer Details Box (Strictly CUSTOMER DETAILS, colons attached) -->
         <tr>
           <td style="padding: 0 20px 20px 20px;">
             <div style="background-color: #F9FAFB; border-radius: 10px; padding: 14px 16px; border: 1px solid #E5E7EB;">
@@ -1635,30 +1786,15 @@ function generateCustomerOrderEmailHtml(order, stage) {
               <div style="font-size: 12px; color: #1F2937; line-height: 1.8;">
                 <div><strong style="color: #4B5563;">Name:</strong> <span style="color: #111827; font-weight: 600;">${order.customerName}</span></div>
                 <div><strong style="color: #4B5563;">Phone:</strong> <span style="color: #111827;">${order.phone}</span></div>
-                <div><strong style="color: #4B5563;">Delivery Address:</strong> <span style="color: #111827;">${order.address}${order.city ? ', ' + order.city : ''}</span></div>
+                <div><strong style="color: #4B5563;">Delivery Address:</strong> <span style="color: #111827;">${displayAddress}</span></div>
                 <div><strong style="color: #4B5563;">Expected Delivery:</strong> <span style="color: #111827; font-weight: 600;">7-10 Working Days</span></div>
-                <div><strong style="color: #4B5563;">Payment Method:</strong> <span style="color: #0B132B; font-weight: 700; text-transform: uppercase;">${paymentMethodUpper}</span></div>
+                <div><strong style="color: #4B5563;">Payment Method:</strong> <span style="color: #0B132B; font-weight: 700; text-transform: uppercase;">${paymentDisplay}</span></div>
               </div>
             </div>
           </td>
         </tr>
 
-        <!-- Footer -->
-        <tr>
-          <td style="background-color: #F3F4F6; padding: 18px 20px; text-align: center; border-top: 1px solid #E5E7EB;">
-            <p style="margin: 0; font-size: 12px; color: #4B5563;">
-              Have questions or need to modify your order? Chat with our team:
-            </p>
-            <p style="margin: 10px 0 0 0;">
-              <a href="https://wa.me/${cfg.helplineWhatsAppRaw}" style="display: inline-block; background-color: #25D366; color: #FFFFFF; font-weight: bold; font-size: 12px; padding: 8px 18px; border-radius: 8px; text-decoration: none;">
-                WhatsApp Helpline: ${cfg.helplinePhone}
-              </a>
-            </p>
-            <p style="margin: 14px 0 0 0; font-size: 10px; color: #9CA3AF;">
-              &copy; 2026 ${cfg.storeName} (${cfg.ownerEmail}). 100% Online Store Serving All Pakistan Cities.
-            </p>
-          </td>
-        </tr>
+        ${getUniversalEmailFooter(cfg)}
       </table>
     </body>
     </html>
@@ -1667,9 +1803,9 @@ function generateCustomerOrderEmailHtml(order, stage) {
 
 /**
  * 6. LUXURY HTML EMAIL: DISPATCH NOTIFICATION
- * - Clean logo & slogan header only (No plain text CALENVEE)
- * - Zero emojis (no corrupted diamond question marks)
- * - Exact courier company name (never "Pending Dispatch")
+ * - Universal brand header & footer
+ * - Zero raw emojis
+ * - Clean courier company name (never "Pending Dispatch")
  * - Optional tracking number
  */
 function sendCustomerDispatchEmail(dispatchData) {
@@ -1729,24 +1865,7 @@ function sendCustomerDispatchEmail(dispatchData) {
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9FAFB; margin: 0; padding: 18px 10px; color: #111827;">
       <table align="center" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 580px; width: 100%; background-color: #FFFFFF; border-radius: 14px; border: 1px solid #E5E7EB; overflow: hidden; margin: 0 auto;">
         
-        <!-- Top Bar: WhatsApp Helpline -->
-        <tr>
-          <td style="background-color: #060B18; padding: 10px 16px; text-align: center; font-size: 11px; color: #94A3B8;">
-            WhatsApp Helpline: <a href="https://wa.me/${cfg.helplineWhatsAppRaw}" style="color: #25D366; font-weight: bold; text-decoration: none;">${cfg.helplinePhone}</a>
-          </td>
-        </tr>
-
-        <!-- Header with Store Logo & Slogan (No "CALENVEE" plain text) -->
-        <tr>
-          <td style="background-color: ${cfg.brandNavy}; padding: 32px 20px; text-align: center;">
-            <div style="margin-bottom: 10px;">
-              <img src="${cfg.logoUrl}" alt="${cfg.storeName}" style="max-height: 44px; width: auto; display: block; margin: 0 auto; border: 0;" />
-            </div>
-            <p style="color: ${cfg.brandOrange}; font-size: 11px; margin: 0; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; text-align: center;">
-              ${cfg.storeTagline} &bull; ORDER DISPATCHED
-            </p>
-          </td>
-        </tr>
+        ${getUniversalEmailHeader(cfg)}
 
         <!-- Hero: Dispatched Notice (Clean checkmark icon, ZERO emojis) -->
         <tr>
@@ -1767,14 +1886,7 @@ function sendCustomerDispatchEmail(dispatchData) {
           </td>
         </tr>
 
-        <!-- Footer -->
-        <tr>
-          <td style="background-color: #F3F4F6; padding: 18px 20px; text-align: center; border-top: 1px solid #E5E7EB;">
-            <p style="margin: 0; font-size: 10px; color: #9CA3AF;">
-              &copy; 2026 ${cfg.storeName} (${cfg.ownerEmail}). 100% Online Store Serving All Pakistan Cities.
-            </p>
-          </td>
-        </tr>
+        ${getUniversalEmailFooter(cfg)}
       </table>
     </body>
     </html>
@@ -1784,6 +1896,181 @@ function sendCustomerDispatchEmail(dispatchData) {
     htmlBody: htmlBody,
     name: cfg.storeName
   });
+}
+
+/**
+ * GENERATES HIGH-RESOLUTION ORDER CANCELLATION EMAIL
+ * - Universal Header and Footer
+ * - Zero raw emojis
+ * - Clear Reason for Cancellation box
+ * - Summary of cancelled items and total amount
+ * - Advance payment refund guidance
+ */
+function generateCustomerOrderCancelledEmailHtml(order, reason) {
+  const cfg = getDynamicStoreSettings();
+
+  const itemsList = Array.isArray(order.items) && order.items.length > 0 
+    ? order.items 
+    : [{ name: order.itemsSummary || "Calenvee Product", quantity: 1, price: order.subtotal || order.total || 0 }];
+
+  const itemsHtml = itemsList.map(item => {
+    const itemName = item.name || (item.product && item.product.name) || "Calenvee Product";
+    const itemQty = Number(item.quantity || 1);
+    const itemPrice = Number(item.price || (item.product && item.product.price) || 0);
+
+    return `
+      <tr>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #E5E7EB; font-size: 13px; color: #111827; text-align: left;">
+          <div style="font-weight: 700; color: #111827; line-height: 1.3;">${itemName}</div>
+        </td>
+        <td style="padding: 12px 6px; border-bottom: 1px solid #E5E7EB; font-size: 13px; text-align: center; color: #374151; vertical-align: middle;">
+          ${itemQty}
+        </td>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #E5E7EB; font-size: 13px; text-align: right; color: #111827; font-weight: 700; vertical-align: middle; white-space: nowrap;">
+          Rs. ${(itemPrice * itemQty).toLocaleString()}
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  let paymentDisplay = "CASH ON DELIVERY (COD)";
+  const rawPm = String(order.paymentMethod || "cod").trim().toUpperCase();
+  if (rawPm.includes("BANK")) {
+    paymentDisplay = "BANK TRANSFER";
+  } else if (rawPm.includes("EASYPAISA")) {
+    paymentDisplay = "EASYPAISA";
+  } else if (rawPm.includes("JAZZCASH")) {
+    paymentDisplay = "JAZZCASH";
+  } else if (rawPm.includes("COD") || rawPm === "CASH ON DELIVERY") {
+    paymentDisplay = "CASH ON DELIVERY (COD)";
+  } else {
+    paymentDisplay = rawPm;
+  }
+
+  const isAdvancePayment = paymentDisplay !== "CASH ON DELIVERY (COD)";
+  const totalStr = Number(order.total || 0).toLocaleString();
+  const cleanAddress = String(order.address || "").replace(/undefined/gi, "").trim();
+  const cleanCity = String(order.city || "").replace(/undefined/gi, "").trim();
+  const displayAddress = [cleanAddress, cleanCity].filter(Boolean).join(", ") || "Address provided during checkout";
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <title>Order Cancelled</title>
+      <style>
+        body, table, td { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        @media only screen and (max-width: 600px) {
+          .email-container { width: 100% !important; max-width: 100% !important; border-radius: 0 !important; }
+          .responsive-padding { padding-left: 14px !important; padding-right: 14px !important; }
+        }
+      </style>
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9FAFB; margin: 0; padding: 18px 10px; color: #111827;">
+      <table align="center" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 580px; width: 100%; background-color: #FFFFFF; border-radius: 14px; border: 1px solid #E5E7EB; overflow: hidden; margin: 0 auto;">
+        
+        ${getUniversalEmailHeader(cfg)}
+        
+        <!-- Hero: Cancellation Notice (Clean cross icon, ZERO emojis) -->
+        <tr>
+          <td style="padding: 28px 20px 20px 20px; text-align: center;">
+            <div style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 50%; background-color: #FEE2E2; color: #DC2626; font-size: 20px; font-weight: bold; margin-bottom: 12px; text-align: center;">
+              &#10005;
+            </div>
+            <h2 style="margin: 0; font-size: 20px; color: #111827; font-weight: 800;">Order Cancellation Notice</h2>
+            <p style="margin: 8px 0 0 0; font-size: 13px; color: #6B7280; line-height: 1.5;">
+              Dear <strong>${order.customerName}</strong>, your Calenvee Order <strong>#${order.orderId}</strong> has been cancelled.
+            </p>
+            <div style="margin-top: 16px; padding: 9px 16px; background-color: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; display: inline-block;">
+              <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #991B1B; font-weight: bold;">ORDER REFERENCE:</span>
+              <span style="font-size: 14px; font-weight: 800; color: #991B1B; margin-left: 6px;">${order.orderId}</span>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Cancellation Reason Box -->
+        <tr>
+          <td style="padding: 0 20px 16px 20px;">
+            <div style="background-color: #FFF5F5; border-left: 4px solid #EF4444; border-radius: 6px; padding: 14px 16px; border: 1px solid #FED7D7; border-left-width: 4px;">
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #991B1B; font-weight: 800; margin-bottom: 4px;">
+                REASON FOR CANCELLATION
+              </div>
+              <div style="font-size: 13px; color: #7F1D1D; font-weight: 600; line-height: 1.5;">
+                ${reason || "Cancelled as requested during customer confirmation / verification call."}
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Cancelled Items Summary -->
+        <tr>
+          <td style="padding: 0 20px 20px 20px;">
+            <div style="font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: #374151; font-weight: 800; margin-bottom: 10px; border-bottom: 2px solid #E5E7EB; padding-bottom: 6px;">
+              CANCELLED ITEMS
+            </div>
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background-color: #F3F4F6;">
+                  <th style="padding: 8px; text-align: left; font-size: 11px; text-transform: uppercase; color: #4B5563; font-weight: 700;">ITEM</th>
+                  <th style="padding: 8px 6px; text-align: center; font-size: 11px; text-transform: uppercase; color: #4B5563; font-weight: 700; width: 44px;">QTY</th>
+                  <th style="padding: 8px; text-align: right; font-size: 11px; text-transform: uppercase; color: #4B5563; font-weight: 700; width: 85px;">PRICE</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top: 14px; font-size: 13px; width: 100%;">
+              <tr style="border-top: 2px solid #E5E7EB; font-size: 14px;">
+                <td style="padding-top: 10px; font-weight: 800; color: #374151;">Total Order Value:</td>
+                <td style="padding-top: 10px; text-align: right; font-weight: 800; color: #111827;">Rs. ${totalStr}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Advance Payment Refund Note if applicable -->
+        ${isAdvancePayment ? `
+        <tr>
+          <td style="padding: 0 20px 20px 20px;">
+            <div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 10px; padding: 14px 16px;">
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #1E40AF; font-weight: 800; margin-bottom: 4px;">
+                ADVANCE PAYMENT REFUND NOTICE
+              </div>
+              <div style="font-size: 12px; color: #1E3A8A; line-height: 1.6;">
+                Since your payment method was <strong>${paymentDisplay}</strong>, our accounts team will verify and process your full refund to your source account within <strong>24 to 48 business hours</strong>. If you have any questions regarding your refund, please message our helpline.
+              </div>
+            </div>
+          </td>
+        </tr>
+        ` : ""}
+
+        <!-- Customer Details Box -->
+        <tr>
+          <td style="padding: 0 20px 20px 20px;">
+            <div style="background-color: #F9FAFB; border-radius: 10px; padding: 14px 16px; border: 1px solid #E5E7EB;">
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #4B5563; font-weight: 800; margin-bottom: 10px; border-bottom: 1px solid #E5E7EB; padding-bottom: 6px;">
+                CUSTOMER DETAILS
+              </div>
+              <div style="font-size: 12px; color: #1F2937; line-height: 1.8;">
+                <div><strong style="color: #4B5563;">Name:</strong> <span style="color: #111827; font-weight: 600;">${order.customerName}</span></div>
+                <div><strong style="color: #4B5563;">Phone:</strong> <span style="color: #111827;">${order.phone}</span></div>
+                <div><strong style="color: #4B5563;">Delivery Address:</strong> <span style="color: #111827;">${displayAddress}</span></div>
+                <div><strong style="color: #4B5563;">Payment Method:</strong> <span style="color: #0B132B; font-weight: 700; text-transform: uppercase;">${paymentDisplay}</span></div>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        ${getUniversalEmailFooter(cfg)}
+      </table>
+    </body>
+    </html>
+  `;
 }
 
 /**
@@ -1902,53 +2189,123 @@ function onOpen() {
     .addSeparator()
     .addItem("✉️ 3. Confirm Selected Order & Send Email", "confirmSelectedOrderRow")
     .addItem("🚚 4. Dispatch Selected Order & Send Email", "sendDispatchEmailForSelectedRow")
+    .addItem("❌ 5. Cancel Selected Order & Send Email", "cancelSelectedOrderRow")
     .addSeparator()
-    .addItem("🧹 5. Clean Ghost / Empty Orders (Remove Blank Rows)", "cleanGhostOrders")
-    .addItem("🧪 6. Send Test Email to Store Owner", "testOrderEmail")
-    .addItem("🗑️ 7. Reset All Dummy Orders (Fresh Store)", "resetDummyData")
+    .addItem("🧹 6. Clean Ghost / Empty Orders (Remove Blank Rows)", "cleanGhostOrders")
+    .addItem("🧪 7. Send Test Email to Store Owner", "testOrderEmail")
+    .addItem("🗑️ 8. Reset All Dummy Orders (Fresh Store)", "resetDummyData")
     .addToUi();
 }
 
 /**
- * 8A. Confirm Selected Order from Sheet Menu
+ * 8A. Confirm Selected Order from Sheet Menu (Option 3)
+ * Transitions status to "Confirmed", queries OrderItems for exact line items and pricing,
+ * and sends customer the official luxury confirmation email.
  */
 function confirmSelectedOrderRow() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   const row = sheet.getActiveCell().getRow();
+  const ui = SpreadsheetApp.getUi();
+
   if (row <= 1) {
-    SpreadsheetApp.getUi().alert("Please select a customer order row first.");
+    ui.alert("⚠️ Please select a customer order row first (click on row 2 or below in the Orders sheet).");
     return;
   }
 
   const values = sheet.getRange(row, 1, 1, 17).getValues()[0];
-  const orderId = values[0];
-  const customerName = values[2];
-  const email = values[4];
-  const phone = values[3];
-  const city = values[5];
-  const total = Number(values[8] || 0);
+  const orderId = String(values[0] || "").trim();
+  const customerName = String(values[2] || "").trim();
+  const email = String(values[4] || "").trim();
 
+  if (!orderId) {
+    ui.alert("⚠️ No Order ID found in the selected row.");
+    return;
+  }
+
+  // Update Status in Column J to Confirmed
   sheet.getRange(row, 10).setValue("Confirmed");
 
+  // Fetch full order data including line items, subtotal, shipping fee, address, payment method
+  const orderData = getOrderDetailsFromSheet(orderId, values);
+
   if (email && email.includes("@") && email !== "N/A") {
-    sendCustomerOrderConfirmationEmail({
-      orderId: orderId,
-      customerName: customerName,
-      email: email,
-      phone: phone,
-      city: city,
-      total: total,
-      itemsSummary: String(values[12] || "")
-    });
+    sendCustomerOrderConfirmationEmail(orderData);
     sheet.getRange(row, 15).setValue("Yes");
-    SpreadsheetApp.getUi().alert(`✅ Order #${orderId} marked Confirmed!\nConfirmation email sent to ${customerName} (${email}).`);
+    ui.alert(`✅ Order #${orderId} marked Confirmed!\n\nConfirmation email sent to ${customerName} (${email})\nSubtotal: Rs. ${orderData.subtotal.toLocaleString()} | Delivery: Rs. ${orderData.shippingFee.toLocaleString()} | Total: Rs. ${orderData.total.toLocaleString()}`);
   } else {
-    SpreadsheetApp.getUi().alert(`✅ Order #${orderId} marked Confirmed! (No email on file)`);
+    ui.alert(`✅ Order #${orderId} marked Confirmed! (No email on file)`);
+  }
+
+  // Refresh Executive Dashboard if available
+  if (typeof createExecutiveDashboard === 'function') {
+    try { createExecutiveDashboard(); } catch (_) {}
   }
 }
 
 /**
- * 8B. Dispatch Selected Order from Sheet Menu (Option 4)
+ * 8B. Cancel Selected Order from Sheet Menu (Option 5)
+ * Prompts user for Cancellation Reason, updates Column J to "Cancelled",
+ * and sends customer the official Cancellation Notice email.
+ */
+function cancelSelectedOrderRow() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const row = sheet.getActiveCell().getRow();
+  const ui = SpreadsheetApp.getUi();
+
+  if (row <= 1) {
+    ui.alert("⚠️ Please select a customer order row first (click on row 2 or below in the Orders sheet).");
+    return;
+  }
+
+  const values = sheet.getRange(row, 1, 1, 17).getValues()[0];
+  const orderId = String(values[0] || "").trim();
+  const customerName = String(values[2] || "").trim();
+  const email = String(values[4] || "").trim();
+
+  if (!orderId) {
+    ui.alert("⚠️ No Order ID found in the selected row.");
+    return;
+  }
+
+  // Prompt: Ask for Cancellation Reason
+  const reasonPrompt = ui.prompt(
+    `Cancel Order #${orderId}`,
+    `Customer: ${customerName} (${email || 'No email'})\n\nEnter Cancellation Reason (will be shown in customer email):\n(e.g., Cancelled by customer on verification call, Duplicate order, Customer requested cancellation, Incomplete address)`,
+    ui.ButtonSet.OK_CANCEL
+  );
+
+  if (reasonPrompt.getSelectedButton() !== ui.Button.OK) {
+    return; // Cancelled by operator
+  }
+
+  let reason = reasonPrompt.getResponseText().trim();
+  if (!reason) {
+    reason = "Cancelled as requested during customer confirmation / verification call.";
+  }
+
+  // Update Status to Cancelled in Column J
+  sheet.getRange(row, 10).setValue("Cancelled");
+
+  // Fetch full order details including line items from OrderItems tab
+  const orderData = getOrderDetailsFromSheet(orderId, values);
+  orderData.cancellationReason = reason;
+
+  // Send cancellation email if email exists
+  if (email && email.includes("@") && email !== "N/A") {
+    sendCustomerOrderCancelledEmail(orderData, reason);
+    ui.alert(`✅ Order #${orderId} marked Cancelled!\n\nReason: ${reason}\n\nCancellation email sent to ${customerName} (${email}).`);
+  } else {
+    ui.alert(`✅ Order #${orderId} marked Cancelled!\n\nReason: ${reason}\n(No customer email on file)`);
+  }
+
+  // Refresh Executive Dashboard if available
+  if (typeof createExecutiveDashboard === 'function') {
+    try { createExecutiveDashboard(); } catch (_) {}
+  }
+}
+
+/**
+ * 8C. Dispatch Selected Order from Sheet Menu (Option 4)
  * Prompts user for Courier Company Name and optional Tracking ID,
  * updates Columns K and L in Orders tab, sets status to Dispatched,
  * and sends customer the official Dispatch Email.
