@@ -8,8 +8,11 @@ import {
   RealBankIcon,
   RealCODBadge,
 } from '../common/RealisticIcons';
+import storeSettingsData from '../../data/storeSettings.json';
 
 export const Footer: React.FC = () => {
+  const whatsappUrl = `https://wa.me/${storeSettingsData.whatsappRaw || '923001234567'}`;
+  const slogan = storeSettingsData.storeSlogan || 'Shop Smart, Live Better';
   return (
     <footer className="bg-[#081320] text-gray-300 border-t border-slate-800">
       {/* Main Footer Container with broad mobile width */}
@@ -55,7 +58,7 @@ export const Footer: React.FC = () => {
               </a>
 
               <a
-                href="https://wa.me/923001234567"
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 rounded-full bg-slate-800/80 hover:bg-[#25D366] text-slate-300 hover:text-white flex items-center justify-center transition-colors"
@@ -136,7 +139,7 @@ export const Footer: React.FC = () => {
                 </li>
                 <li>
                   <a
-                    href="https://wa.me/923001234567"
+                    href={whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#25D366] transition-colors inline-flex items-center space-x-1"
@@ -216,7 +219,7 @@ export const Footer: React.FC = () => {
 
         {/* Bottom Copyright & Legal */}
         <div className="pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2 text-center sm:text-left">
-          <p>© 2026 Calenvee. All rights reserved. Shop Smart, Live Better.</p>
+          <p>© 2026 Calenvee. All rights reserved. {slogan}.</p>
           <div className="flex items-center space-x-4 text-[11px] justify-center">
             <Link to="/privacy-policy" className="hover:text-slate-300 transition-colors">Privacy Policy</Link>
             <Link to="/terms-and-conditions" className="hover:text-slate-300 transition-colors">Terms of Service</Link>

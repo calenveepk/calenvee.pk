@@ -1,29 +1,27 @@
 import React from 'react';
 import { Truck, RotateCcw, ShieldCheck, Headphones } from 'lucide-react';
+import homeContentData from '../../data/homeContent.json';
 
 export const ValuePropsBar: React.FC = () => {
-  const props = [
-    {
-      icon: <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-[#081320]" />,
-      title: 'Free Shipping',
-      subtitle: 'On orders over Rs. 2,999',
-    },
-    {
-      icon: <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6 text-[#081320]" />,
-      title: 'Easy Returns',
-      subtitle: '7-day replacement warranty',
-    },
-    {
-      icon: <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-[#081320]" />,
-      title: 'Secure Payments',
-      subtitle: '100% Cash on Delivery & Raast',
-    },
-    {
-      icon: <Headphones className="w-5 h-5 sm:w-6 sm:h-6 text-[#081320]" />,
-      title: '24/7 Support',
-      subtitle: "We're here to help on WhatsApp",
-    },
+  const customProps = homeContentData.valueProps || [
+    { title: 'Free Shipping', subtitle: 'On orders over Rs. 3,999' },
+    { title: 'Easy Returns', subtitle: '7-day return policy' },
+    { title: 'Secure Payments', subtitle: '100% Cash on Delivery & Raast' },
+    { title: '24/7 Support', subtitle: "We're here to help on WhatsApp" },
   ];
+
+  const icons = [
+    <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-[#081320]" />,
+    <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6 text-[#081320]" />,
+    <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-[#081320]" />,
+    <Headphones className="w-5 h-5 sm:w-6 sm:h-6 text-[#081320]" />,
+  ];
+
+  const props = customProps.map((p, idx) => ({
+    icon: icons[idx % icons.length],
+    title: p.title,
+    subtitle: p.subtitle,
+  }));
 
   return (
     <section className="bg-white border-y border-gray-100 py-6 sm:py-8 my-2 overflow-hidden">

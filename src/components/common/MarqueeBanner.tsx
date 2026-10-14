@@ -2,34 +2,44 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Truck, Tag, Sparkles, ShieldCheck, Zap } from 'lucide-react';
 
+import announcementsData from '../../data/announcements.json';
+
 export const MarqueeBanner: React.FC = () => {
-  const items = [
-    {
-      icon: <Truck className="w-3.5 h-3.5 text-[#F97316]" />,
-      prefix: 'FREE SHIPPING',
-      text: 'Nationwide on orders over Rs. 2,999',
-    },
-    {
-      icon: <Tag className="w-3.5 h-3.5 text-[#F97316]" />,
-      prefix: 'EXTRA 10% OFF',
-      text: 'On prepaid orders (JazzCash / EasyPaisa / Bank)',
-    },
-    {
-      icon: <Zap className="w-3.5 h-3.5 text-[#F97316]" />,
-      prefix: 'UP TO 50% OFF',
-      text: 'Flash Deals live right now — Shop More, Save More!',
-    },
-    {
-      icon: <ShieldCheck className="w-3.5 h-3.5 text-[#F97316]" />,
-      prefix: 'CASH ON DELIVERY',
-      text: 'Available across all cities in Pakistan',
-    },
-    {
-      icon: <Sparkles className="w-3.5 h-3.5 text-[#F97316]" />,
-      prefix: 'CALENVEE EXCLUSIVE',
-      text: 'Shop Smart, Live Better • 7-Day Easy Exchange',
-    },
+  const iconList = [
+    <Truck className="w-3.5 h-3.5 text-[#F97316]" />,
+    <Tag className="w-3.5 h-3.5 text-[#F97316]" />,
+    <Zap className="w-3.5 h-3.5 text-[#F97316]" />,
+    <ShieldCheck className="w-3.5 h-3.5 text-[#F97316]" />,
+    <Sparkles className="w-3.5 h-3.5 text-[#F97316]" />,
   ];
+
+  const rawList: string[] = Array.isArray(announcementsData) && announcementsData.length > 0
+    ? announcementsData
+    : [
+        'FREE SHIPPING: Nationwide on orders over Rs. 3,999',
+        'CASH ON DELIVERY: Available across all cities in Pakistan',
+        'SHOP SMART, LIVE BETTER: 7-Day Easy Exchange & Warranty',
+        'EXTRA 10% OFF: On prepaid orders (JazzCash / EasyPaisa / Bank)',
+      ];
+
+  const items = rawList.map((str, i) => {
+    let prefix = 'CALENVEE';
+    let text = str;
+    if (str.includes(':')) {
+      const parts = str.split(':');
+      prefix = parts[0].trim();
+      text = parts.slice(1).join(':').trim();
+    } else if (str.includes('--')) {
+      const parts = str.split('--');
+      prefix = parts[0].trim();
+      text = parts.slice(1).join('--').trim();
+    }
+    return {
+      icon: iconList[i % iconList.length],
+      prefix,
+      text,
+    };
+  });
 
   // Duplicate items 4 times to ensure seamless infinite looping track
   const tickerItems = [...items, ...items, ...items, ...items];

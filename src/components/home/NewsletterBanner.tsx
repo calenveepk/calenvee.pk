@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
 import { Mail, CheckCircle2 } from 'lucide-react';
+import homeContentData from '../../data/homeContent.json';
 
 export const NewsletterBanner: React.FC = () => {
   const [email, setEmail] = useState('');
   const [honeypot, setHoneypot] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
+
+  const newsletter = homeContentData.newsletter || {
+    title: 'Stay in the Loop',
+    subtitle: 'Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.',
+    buttonText: 'Subscribe',
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,10 +43,10 @@ export const NewsletterBanner: React.FC = () => {
 
               <div className="space-y-1 text-center sm:text-left">
                 <h3 className="text-xl sm:text-2xl font-black text-[#0B132B] tracking-tight">
-                  Stay in the Loop
+                  {newsletter.title}
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-600 font-normal">
-                  Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.
+                  {newsletter.subtitle}
                 </p>
               </div>
             </div>

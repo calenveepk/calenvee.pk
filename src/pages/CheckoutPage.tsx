@@ -12,6 +12,8 @@ import {
   X,
   Camera,
   Trash2,
+  Mail,
+  ArrowRight,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useCart } from '../context/CartContext';
@@ -52,6 +54,7 @@ export const CheckoutPage: React.FC = () => {
   const [completedOrder, setCompletedOrder] = useState<OrderDetails | null>(null);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [botHoneypot, setBotHoneypot] = useState('');
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   const handleReceiptUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -121,7 +124,7 @@ export const CheckoutPage: React.FC = () => {
     }
   };
 
-  const handlePlaceOrder = async (e: React.FormEvent) => {
+  const handlePlaceOrder = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (items.length === 0) {
@@ -140,7 +143,16 @@ export const CheckoutPage: React.FC = () => {
       return;
     }
 
-    // Double-submit prevention
+    if (!email.trim() || !email.includes('@')) {
+      alert('Please provide a valid Gmail / Email address so we can deliver your official invoice.');
+      return;
+    }
+
+    // Open confirmation modal to ask customer before final placement
+    setIsConfirmModalOpen(true);
+  };
+
+  const executeFinalSubmitOrder = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
@@ -149,7 +161,7 @@ export const CheckoutPage: React.FC = () => {
       trackingNumber: generateTrackingNumber('TCS Express'),
       courier: 'TCS Express',
       customerName: fullName.trim(),
-      email: email.trim() || 'N/A',
+      email: email.trim(),
       phone: phone.trim(),
       city,
       address: address.trim(),
@@ -180,6 +192,7 @@ export const CheckoutPage: React.FC = () => {
       colors: ['#F97316', '#0B132B', '#25D366', '#FFFFFF'],
     });
 
+    setIsConfirmModalOpen(false);
     setCompletedOrder(newOrder);
     clearCart();
     setIsSubmitting(false);
@@ -299,8 +312,109 @@ export const CheckoutPage: React.FC = () => {
               })()}
             </div>
 
-            {/* Official Calenvee Invoice Template (Rendered as in reference template) */}
-            <OrderInvoice order={completedOrder} />
+            {/* Invoice Emailed to Gmail Notice & Itemized Summary (No review/print on screen) */}
+            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm space-y-5 text-left">
+              
+              <div className="flex items-start space-x-3.5 p-4 rounded-xl bg-orange-50/80 border border-orange-200">
+                <div className="w-10 h-10 rounded-xl bg-[#F97316] text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <Mail className="w-5 h-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <h3 className="text-sm font-bold text-gray-900">
+                    Official Itemized Invoice Dispatched to Your Gmail
+                  </h3>
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    A copy of your complete official order invoice and packaging slip has been dispatched to <strong className="text-gray-900 font-semibold">{completedOrder.email}</strong>. Please check your inbox or spam folder.
+                  </p>
+                </div>
+              </div>
+
+              {/* Order Items Breakdown */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                  Items Ordered ({completedOrder.items.length})
+                </h4>
+                <div className="divide-y divide-gray-100 border border-gray-100 rounded-xl overflow-hidden bg-gray-50/40">
+                  {completedOrder.items.map((item, idx) => {
+                    const img = item.product?.images?.[0] || '';
+                    return (
+                      <div key={idx} className="p-3.5 flex items-center justify-between gap-3 bg-white">
+                        <div className="flex items-center space-x-3 min-w-0">
+                          {img && (
+                            <img
+                              src={img}
+                              alt={item.product?.name}
+                              className="w-12 h-12 object-contain rounded-lg border border-gray-100 bg-gray-50 p-1 flex-shrink-0"
+                            />
+                          )}
+                          <div className="min-w-0">
+                            <h5 className="text-xs font-bold text-gray-900 truncate">
+                              {item.product?.name}
+                            </h5>
+                            <p className="text-[11px] text-gray-500">
+                              {item.selectedColor?.name && `Color: ${item.selectedColor.name}`}
+                              {item.selectedSize?.name && ` | Size: ${item.selectedSize.name}`}
+                              {` • Qty: ${item.quantity}`}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-xs font-bold text-gray-900 whitespace-nowrap">
+                          {formatPKR(item.product?.price * item.quantity)}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Delivery & Logistics Summary */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <div className="p-3.5 rounded-xl border border-gray-100 bg-gray-50/60 space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">
+                    Shipping Address
+                  </span>
+                  <p className="text-xs font-semibold text-gray-800">
+                    {completedOrder.address}, {completedOrder.city}
+                  </p>
+                  <p className="text-[11px] text-gray-500">Phone: {completedOrder.phone}</p>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-gray-100 bg-gray-50/60 space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">
+                    Delivery & Courier
+                  </span>
+                  <p className="text-xs font-semibold text-[#F97316]">
+                    TCS Express (Expected 7-10 Days Delivery)
+                  </p>
+                  <p className="text-[11px] text-gray-500 font-mono">
+                    Tracking ID: {completedOrder.trackingNumber}
+                  </p>
+                </div>
+              </div>
+
+              {/* Price Calculation Summary */}
+              <div className="pt-3 border-t border-gray-100 space-y-1 text-xs">
+                <div className="flex justify-between text-gray-500">
+                  <span>Subtotal:</span>
+                  <span>{formatPKR(completedOrder.subtotal)}</span>
+                </div>
+                {completedOrder.discount > 0 && (
+                  <div className="flex justify-between text-emerald-600 font-medium">
+                    <span>Discount:</span>
+                    <span>-{formatPKR(completedOrder.discount)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-gray-500">
+                  <span>Shipping:</span>
+                  <span>{completedOrder.shippingFee === 0 ? 'FREE' : formatPKR(completedOrder.shippingFee)}</span>
+                </div>
+                <div className="flex justify-between text-sm font-extrabold text-gray-900 pt-2 border-t border-gray-200">
+                  <span>Total Amount Payable:</span>
+                  <span className="text-[#F97316] font-black">{formatPKR(completedOrder.total)}</span>
+                </div>
+              </div>
+
+            </div>
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
@@ -311,15 +425,22 @@ export const CheckoutPage: React.FC = () => {
                 Continue Shopping
               </Link>
 
+              <Link
+                to={`/track-order?tracking=${completedOrder.trackingNumber}`}
+                className="flex-1 py-3.5 bg-[#081320] hover:bg-[#1C2541] text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors text-center shadow-md"
+              >
+                Track Your Package
+              </Link>
+
               <a
                 href={`https://wa.me/${PHYSICAL_STORE_LOCATION.whatsappRaw}?text=${encodeURIComponent(
                   `Hello Calenvee.pk! I have an inquiry about Order #${completedOrder.orderId}.`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 py-3.5 bg-[#0B132B] hover:bg-[#1C2541] text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors text-center shadow-md flex items-center justify-center space-x-2"
+                className="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors text-center shadow-md flex items-center justify-center space-x-2"
               >
-                <span>Order Inquiries (WhatsApp)</span>
+                <span>WhatsApp Support</span>
               </a>
             </div>
           </div>
@@ -842,6 +963,95 @@ export const CheckoutPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Final Step: Customer Confirmation Modal before Order Placement */}
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-gray-100 space-y-6 text-left animate-in zoom-in-95 duration-200">
+            
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-orange-100 text-[#F97316] flex items-center justify-center shadow-xs">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-extrabold text-gray-900">
+                    Confirm Your Order
+                  </h3>
+                  <p className="text-[11px] text-gray-500">
+                    Please verify your delivery details before final submission
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsConfirmModalOpen(false)}
+                className="p-1.5 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Verification Details Box */}
+            <div className="bg-gray-50 rounded-2xl p-4 sm:p-5 border border-gray-100 space-y-2.5 text-xs">
+              <div className="flex justify-between items-baseline">
+                <span className="text-gray-500 font-medium">Customer Name:</span>
+                <strong className="text-gray-900 font-bold text-sm">{fullName}</strong>
+              </div>
+              <div className="flex justify-between items-baseline">
+                <span className="text-gray-500 font-medium">Contact Phone:</span>
+                <strong className="text-gray-900 font-mono font-bold">{phone}</strong>
+              </div>
+              <div className="flex justify-between items-baseline">
+                <span className="text-gray-500 font-medium">Invoice Gmail:</span>
+                <span className="text-gray-900 font-semibold truncate max-w-[200px]">{email}</span>
+              </div>
+              <div className="flex justify-between items-start pt-1 border-t border-gray-200/60">
+                <span className="text-gray-500 font-medium">Delivery Address:</span>
+                <span className="text-gray-900 font-medium text-right max-w-[220px]">
+                  {address}, {city}
+                </span>
+              </div>
+              <div className="flex justify-between items-baseline pt-1 border-t border-gray-200/60">
+                <span className="text-gray-500 font-medium">Payment Method:</span>
+                <span className="text-[#EA580C] font-extrabold uppercase">
+                  {paymentMethod === 'cod' ? 'Cash on Delivery (Pay at Doorstep)' : paymentMethod.toUpperCase()}
+                </span>
+              </div>
+              <div className="flex justify-between items-baseline pt-2 border-t border-gray-200 text-sm">
+                <span className="font-bold text-gray-900">Total Payable:</span>
+                <span className="font-extrabold text-[#F97316] text-base">{formatPKR(finalTotal)}</span>
+              </div>
+            </div>
+
+            {/* Prompt Question */}
+            <div className="p-3.5 rounded-xl bg-orange-50 border border-orange-200 text-center text-xs text-orange-950 font-medium">
+              Would you like to confirm and place this order now?
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-1">
+              <button
+                type="button"
+                onClick={executeFinalSubmitOrder}
+                disabled={isSubmitting}
+                className="flex-1 py-3.5 bg-[#F97316] hover:bg-[#EA580C] disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center space-x-2"
+              >
+                <span>{isSubmitting ? 'Submitting Order...' : '✓ Yes, Place My Order'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsConfirmModalOpen(false)}
+                disabled={isSubmitting}
+                className="py-3.5 px-6 border border-gray-300 hover:bg-gray-100 text-gray-700 font-bold text-xs uppercase tracking-wider rounded-xl transition-colors"
+              >
+                Review / Edit
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 };
