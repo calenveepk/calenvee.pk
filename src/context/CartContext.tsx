@@ -56,20 +56,22 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   useEffect(() => {
-    // Sync with local admin server if running
-    const syncLiveSettings = async () => {
-      try {
-        const res = await fetch('http://localhost:4200/api/settings');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.freeShippingThreshold) setFreeShippingThreshold(Number(data.freeShippingThreshold));
-          if (data.standardShippingFee !== undefined) setStandardShippingFee(Number(data.standardShippingFee));
+    // Only query local admin server when running on localhost (prevents browser "Access local devices" security prompt on live production site)
+    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+      const syncLiveSettings = async () => {
+        try {
+          const res = await fetch('http://localhost:4200/api/settings');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.freeShippingThreshold) setFreeShippingThreshold(Number(data.freeShippingThreshold));
+            if (data.standardShippingFee !== undefined) setStandardShippingFee(Number(data.standardShippingFee));
+          }
+        } catch (_) {
+          // Fallback: storeSettingsData is already active
         }
-      } catch (_) {
-        // Fallback: storeSettingsData is already active
-      }
-    };
-    syncLiveSettings();
+      };
+      syncLiveSettings();
+    }
   }, []);
 
   useEffect(() => {
