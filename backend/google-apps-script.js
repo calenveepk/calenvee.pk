@@ -112,27 +112,27 @@ function setupSheet() {
     const now = new Date();
     const sampleOrders = [
       [
-        "CV-100201", now, "Hamza Tariq", "+923001234567", "calenvee.pk@gmail.com",
+        "CAL-ORD-1000001", now, "Hamza Tariq", "+923001234567", "calenvee.pk@gmail.com",
         "Lahore", "DHA Phase 5, Sector C", "COD", 3899, "Delivered",
         "TCS Express", "TRK-982101", "Obsidian Chronograph Edition (x1) - Rs. 3899", "Deliver after 4 PM", "Yes", "Yes", "N/A (Cash on Delivery)"
       ],
       [
-        "CV-100202", now, "Ayesha Malik", "+923219876543", "calenvee.pk@gmail.com",
+        "CAL-ORD-1000002", now, "Ayesha Malik", "+923219876543", "calenvee.pk@gmail.com",
         "Karachi", "Clifton Block 4", "EASYPAISA", 4499, "Dispatched",
         "Trax Logistics", "TRK-982102", "Royal Gold Dress Watch (x1) - Rs. 4499", "Call before arrival", "Yes", "Yes", "Attached in Drive & Email 🧾"
       ],
       [
-        "CV-100203", now, "Bilal Ahmed", "+923335551234", "calenvee.pk@gmail.com",
+        "CAL-ORD-1000003", now, "Bilal Ahmed", "+923335551234", "calenvee.pk@gmail.com",
         "Islamabad", "F-7/2, Street 14", "COD", 3499, "Confirmed",
-        "TCS Express", "N/A", "Azure Chronograph Edition (x1) - Rs. 3499", "Leave at reception", "Yes", "No", "N/A (Cash on Delivery)"
+        "Pending Dispatch (TCS Express)", "N/A", "Azure Chronograph Edition (x1) - Rs. 3499", "Leave at reception", "Yes", "No", "N/A (Cash on Delivery)"
       ]
     ];
     ordersSheet.getRange(2, 1, sampleOrders.length, sampleOrders[0].length).setValues(sampleOrders);
 
     const sampleItems = [
-      ["CV-100201", now, "Obsidian Chronograph Edition", 1, 3899, 3899, "Matte Stealth Black", "Standard"],
-      ["CV-100202", now, "Royal Gold Dress Watch", 1, 4499, 4499, "Royal Gold", "Standard"],
-      ["CV-100203", now, "Azure Chronograph Edition", 1, 3499, 3499, "Ocean Sunburst Blue", "Standard"]
+      ["CAL-ORD-1000001", now, "Obsidian Chronograph Edition", 1, 3899, 3899, "Matte Stealth Black", "Standard"],
+      ["CAL-ORD-1000002", now, "Royal Gold Dress Watch", 1, 4499, 4499, "Royal Gold", "Standard"],
+      ["CAL-ORD-1000003", now, "Azure Chronograph Edition", 1, 3499, 3499, "Ocean Sunburst Blue", "Standard"]
     ];
     itemsSheet.getRange(2, 1, sampleItems.length, sampleItems[0].length).setValues(sampleItems);
   }
@@ -686,7 +686,16 @@ function doPost(e) {
   try {
     const rawData = (e && e.postData && e.postData.contents) ? e.postData.contents : "{}";
     const payload = JSON.parse(rawData);
-    const action = payload.action || (payload.order ? 'create_order' : (payload.items && payload.customerName ? 'create_order' : 'create_order'));
+    
+    // STRICT ACTION DISPATCH: Only recognize explicit valid actions (NEVER default to create_order!)
+    const action = payload.action || (payload.order ? 'create_order' : null);
+
+    if (!action) {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        error: "Missing action. No database modification performed."
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
 
     if (action === 'sync_catalog') {
       return handleSyncCatalog(payload);
@@ -696,7 +705,7 @@ function doPost(e) {
       return handleUpdateOrderStatus(payload);
     } else if (action === 'get_orders') {
       return handleGetOrders();
-    } else if (action === 'create_order' || payload.order || (payload.customerName && payload.items)) {
+    } else if (action === 'create_order') {
       return handleCreateOrder(payload);
     }
 
@@ -714,16 +723,108 @@ function doPost(e) {
 }
 
 /**
+ * Generates the next sequential Order ID in format CAL-ORD-1000001, CAL-ORD-1000002...
+ * Scans Orders sheet and ScriptProperties to guarantee strictly increasing sequential IDs.
+ */
+function getNextSequentialOrderId(ordersSheet, requestedId) {
+  let highestNum = 1000000;
+  
+  // 1. Read persistent counter from Script Properties
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const savedLast = props.getProperty("LAST_ORDER_SEQ");
+    if (savedLast) {
+      const parsed = parseInt(savedLast, 10);
+      if (!isNaN(parsed) && parsed > highestNum) {
+        highestNum = parsed;
+      }
+    }
+  } catch (propErr) {
+    Logger.log("ScriptProperties read error: " + propErr.toString());
+  }
+
+  // 2. Scan Orders sheet Column A for highest CAL-ORD- number
+  if (ordersSheet && ordersSheet.getLastRow() > 1) {
+    const ids = ordersSheet.getRange(2, 1, ordersSheet.getLastRow() - 1, 1).getValues();
+    for (let i = 0; i < ids.length; i++) {
+      const str = String(ids[i][0] || '').trim();
+      const match = str.match(/CAL-ORD-(\d+)/i);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (!isNaN(num) && num > highestNum) {
+          highestNum = num;
+        }
+      }
+    }
+  }
+
+  // 3. If client already generated a valid sequential ID that doesn't conflict, validate it
+  if (requestedId && typeof requestedId === 'string') {
+    const reqMatch = requestedId.trim().match(/^CAL-ORD-(\d+)$/i);
+    if (reqMatch) {
+      const reqNum = parseInt(reqMatch[1], 10);
+      if (!isNaN(reqNum) && reqNum > highestNum) {
+        highestNum = reqNum;
+        try {
+          PropertiesService.getScriptProperties().setProperty("LAST_ORDER_SEQ", String(highestNum));
+        } catch (_) {}
+        return requestedId.trim().toUpperCase();
+      }
+    }
+  }
+
+  const nextNum = highestNum + 1;
+  try {
+    PropertiesService.getScriptProperties().setProperty("LAST_ORDER_SEQ", String(nextNum));
+  } catch (_) {}
+
+  return `CAL-ORD-${nextNum}`;
+}
+
+/**
  * 2A. ORDER CREATION HANDLER
+ * Enforces strict validation: Only REAL placed orders with verified customer name,
+ * phone, items list, and total > 0 are logged to Orders & OrderItems tabs.
  */
 function handleCreateOrder(payload) {
   const order = payload.order || payload;
+
+  // STRICT VALIDATION GUARD: Reject any malformed, empty, or ghost orders
+  const customerName = String(order.customerName || '').trim();
+  const phone = String(order.phone || '').trim();
+  const address = String(order.address || '').trim();
+  const itemsList = Array.isArray(order.items) ? order.items : [];
+  const total = Number(order.total || 0);
+
+  if (!customerName || customerName.toUpperCase() === 'N/A' || customerName.length < 2) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: "Order rejected: Customer name is required."
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (!phone || phone.toUpperCase() === 'N/A' || phone.length < 7) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: "Order rejected: Valid contact phone is required."
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (itemsList.length === 0 || total <= 0) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: "Order rejected: Must contain at least 1 product item with total > 0."
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const ordersSheet = ss.getSheetByName("Orders") || ss.getActiveSheet();
   const itemsSheet = ss.getSheetByName("OrderItems");
 
-  const itemsList = order.items || [];
+  // Generate authoritative sequential Order ID (e.g. CAL-ORD-1000001, CAL-ORD-1000002...)
+  const finalOrderId = getNextSequentialOrderId(ordersSheet, order.orderId);
+  order.orderId = finalOrderId;
+
   const itemsSummary = itemsList.map(item => `${item.name} (x${item.quantity}) - Rs. ${item.price}`).join("; ");
   const timestamp = order.createdAt ? new Date(order.createdAt) : new Date();
 
@@ -766,20 +867,24 @@ function handleCreateOrder(payload) {
     ? `=HYPERLINK("${receiptUrl}", "View Receipt 🧾")`
     : (paymentMethodUpper === "COD" ? "N/A (Cash on Delivery)" : "No Screenshot Uploaded");
 
-  // Append to Orders tab
+  // Initial tracking number is ALWAYS "N/A" on initial placement (DO NOT auto-generate fake tracking!)
+  const initialTracking = "N/A";
+  const initialCourier = order.courier || "Pending Dispatch (TCS Express)";
+
+  // Append strictly verified order to Orders tab
   ordersSheet.appendRow([
-    order.orderId || "CV-" + Math.floor(100000 + Math.random() * 900000),
+    order.orderId,
     timestamp,
-    order.customerName || "N/A",
-    order.phone || "N/A",
+    customerName,
+    phone,
     order.email || "N/A",
     order.city || "N/A",
-    order.address || "N/A",
+    address,
     paymentMethodUpper,
-    order.total || 0,
+    total,
     "Confirmed",
-    order.courier || "TCS Express",
-    order.trackingNumber || "N/A",
+    initialCourier,
+    initialTracking,
     itemsSummary,
     order.notes || "None",
     order.email && order.email.includes("@") ? "Yes" : "No Email",
@@ -787,7 +892,7 @@ function handleCreateOrder(payload) {
     receiptProofCell
   ]);
 
-  // Append items to OrderItems tab
+  // Append items to OrderItems tab with the exact sequential orderId
   if (itemsSheet && itemsList.length > 0) {
     itemsList.forEach(item => {
       itemsSheet.appendRow([
@@ -803,7 +908,7 @@ function handleCreateOrder(payload) {
     });
   }
 
-  // Send customer order confirmation email (if email was provided)
+  // Send customer order confirmation email with official invoice (if email was provided)
   if (order.email && order.email.includes("@") && order.email !== "N/A") {
     sendCustomerOrderConfirmationEmail(order);
   }
@@ -814,7 +919,7 @@ function handleCreateOrder(payload) {
   return ContentService.createTextOutput(JSON.stringify({
     success: true,
     orderId: order.orderId,
-    message: "Order placed and recorded successfully in Calenvee database."
+    message: `Order #${order.orderId} verified and recorded successfully in Calenvee database.`
   })).setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -1015,7 +1120,10 @@ function handleUpdateOrderStatus(payload) {
   const orderId = payload.orderId;
   const newStatus = payload.status || "Dispatched";
   const courier = payload.courier || "TCS Express";
-  const trackingNumber = payload.trackingNumber || ("TRK-" + Math.floor(10000000 + Math.random() * 90000000));
+  const rawTracking = payload.trackingNumber;
+  const trackingNumber = (rawTracking && String(rawTracking).trim() !== '' && String(rawTracking).trim().toUpperCase() !== 'N/A')
+    ? String(rawTracking).trim()
+    : "N/A";
   const sendEmail = payload.sendEmail !== false;
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1575,7 +1683,26 @@ function generateCustomerInvoiceEmailHtml(order) {
  */
 function sendCustomerDispatchEmail(dispatchData) {
   const cfg = getDynamicStoreSettings();
-  const subject = `Your Order Has Been Dispatched! Tracking: ${dispatchData.trackingNumber} | ${cfg.storeName}`;
+  const rawTrk = dispatchData.trackingNumber;
+  const hasTracking = rawTrk && String(rawTrk).trim() !== '' && String(rawTrk).trim().toUpperCase() !== 'N/A';
+  
+  const subject = hasTracking
+    ? `Your Order #${dispatchData.orderId} Has Been Dispatched! Tracking: ${rawTrk} | ${cfg.storeName}`
+    : `Your Order #${dispatchData.orderId} Has Been Dispatched! | ${cfg.storeName}`;
+
+  const trackingBoxHtml = hasTracking ? `
+    <div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 18px; margin: 16px 0; text-align: left;">
+      <div style="font-size: 12px; color: #1E40AF; margin-bottom: 6px;"><strong>Courier Service:</strong> ${dispatchData.courier || 'TCS Express'}</div>
+      <div style="font-size: 14px; color: #1E3A8A; font-weight: 800;"><strong>Tracking Number:</strong> ${rawTrk}</div>
+      <div style="font-size: 11px; color: #3B82F6; margin-top: 6px;">You can track this consignment on the official courier portal or via SMS alerts.</div>
+    </div>
+  ` : `
+    <div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 18px; margin: 16px 0; text-align: left;">
+      <div style="font-size: 12px; color: #1E40AF; margin-bottom: 6px;"><strong>Courier Service:</strong> ${dispatchData.courier || 'TCS Express'}</div>
+      <div style="font-size: 13px; color: #1E3A8A; font-weight: 700;"><strong>Consignment Status:</strong> Dispatched & In Transit for Doorstep Delivery</div>
+      <div style="font-size: 11px; color: #3B82F6; margin-top: 6px;">The courier delivery rider will coordinate with you via call/SMS prior to delivery. Please keep the exact payable amount ready.</div>
+    </div>
+  `;
 
   const htmlBody = `
     <!DOCTYPE html>
@@ -1598,14 +1725,10 @@ function sendCustomerDispatchEmail(dispatchData) {
             <div style="font-size: 32px; margin-bottom: 8px;">📦</div>
             <h2 style="margin: 0; font-size: 20px; color: #111827;">Your Package is on the Way!</h2>
             <p style="margin: 8px 0 16px 0; font-size: 13px; color: #6B7280;">
-              Dear <strong>${dispatchData.customerName}</strong>, your Calenvee parcel for Order <strong>${dispatchData.orderId}</strong> has been handed over to ${dispatchData.courier}.
+              Dear <strong>${dispatchData.customerName}</strong>, your Calenvee parcel for Order <strong>#${dispatchData.orderId}</strong> has been handed over to ${dispatchData.courier || 'our delivery partner'}.
             </p>
             
-            <div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 18px; margin: 16px 0; text-align: left;">
-              <div style="font-size: 12px; color: #1E40AF; margin-bottom: 6px;"><strong>Courier Service:</strong> ${dispatchData.courier}</div>
-              <div style="font-size: 14px; color: #1E3A8A; font-weight: 800;"><strong>Tracking Number:</strong> ${dispatchData.trackingNumber}</div>
-              <div style="font-size: 11px; color: #3B82F6; margin-top: 6px;">Please keep the exact amount ready upon courier delivery (Nationwide Cash on Delivery).</div>
-            </div>
+            ${trackingBoxHtml}
 
             <p style="font-size: 12px; color: #6B7280; margin-top: 20px;">
               Need delivery status assistance? WhatsApp us at <a href="https://wa.me/${cfg.helplineWhatsAppRaw}" style="color: #F97316; font-weight: bold;">${cfg.helplinePhone}</a>.
@@ -1802,9 +1925,10 @@ function onOpen() {
     .addItem("⚙️ 2. Setup All Sheets (Dashboard + Orders + OrderItems + Inventory + Settings)", "setupSheet")
     .addSeparator()
     .addItem("✉️ 3. Send Dispatch Email for Selected Row", "sendDispatchEmailForSelectedRow")
-    .addItem("🧪 4. Send Test Email to Store Owner", "testOrderEmail")
+    .addItem("🧹 4. Clean Ghost / Empty Orders (Remove Blank Rows)", "cleanGhostOrders")
+    .addItem("🧪 5. Send Test Email to Store Owner", "testOrderEmail")
     .addSeparator()
-    .addItem("🗑️ 5. Reset All Dummy Orders (Fresh Store)", "resetDummyData")
+    .addItem("🗑️ 6. Reset All Dummy Orders (Fresh Store)", "resetDummyData")
     .addToUi();
 }
 
@@ -1821,16 +1945,16 @@ function sendDispatchEmailForSelectedRow() {
   const customerName = values[2];
   const email = values[4];
   const courier = values[10] || "TCS Express";
-  const trackingNumber = values[11];
+  let trackingNumber = String(values[11] || "").trim();
 
   if (!email || !email.includes("@")) {
     SpreadsheetApp.getUi().alert("No valid email address in this row.");
     return;
   }
 
-  if (!trackingNumber || trackingNumber === "N/A") {
-    SpreadsheetApp.getUi().alert("Please enter a tracking number in Column L before sending dispatch email.");
-    return;
+  // Tracking number is OPTIONAL! If empty or N/A, keep it as N/A
+  if (!trackingNumber || trackingNumber === "") {
+    trackingNumber = "N/A";
   }
 
   sendCustomerDispatchEmail({
@@ -1842,8 +1966,71 @@ function sendDispatchEmailForSelectedRow() {
   });
 
   sheet.getRange(row, 10).setValue("Dispatched");
+  sheet.getRange(row, 12).setValue(trackingNumber);
   sheet.getRange(row, 16).setValue("Yes");
-  SpreadsheetApp.getUi().alert(`✅ Dispatch email sent to ${customerName} (${email})!`);
+  SpreadsheetApp.getUi().alert(`✅ Dispatch email sent to ${customerName} (${email})!\nOrder: #${orderId}\nStatus: Dispatched\nTracking: ${trackingNumber}`);
+}
+
+/**
+ * 11. CLEAN GHOST / EMPTY ORDERS
+ * Safely removes any erroneous empty rows (e.g. rows created with missing customer details,
+ * or 0 total) from both Orders and OrderItems tabs.
+ */
+function cleanGhostOrders() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ordersSheet = ss.getSheetByName("Orders");
+  const itemsSheet = ss.getSheetByName("OrderItems");
+  
+  if (!ordersSheet) {
+    SpreadsheetApp.getUi().alert("Orders sheet not found.");
+    return "Orders sheet not found";
+  }
+  
+  const lastRow = ordersSheet.getLastRow();
+  if (lastRow <= 1) {
+    SpreadsheetApp.getUi().alert("No orders to clean.");
+    return "No orders to clean.";
+  }
+  
+  const deletedOrders = [];
+  // Loop from bottom to top so index shifts do not affect row deletion
+  for (let r = lastRow; r >= 2; r--) {
+    const row = ordersSheet.getRange(r, 1, 1, 17).getValues()[0];
+    const orderId = String(row[0] || "").trim();
+    const customerName = String(row[2] || "").trim();
+    const phone = String(row[3] || "").trim();
+    const total = Number(row[8] || 0);
+    
+    // Ghost row criteria: customer name is empty or "N/A", and total is 0 or phone is empty/"N/A"
+    const isGhost = (!customerName || customerName.toUpperCase() === "N/A") && (total === 0 || !phone || phone.toUpperCase() === "N/A");
+    
+    if (isGhost) {
+      if (orderId) deletedOrders.push(orderId);
+      ordersSheet.deleteRow(r);
+    }
+  }
+  
+  // Clean corresponding OrderItems for deleted ghost orders or blank items
+  if (itemsSheet && itemsSheet.getLastRow() > 1) {
+    const itemsLastRow = itemsSheet.getLastRow();
+    for (let r = itemsLastRow; r >= 2; r--) {
+      const itemRow = itemsSheet.getRange(r, 1, 1, 8).getValues()[0];
+      const itemOrderId = String(itemRow[0] || "").trim();
+      const itemName = String(itemRow[2] || "").trim();
+      if (!itemName || deletedOrders.includes(itemOrderId) || !itemOrderId) {
+        itemsSheet.deleteRow(r);
+      }
+    }
+  }
+  
+  // Refresh Dashboard
+  if (typeof createExecutiveDashboard === 'function') {
+    try { createExecutiveDashboard(); } catch (_) {}
+  }
+  
+  const msg = `Cleaned ${deletedOrders.length} ghost/empty row(s) successfully!`;
+  SpreadsheetApp.getUi().alert("🧹 Cleanup Complete!\n\n" + msg + (deletedOrders.length > 0 ? "\nRemoved IDs: " + deletedOrders.join(", ") : ""));
+  return msg;
 }
 
 /**

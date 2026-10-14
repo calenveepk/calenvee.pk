@@ -7,8 +7,18 @@ export function calculateSavings(originalPrice: number, currentPrice: number): n
 }
 
 export function generateOrderId(): string {
-  const randomSuffix = Math.floor(100000 + Math.random() * 900000);
-  return `CV-${randomSuffix}`;
+  let nextSeq = 1000001;
+  try {
+    const stored = localStorage.getItem('calenvee_order_seq');
+    if (stored) {
+      const parsed = parseInt(stored, 10);
+      if (!isNaN(parsed) && parsed >= 1000001) {
+        nextSeq = parsed + 1;
+      }
+    }
+    localStorage.setItem('calenvee_order_seq', String(nextSeq));
+  } catch (_) {}
+  return `CAL-ORD-${nextSeq}`;
 }
 
 export function generateTrackingNumber(courier: string = 'TCS Express'): string {

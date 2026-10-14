@@ -1327,10 +1327,10 @@ Ready to commit and deploy changes.</pre>
             </select>
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Tracking Number</label>
+            <label class="block font-semibold text-slate-700 mb-1">Tracking Number <span class="text-slate-400 font-normal">(Optional)</span></label>
             <div class="flex gap-1.5">
-              <input type="text" id="disp_trackingNumber" placeholder="e.g. TRK-7892102" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-mono text-xs focus:outline-none focus:border-[#F97316]">
-              <button type="button" onclick="generateDemoTracking()" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold">Auto</button>
+              <input type="text" id="disp_trackingNumber" placeholder="Optional (e.g. TRK-7892102)" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-mono text-xs focus:outline-none focus:border-[#F97316]">
+              <button type="button" onclick="generateDemoTracking()" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold" title="Generate dummy tracking ID for testing">Auto</button>
             </div>
           </div>
         </div>
@@ -1699,8 +1699,8 @@ Ready to commit and deploy changes.</pre>
       document.getElementById('disp_itemsSummary').innerText = order.itemsSummary || 'Standard order items';
 
       document.getElementById('disp_status').value = order.status || 'Dispatched';
-      document.getElementById('disp_courier').value = order.courier && order.courier !== 'N/A' ? order.courier : 'TCS Express';
-      document.getElementById('disp_trackingNumber').value = order.trackingNumber && order.trackingNumber !== 'N/A' ? order.trackingNumber : ('TRK-' + Math.floor(10000000 + Math.random() * 90000000));
+      document.getElementById('disp_courier').value = order.courier && order.courier !== 'N/A' && !order.courier.includes('Pending') ? order.courier : 'TCS Express';
+      document.getElementById('disp_trackingNumber').value = (order.trackingNumber && order.trackingNumber !== 'N/A') ? order.trackingNumber : '';
       document.getElementById('disp_sendEmail').checked = true;
 
       document.getElementById('dispatchModal').classList.remove('hidden');
@@ -1722,7 +1722,7 @@ Ready to commit and deploy changes.</pre>
       const orderId = document.getElementById('disp_orderId').value;
       const status = document.getElementById('disp_status').value;
       const courier = document.getElementById('disp_courier').value;
-      const trackingNumber = document.getElementById('disp_trackingNumber').value;
+      const trackingNumber = document.getElementById('disp_trackingNumber').value.trim() || 'N/A';
       const sendEmail = document.getElementById('disp_sendEmail').checked;
 
       const btn = document.getElementById('saveDispatchBtn');

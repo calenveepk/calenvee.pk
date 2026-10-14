@@ -101,7 +101,7 @@ export interface OrderDetails {
   promoCode?: string;
   status: 'confirmed' | 'processing' | 'shipped' | 'delivered';
   trackingNumber: string;
-  courier: 'TCS Express' | 'Trax Logistics' | 'Call Courier' | 'Leopard';
+  courier: string;
   createdAt: string;
   receiptImage?: string;
   receiptFileName?: string;

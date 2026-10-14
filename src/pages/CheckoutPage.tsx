@@ -156,10 +156,12 @@ export const CheckoutPage: React.FC = () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
+    const initialOrderId = generateOrderId();
+
     const newOrder: OrderDetails = {
-      orderId: generateOrderId(),
-      trackingNumber: generateTrackingNumber('TCS Express'),
-      courier: 'TCS Express',
+      orderId: initialOrderId,
+      trackingNumber: '', // NO tracking number upon initial order placement!
+      courier: 'Pending Dispatch (TCS Express)',
       customerName: fullName.trim(),
       email: email.trim(),
       phone: phone.trim(),
@@ -180,7 +182,10 @@ export const CheckoutPage: React.FC = () => {
     };
 
     try {
-      await submitOrderToBackend(newOrder);
+      const result = await submitOrderToBackend(newOrder);
+      if (result && result.orderId) {
+        newOrder.orderId = result.orderId;
+      }
     } catch (err) {
       console.warn('Backend sync error:', err);
     }

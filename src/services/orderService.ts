@@ -17,6 +17,17 @@ const DEFAULT_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwCZvq-OqA4
 export async function submitOrderToBackend(order: OrderDetails): Promise<OrderSubmissionResult> {
   const webhookUrl = (import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL || DEFAULT_WEBHOOK_URL)?.trim();
 
+  // Guard: NEVER send ghost or empty orders
+  if (!order || !order.customerName || !order.phone || !order.items || order.items.length === 0 || order.total <= 0) {
+    console.warn('Blocked invalid/empty order submission');
+    return {
+      success: false,
+      orderId: order?.orderId || '',
+      source: 'local_fallback',
+      message: 'Order validation failed: missing customer details or items.',
+    };
+  }
+
   // Always cache locally in localStorage first for resilience
   try {
     const savedOrders = JSON.parse(localStorage.getItem('calenvee_orders') || '[]');
@@ -45,7 +56,7 @@ export async function submitOrderToBackend(order: OrderDetails): Promise<OrderSu
         const data = await response.json();
         return {
           success: true,
-          orderId: order.orderId,
+          orderId: data.orderId || order.orderId,
           source: 'google_sheets',
           message: data.message || 'Order confirmed and recorded in Google Sheets.',
         };
