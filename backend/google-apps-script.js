@@ -1475,6 +1475,11 @@ function sendCustomerOrderConfirmationEmail(order) {
 /**
  * GENERATES HIGH-RESOLUTION CUSTOMER ORDER EMAIL (OFFICIAL CARD TEMPLATE)
  * Supports both stage = "placed" and stage = "confirmed"
+ * - Responsive 100% fluid container for mobile Gmail (no compressed layout)
+ * - Zero raw emojis (no corrupted diamond question marks)
+ * - Zero item images in item summary (clean text layout)
+ * - WhatsApp helpline number at the top
+ * - Customer details with Name:, Phone: labels attached to colons
  */
 function generateCustomerOrderEmailHtml(order, stage) {
   const cfg = getDynamicStoreSettings();
@@ -1484,6 +1489,7 @@ function generateCustomerOrderEmailHtml(order, stage) {
     ? order.items 
     : [{ name: order.itemsSummary || "Calenvee Product", quantity: 1, price: order.total || 0 }];
 
+  // Item summary without images (Point 7)
   const itemsHtml = itemsList.map(item => {
     const itemName = item.name || (item.product && item.product.name) || "Calenvee Product";
     const itemQty = Number(item.quantity || 1);
@@ -1498,14 +1504,14 @@ function generateCustomerOrderEmailHtml(order, stage) {
 
     return `
       <tr>
-        <td style="padding: 12px 8px; border-bottom: 1px solid #E5E7EB; font-size: 13px; color: #111827;">
-          <strong>${itemName}</strong>
-          ${variantStr ? `<br><span style="font-size: 11px; color: #6B7280;">${variantStr}</span>` : ""}
+        <td style="padding: 10px 8px; border-bottom: 1px solid #E5E7EB; font-size: 13px; color: #111827; text-align: left;">
+          <div style="font-weight: 700; color: #111827; line-height: 1.3;">${itemName}</div>
+          ${variantStr ? `<div style="font-size: 11px; color: #6B7280; margin-top: 2px;">${variantStr}</div>` : ""}
         </td>
-        <td style="padding: 12px 8px; border-bottom: 1px solid #E5E7EB; font-size: 13px; text-align: center; color: #374151;">
+        <td style="padding: 10px 6px; border-bottom: 1px solid #E5E7EB; font-size: 13px; text-align: center; color: #374151; vertical-align: middle;">
           ${itemQty}
         </td>
-        <td style="padding: 12px 8px; border-bottom: 1px solid #E5E7EB; font-size: 13px; text-align: right; color: #111827; font-weight: bold;">
+        <td style="padding: 10px 8px; border-bottom: 1px solid #E5E7EB; font-size: 13px; text-align: right; color: #111827; font-weight: 700; vertical-align: middle; white-space: nowrap;">
           Rs. ${(itemPrice * itemQty).toLocaleString()}
         </td>
       </tr>
@@ -1528,48 +1534,67 @@ function generateCustomerOrderEmailHtml(order, stage) {
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
       <title>${heroTitle}</title>
+      <style>
+        body, table, td { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        @media only screen and (max-width: 600px) {
+          .email-container { width: 100% !important; max-width: 100% !important; border-radius: 0 !important; }
+          .responsive-padding { padding-left: 14px !important; padding-right: 14px !important; }
+        }
+      </style>
     </head>
-    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9FAFB; margin: 0; padding: 24px; color: #111827;">
-      <table align="center" width="100%" style="max-width: 600px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E5E7EB; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin: 0 auto;">
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9FAFB; margin: 0; padding: 18px 10px; color: #111827;">
+      <table align="center" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 580px; width: 100%; background-color: #FFFFFF; border-radius: 14px; border: 1px solid #E5E7EB; overflow: hidden; margin: 0 auto;">
         
+        <!-- Top Bar: WhatsApp Helpline (Point 8) -->
+        <tr>
+          <td style="background-color: #060B18; padding: 10px 16px; text-align: center; font-size: 11px; color: #94A3B8;">
+            WhatsApp Helpline: <a href="https://wa.me/${cfg.helplineWhatsAppRaw}" style="color: #25D366; font-weight: bold; text-decoration: none;">${cfg.helplinePhone}</a>
+          </td>
+        </tr>
+
         <!-- Header with Official Logo & Slogan (No "CALENVEE" plain text) -->
         <tr>
-          <td style="background-color: ${cfg.brandNavy}; padding: 36px 24px; text-align: center;">
+          <td style="background-color: ${cfg.brandNavy}; padding: 32px 20px; text-align: center;">
             <div style="margin-bottom: 10px;">
-              <img src="${cfg.logoUrl}" alt="${cfg.storeName}" style="max-height: 48px; width: auto; display: inline-block; border: 0;" />
+              <img src="${cfg.logoUrl}" alt="${cfg.storeName}" style="max-height: 48px; width: auto; display: block; margin: 0 auto; border: 0;" />
             </div>
-            <p style="color: ${cfg.brandOrange}; font-size: 11px; margin: 8px 0 0 0; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <p style="color: ${cfg.brandOrange}; font-size: 11px; margin: 0; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; text-align: center;">
               ${cfg.storeTagline}
             </p>
           </td>
         </tr>
         
-        <!-- Hero Confirmation -->
+        <!-- Hero Confirmation (Clean checkmark icon, ZERO emojis - Point 6) -->
         <tr>
-          <td style="padding: 32px 24px 20px 24px; text-align: center;">
-            <div style="display: inline-block; width: 48px; height: 48px; line-height: 48px; border-radius: 50%; background-color: #ECFDF5; color: #059669; font-size: 24px; margin-bottom: 12px;">✓</div>
-            <h2 style="margin: 0; font-size: 20px; color: #111827;">${heroTitle}</h2>
+          <td style="padding: 28px 20px 20px 20px; text-align: center;">
+            <div style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 50%; background-color: #ECFDF5; color: #059669; font-size: 20px; font-weight: bold; margin-bottom: 12px; text-align: center;">
+              &#10003;
+            </div>
+            <h2 style="margin: 0; font-size: 20px; color: #111827; font-weight: 800;">${heroTitle}</h2>
             <p style="margin: 8px 0 0 0; font-size: 13px; color: #6B7280; line-height: 1.5;">
               ${heroSubtitle}
             </p>
-            <div style="margin-top: 16px; padding: 10px 18px; background-color: #FFF7ED; border: 1px solid #FED7AA; border-radius: 8px; display: inline-block;">
+            <div style="margin-top: 16px; padding: 9px 16px; background-color: #FFF7ED; border: 1px solid #FED7AA; border-radius: 8px; display: inline-block;">
               <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #C2410C; font-weight: bold;">ORDER REFERENCE:</span>
               <span style="font-size: 14px; font-weight: 800; color: #9A3412; margin-left: 6px;">${order.orderId}</span>
             </div>
           </td>
         </tr>
 
-        <!-- Order Items Table -->
+        <!-- Order Items Table (No images - Point 7) -->
         <tr>
-          <td style="padding: 0 24px 24px 24px;">
-            <h3 style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #374151; margin-bottom: 12px; border-bottom: 2px solid ${cfg.brandOrange}; padding-bottom: 6px;">ORDER SUMMARY</h3>
-            <table width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+          <td style="padding: 0 20px 20px 20px;">
+            <div style="font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: #374151; font-weight: 800; margin-bottom: 10px; border-bottom: 2px solid ${cfg.brandOrange}; padding-bottom: 6px;">
+              ORDER SUMMARY
+            </div>
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" style="width: 100%; border-collapse: collapse;">
               <thead>
                 <tr style="background-color: #F3F4F6;">
-                  <th style="padding: 8px; text-align: left; font-size: 11px; text-transform: uppercase; color: #4B5563;">ITEM</th>
-                  <th style="padding: 8px; text-align: center; font-size: 11px; text-transform: uppercase; color: #4B5563;">QTY</th>
-                  <th style="padding: 8px; text-align: right; font-size: 11px; text-transform: uppercase; color: #4B5563;">PRICE</th>
+                  <th style="padding: 8px; text-align: left; font-size: 11px; text-transform: uppercase; color: #4B5563; font-weight: 700;">ITEM</th>
+                  <th style="padding: 8px 6px; text-align: center; font-size: 11px; text-transform: uppercase; color: #4B5563; font-weight: 700; width: 44px;">QTY</th>
+                  <th style="padding: 8px; text-align: right; font-size: 11px; text-transform: uppercase; color: #4B5563; font-weight: 700; width: 85px;">PRICE</th>
                 </tr>
               </thead>
               <tbody>
@@ -1578,7 +1603,7 @@ function generateCustomerOrderEmailHtml(order, stage) {
             </table>
 
             <!-- Totals (Strictly "Total Amount", NOT "Total Payable (COD)") -->
-            <table width="100%" style="margin-top: 16px; font-size: 13px;">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top: 14px; font-size: 13px; width: 100%;">
               <tr>
                 <td style="color: #6B7280; padding: 4px 0;">Subtotal:</td>
                 <td style="text-align: right; font-weight: 600; color: #111827;">Rs. ${subtotal.toLocaleString()}</td>
@@ -1592,7 +1617,7 @@ function generateCustomerOrderEmailHtml(order, stage) {
                 <td style="color: #6B7280; padding: 4px 0;">Delivery Charges:</td>
                 <td style="text-align: right; font-weight: 600; color: #111827;">${shippingFeeStr}</td>
               </tr>
-              <tr style="border-top: 2px solid #E5E7EB; font-size: 16px;">
+              <tr style="border-top: 2px solid #E5E7EB; font-size: 15px;">
                 <td style="padding-top: 10px; font-weight: 800; color: ${cfg.brandNavy};">Total Amount:</td>
                 <td style="padding-top: 10px; text-align: right; font-weight: 800; color: ${cfg.brandOrange};">Rs. ${totalStr}</td>
               </tr>
@@ -1600,25 +1625,27 @@ function generateCustomerOrderEmailHtml(order, stage) {
           </td>
         </tr>
 
-        <!-- Customer Details (Replaces Shipping Details) -->
+        <!-- Customer Details Box (Colons attached to headings - Point 9) -->
         <tr>
-          <td style="padding: 0 24px 24px 24px;">
-            <div style="background-color: #F9FAFB; border-radius: 12px; padding: 16px; border: 1px solid #E5E7EB;">
-              <h4 style="margin: 0 0 10px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #4B5563; font-weight: 800;">CUSTOMER DETAILS</h4>
-              <p style="margin: 0; font-size: 12px; color: #1F2937; line-height: 1.7;">
-                <strong>Recipient:</strong> ${order.customerName}<br>
-                <strong>Phone:</strong> ${order.phone}<br>
-                <strong>Delivery Address:</strong> ${order.address}${order.city ? ', ' + order.city : ''}<br>
-                <strong>Expected Delivery:</strong> 7-10 Working Days<br>
-                <strong>Payment Method:</strong> ${paymentMethodUpper}
-              </p>
+          <td style="padding: 0 20px 20px 20px;">
+            <div style="background-color: #F9FAFB; border-radius: 10px; padding: 14px 16px; border: 1px solid #E5E7EB;">
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #4B5563; font-weight: 800; margin-bottom: 10px; border-bottom: 1px solid #E5E7EB; padding-bottom: 6px;">
+                CUSTOMER DETAILS
+              </div>
+              <div style="font-size: 12px; color: #1F2937; line-height: 1.8;">
+                <div><strong style="color: #4B5563;">Name:</strong> <span style="color: #111827; font-weight: 600;">${order.customerName}</span></div>
+                <div><strong style="color: #4B5563;">Phone:</strong> <span style="color: #111827;">${order.phone}</span></div>
+                <div><strong style="color: #4B5563;">Delivery Address:</strong> <span style="color: #111827;">${order.address}${order.city ? ', ' + order.city : ''}</span></div>
+                <div><strong style="color: #4B5563;">Expected Delivery:</strong> <span style="color: #111827; font-weight: 600;">7-10 Working Days</span></div>
+                <div><strong style="color: #4B5563;">Payment Method:</strong> <span style="color: #0B132B; font-weight: 700; text-transform: uppercase;">${paymentMethodUpper}</span></div>
+              </div>
             </div>
           </td>
         </tr>
 
         <!-- Footer -->
         <tr>
-          <td style="background-color: #F3F4F6; padding: 20px 24px; text-align: center; border-top: 1px solid #E5E7EB;">
+          <td style="background-color: #F3F4F6; padding: 18px 20px; text-align: center; border-top: 1px solid #E5E7EB;">
             <p style="margin: 0; font-size: 12px; color: #4B5563;">
               Have questions or need to modify your order? Chat with our team:
             </p>
@@ -1640,57 +1667,111 @@ function generateCustomerOrderEmailHtml(order, stage) {
 
 /**
  * 6. LUXURY HTML EMAIL: DISPATCH NOTIFICATION
+ * - Clean logo & slogan header only (No plain text CALENVEE)
+ * - Zero emojis (no corrupted diamond question marks)
+ * - Exact courier company name (never "Pending Dispatch")
+ * - Optional tracking number
  */
 function sendCustomerDispatchEmail(dispatchData) {
   const cfg = getDynamicStoreSettings();
-  const rawTrk = dispatchData.trackingNumber;
-  const hasTracking = rawTrk && String(rawTrk).trim() !== '' && String(rawTrk).trim().toUpperCase() !== 'N/A';
+  const rawTrk = String(dispatchData.trackingNumber || "").trim();
+  const hasTracking = rawTrk !== "" && rawTrk !== "-" && rawTrk.toUpperCase() !== "N/A";
   
   const subject = hasTracking
     ? `Your Order #${dispatchData.orderId} Has Been Dispatched! Tracking: ${rawTrk} | ${cfg.storeName}`
     : `Your Order #${dispatchData.orderId} Has Been Dispatched! | ${cfg.storeName}`;
 
+  // Clean courier name (strip any "Pending Dispatch" or brackets)
+  const courierClean = String(dispatchData.courier || "TCS Express").replace(/Pending\s*Dispatch\s*\(?/i, "").replace(/\)$/, "").trim() || "TCS Express";
+
   const trackingBoxHtml = hasTracking ? `
-    <div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 18px; margin: 16px 0; text-align: left;">
-      <div style="font-size: 12px; color: #1E40AF; margin-bottom: 6px;"><strong>Courier Service:</strong> ${dispatchData.courier || 'TCS Express'}</div>
-      <div style="font-size: 14px; color: #1E3A8A; font-weight: 800;"><strong>Tracking Number:</strong> ${rawTrk}</div>
-      <div style="font-size: 11px; color: #3B82F6; margin-top: 6px;">You can track this consignment on the official courier portal or via SMS alerts.</div>
+    <div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 16px 18px; margin: 18px 0; text-align: left;">
+      <div style="font-size: 13px; color: #1E40AF; margin-bottom: 6px;">
+        <strong style="color: #1E3A8A;">Courier Service:</strong> ${courierClean}
+      </div>
+      <div style="font-size: 14px; color: #1E3A8A; font-weight: 800;">
+        <strong style="color: #1E3A8A;">Tracking Number:</strong> ${rawTrk}
+      </div>
+      <div style="font-size: 11px; color: #3B82F6; margin-top: 6px;">
+        You can track this consignment on the official ${courierClean} portal or via courier SMS alerts.
+      </div>
     </div>
   ` : `
-    <div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 18px; margin: 16px 0; text-align: left;">
-      <div style="font-size: 12px; color: #1E40AF; margin-bottom: 6px;"><strong>Courier Service:</strong> ${dispatchData.courier || 'TCS Express'}</div>
-      <div style="font-size: 13px; color: #1E3A8A; font-weight: 700;"><strong>Consignment Status:</strong> Dispatched & In Transit for Doorstep Delivery</div>
-      <div style="font-size: 11px; color: #3B82F6; margin-top: 6px;">The courier delivery rider will coordinate with you via call/SMS prior to delivery. Please keep the exact payable amount ready.</div>
+    <div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 16px 18px; margin: 18px 0; text-align: left;">
+      <div style="font-size: 13px; color: #1E40AF; margin-bottom: 6px;">
+        <strong style="color: #1E3A8A;">Courier Service:</strong> ${courierClean}
+      </div>
+      <div style="font-size: 13px; color: #1E3A8A; font-weight: 700;">
+        <strong style="color: #1E3A8A;">Consignment Status:</strong> Dispatched &amp; In Transit for Doorstep Delivery
+      </div>
+      <div style="font-size: 11px; color: #3B82F6; margin-top: 6px;">
+        The courier delivery rider will coordinate with you via call/SMS prior to delivery. Please keep the exact payable amount ready.
+      </div>
     </div>
   `;
 
   const htmlBody = `
     <!DOCTYPE html>
     <html>
-    <head><meta charset="utf-8"></head>
-    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9FAFB; margin: 0; padding: 24px; color: #111827;">
-      <table align="center" width="100%" style="max-width: 600px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E5E7EB; overflow: hidden; margin: 0 auto;">
-        <!-- Header with Store Logo & Slogan (No "CALENVEE" plain text) -->
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <title>Order #${dispatchData.orderId} Dispatched</title>
+      <style>
+        body, table, td { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        @media only screen and (max-width: 600px) {
+          .container { width: 100% !important; max-width: 100% !important; border-radius: 0 !important; }
+          .responsive-padding { padding-left: 14px !important; padding-right: 14px !important; }
+        }
+      </style>
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9FAFB; margin: 0; padding: 18px 10px; color: #111827;">
+      <table align="center" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 580px; width: 100%; background-color: #FFFFFF; border-radius: 14px; border: 1px solid #E5E7EB; overflow: hidden; margin: 0 auto;">
+        
+        <!-- Top Bar: WhatsApp Helpline -->
         <tr>
-          <td style="background-color: ${cfg.brandNavy}; padding: 32px 24px; text-align: center;">
-            <div style="margin-bottom: 10px;">
-              <img src="${cfg.logoUrl}" alt="${cfg.storeName}" style="max-height: 44px; width: auto; display: inline-block; border: 0;" />
-            </div>
-            <p style="color: ${cfg.brandOrange}; font-size: 11px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 2px; font-weight: bold;">${cfg.storeTagline} • ORDER DISPATCHED</p>
+          <td style="background-color: #060B18; padding: 10px 16px; text-align: center; font-size: 11px; color: #94A3B8;">
+            WhatsApp Helpline: <a href="https://wa.me/${cfg.helplineWhatsAppRaw}" style="color: #25D366; font-weight: bold; text-decoration: none;">${cfg.helplinePhone}</a>
           </td>
         </tr>
+
+        <!-- Header with Store Logo & Slogan (No "CALENVEE" plain text) -->
         <tr>
-          <td style="padding: 28px 24px; text-align: center;">
-            <div style="font-size: 32px; margin-bottom: 8px;">📦</div>
-            <h2 style="margin: 0; font-size: 20px; color: #111827;">Your Package is on the Way!</h2>
-            <p style="margin: 8px 0 16px 0; font-size: 13px; color: #6B7280;">
-              Dear <strong>${dispatchData.customerName}</strong>, your Calenvee parcel for Order <strong>#${dispatchData.orderId}</strong> has been handed over to ${dispatchData.courier || 'our delivery partner'}.
+          <td style="background-color: ${cfg.brandNavy}; padding: 32px 20px; text-align: center;">
+            <div style="margin-bottom: 10px;">
+              <img src="${cfg.logoUrl}" alt="${cfg.storeName}" style="max-height: 44px; width: auto; display: block; margin: 0 auto; border: 0;" />
+            </div>
+            <p style="color: ${cfg.brandOrange}; font-size: 11px; margin: 0; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; text-align: center;">
+              ${cfg.storeTagline} &bull; ORDER DISPATCHED
+            </p>
+          </td>
+        </tr>
+
+        <!-- Hero: Dispatched Notice (Clean checkmark icon, ZERO emojis) -->
+        <tr>
+          <td style="padding: 28px 20px 20px 20px; text-align: center;">
+            <div style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 50%; background-color: #EFF6FF; color: #2563EB; font-size: 20px; font-weight: bold; margin-bottom: 12px; text-align: center;">
+              &#10003;
+            </div>
+            <h2 style="margin: 0; font-size: 20px; color: #111827; font-weight: 800;">Your Package is on the Way!</h2>
+            <p style="margin: 8px 0 16px 0; font-size: 13px; color: #6B7280; line-height: 1.5;">
+              Dear <strong>${dispatchData.customerName}</strong>, your Calenvee parcel for Order <strong>#${dispatchData.orderId}</strong> has been handed over to ${courierClean}.
             </p>
             
             ${trackingBoxHtml}
 
-            <p style="font-size: 12px; color: #6B7280; margin-top: 20px;">
-              Need delivery status assistance? WhatsApp us at <a href="https://wa.me/${cfg.helplineWhatsAppRaw}" style="color: #F97316; font-weight: bold;">${cfg.helplinePhone}</a>.
+            <p style="font-size: 12px; color: #6B7280; margin: 20px 0 6px 0;">
+              Need delivery status assistance? WhatsApp us at <a href="https://wa.me/${cfg.helplineWhatsAppRaw}" style="color: #F97316; font-weight: bold; text-decoration: none;">${cfg.helplinePhone}</a>.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background-color: #F3F4F6; padding: 18px 20px; text-align: center; border-top: 1px solid #E5E7EB;">
+            <p style="margin: 0; font-size: 10px; color: #9CA3AF;">
+              &copy; 2026 ${cfg.storeName} (${cfg.ownerEmail}). 100% Online Store Serving All Pakistan Cities.
             </p>
           </td>
         </tr>
@@ -1709,6 +1790,7 @@ function sendCustomerDispatchEmail(dispatchData) {
  * 7. STORE OWNER NOTIFICATION EMAIL
  * Alerts store management with customer and payment details.
  * Item list and payment attachments are omitted as per store configuration.
+ * Strictly clean ASCII without unicode emojis.
  */
 function sendOwnerNewOrderAlertEmail(order) {
   const cfg = getDynamicStoreSettings();
@@ -1742,7 +1824,7 @@ function sendOwnerNewOrderAlertEmail(order) {
         <!-- Top Banner -->
         <tr>
           <td style="background-color: ${cfg.brandNavy}; padding: 24px 20px; text-align: center;">
-            <img src="${cfg.logoUrl}" alt="${cfg.storeName}" style="max-height: 38px; margin-bottom: 8px;" />
+            <img src="${cfg.logoUrl}" alt="${cfg.storeName}" style="max-height: 38px; margin-bottom: 8px; display: block; margin-left: auto; margin-right: auto;" />
             <div style="color: #FFFFFF; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">NEW ORDER PLACED (PENDING CONFIRMATION)</div>
             <div style="color: ${cfg.brandOrange}; font-size: 10px; font-weight: bold; margin-top: 4px; letter-spacing: 1.5px;">${cfg.storeTagline}</div>
           </td>
@@ -1770,7 +1852,7 @@ function sendOwnerNewOrderAlertEmail(order) {
               <div style="font-size: 11px; font-weight: bold; color: #64748B; text-transform: uppercase; margin-bottom: 10px;">Customer &amp; Delivery Information</div>
               <table width="100%" style="font-size: 12px; line-height: 1.9;">
                 <tr><td width="30%" style="color: #64748B;">Name:</td><td style="font-weight: bold; color: #1E293B;">${order.customerName}</td></tr>
-                <tr><td style="color: #64748B;">Mobile (WhatsApp):</td><td><a href="https://wa.me/${(order.phone || '').replace(/[^0-9]/g, '')}" style="color: #2563EB; font-weight: bold; text-decoration: none;">${order.phone} 💬</a></td></tr>
+                <tr><td style="color: #64748B;">Mobile (WhatsApp):</td><td><a href="https://wa.me/${(order.phone || '').replace(/[^0-9]/g, '')}" style="color: #2563EB; font-weight: bold; text-decoration: none;">${order.phone}</a></td></tr>
                 <tr><td style="color: #64748B;">Email:</td><td style="color: #1E293B;">${order.email || 'N/A'}</td></tr>
                 <tr><td style="color: #64748B;">City:</td><td style="font-weight: bold; color: #1E293B;">${order.city}</td></tr>
                 <tr><td style="color: #64748B;">Address:</td><td style="color: #1E293B;">${order.address}</td></tr>
@@ -1784,7 +1866,7 @@ function sendOwnerNewOrderAlertEmail(order) {
               <tr>
                 <td align="center">
                   <a href="${SpreadsheetApp.getActiveSpreadsheet().getUrl()}" target="_blank" style="background-color: ${cfg.brandNavy}; color: #FFFFFF; font-size: 12px; font-weight: bold; padding: 12px 24px; border-radius: 10px; text-decoration: none; display: inline-block;">
-                    Open Orders in Google Sheets 📊
+                    Open Orders in Google Sheets
                   </a>
                 </td>
               </tr>
@@ -1866,44 +1948,105 @@ function confirmSelectedOrderRow() {
 }
 
 /**
- * 8B. Dispatch Selected Order from Sheet Menu
+ * 8B. Dispatch Selected Order from Sheet Menu (Option 4)
+ * Prompts user for Courier Company Name and optional Tracking ID,
+ * updates Columns K and L in Orders tab, sets status to Dispatched,
+ * and sends customer the official Dispatch Email.
  */
 function sendDispatchEmailForSelectedRow() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   const row = sheet.getActiveCell().getRow();
+  const ui = SpreadsheetApp.getUi();
+
   if (row <= 1) {
-    SpreadsheetApp.getUi().alert("Please select a customer order row first.");
+    ui.alert("⚠️ Please select a customer order row first (click on row 2 or below in the Orders sheet).");
     return;
   }
 
   const values = sheet.getRange(row, 1, 1, 17).getValues()[0];
-  const orderId = values[0];
-  const customerName = values[2];
-  const email = values[4];
-  const courier = values[10] || "TCS Express";
-  let trackingNumber = String(values[11] || "").trim();
+  const orderId = String(values[0] || "").trim();
+  const customerName = String(values[2] || "").trim();
+  const email = String(values[4] || "").trim();
 
-  if (!email || !email.includes("@")) {
-    SpreadsheetApp.getUi().alert("No valid email address in this row.");
+  if (!orderId) {
+    ui.alert("⚠️ No Order ID found in the selected row.");
     return;
   }
 
-  if (!trackingNumber || trackingNumber === "") {
-    trackingNumber = "N/A";
+  if (!email || !email.includes("@")) {
+    ui.alert(`⚠️ No valid email address found for Order #${orderId} (${customerName}).`);
+    return;
   }
 
+  // Determine intelligent default courier name (clean any "Pending..." or "-")
+  let defaultCourier = String(values[10] || "").trim();
+  if (!defaultCourier || defaultCourier === "-" || defaultCourier.toLowerCase().includes("pending")) {
+    defaultCourier = "TCS Express";
+  }
+
+  // Prompt 1: Ask for Courier Partner Name
+  const courierPrompt = ui.prompt(
+    "Step 1: Courier Company Name",
+    `Dispatching Order #${orderId} for ${customerName}\n\nEnter Courier Company Name (e.g. TCS Express, Leopards, Trax, PostEx, Rider, Call Courier):`,
+    ui.ButtonSet.OK_CANCEL
+  );
+
+  if (courierPrompt.getSelectedButton() !== ui.Button.OK) {
+    return; // Cancelled
+  }
+
+  let courierName = courierPrompt.getResponseText().trim();
+  if (!courierName) {
+    courierName = defaultCourier;
+  }
+
+  // Determine existing tracking number (ignore "-" or "N/A")
+  let existingTracking = String(values[11] || "").trim();
+  if (existingTracking === "-" || existingTracking.toUpperCase() === "N/A" || existingTracking.toLowerCase().includes("pending")) {
+    existingTracking = "";
+  }
+
+  // Prompt 2: Ask for Tracking ID (Optional)
+  const trackingPrompt = ui.prompt(
+    "Step 2: Tracking ID (Optional)",
+    `Enter Tracking ID / Consignment Number for ${courierName}:\n\n(Optional — leave blank if not yet available, rider will coordinate via SMS)`,
+    ui.ButtonSet.OK_CANCEL
+  );
+
+  if (trackingPrompt.getSelectedButton() !== ui.Button.OK) {
+    return; // Cancelled
+  }
+
+  let trackingNumber = trackingPrompt.getResponseText().trim();
+  if (!trackingNumber) {
+    trackingNumber = "-";
+  }
+
+  // Update Orders Sheet:
+  // Column J (10): Order Status -> "Dispatched"
+  // Column K (11): Courier -> courierName
+  // Column L (12): Tracking Number -> trackingNumber
+  // Column P (16): Dispatch Email Sent -> "Yes"
+  sheet.getRange(row, 10).setValue("Dispatched");
+  sheet.getRange(row, 11).setValue(courierName);
+  sheet.getRange(row, 12).setValue(trackingNumber);
+  sheet.getRange(row, 16).setValue("Yes");
+
+  // Send the professional dispatch email
   sendCustomerDispatchEmail({
     orderId: orderId,
     customerName: customerName,
     email: email,
-    courier: courier,
+    courier: courierName,
     trackingNumber: trackingNumber
   });
 
-  sheet.getRange(row, 10).setValue("Dispatched");
-  sheet.getRange(row, 12).setValue(trackingNumber);
-  sheet.getRange(row, 16).setValue("Yes");
-  SpreadsheetApp.getUi().alert(`✅ Dispatch email sent to ${customerName} (${email})!\nOrder: #${orderId}\nStatus: Dispatched\nTracking: ${trackingNumber}`);
+  // Refresh Executive Dashboard KPIs if available
+  if (typeof createExecutiveDashboard === 'function') {
+    try { createExecutiveDashboard(); } catch (_) {}
+  }
+
+  ui.alert(`✅ Order #${orderId} Dispatched Successfully!\n\nCourier: ${courierName}\nTracking ID: ${trackingNumber}\n\nEmail sent to ${customerName} (${email})\nGoogle Sheet Columns K & L updated.`);
 }
 
 /**
