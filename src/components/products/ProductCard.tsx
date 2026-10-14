@@ -148,27 +148,28 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         </div>
 
-        {/* Bottom Row: Pricing & Cart Button (Centered on mobile) */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0 pt-2 border-t border-gray-50 w-full">
-          <div className="flex items-baseline justify-center sm:justify-start space-x-1.5">
-            <span className="text-xs sm:text-sm font-extrabold text-[#0B132B]">
+        {/* Bottom Row: Pricing & Cart Button */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-2 pt-2 border-t border-gray-50 w-full mt-auto">
+          {/* Price Container: Single line, no awkward breaking */}
+          <div className="flex flex-wrap items-baseline justify-center sm:justify-start gap-x-1.5 whitespace-nowrap min-w-0">
+            <span className="text-xs sm:text-sm font-extrabold text-[#0B132B] whitespace-nowrap">
               {formatPKR(product.price)}
             </span>
             {product.originalPrice > product.price && (
-              <span className="text-[10px] sm:text-xs text-gray-400 line-through">
+              <span className="text-[10px] sm:text-xs text-gray-400 line-through whitespace-nowrap">
                 {formatPKR(product.originalPrice)}
               </span>
             )}
           </div>
 
-          {/* Quick Add Cart Button: Full-width friendly on mobile, square button on desktop */}
+          {/* Quick Add Cart Button: Full-width button with label on mobile, neat square icon button on desktop */}
           <button
             onClick={handleQuickAdd}
-            className="w-full sm:w-8.5 h-8 sm:h-8.5 rounded-lg border border-gray-200 hover:border-[#F97316] hover:bg-[#F97316] text-gray-700 hover:text-white flex items-center justify-center transition-all duration-200 active:scale-95 shadow-2xs space-x-1.5 sm:space-x-0"
+            className="w-full sm:w-9 h-8 sm:h-9 shrink-0 rounded-lg border border-gray-200 hover:border-[#F97316] hover:bg-[#F97316] text-gray-700 hover:text-white flex items-center justify-center transition-all duration-200 active:scale-95 shadow-2xs space-x-1.5 sm:space-x-0 cursor-pointer"
             title="Add to cart"
             aria-label="Add to cart"
           >
-            <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             <span className="text-[11px] font-bold uppercase sm:hidden">Add to Cart</span>
           </button>
         </div>

@@ -1,5 +1,5 @@
 export function formatPKR(amount: number): string {
-  return `Rs. ${amount.toLocaleString('en-PK')}`;
+  return `Rs.\u00A0${amount.toLocaleString('en-PK')}`;
 }
 
 export function calculateSavings(originalPrice: number, currentPrice: number): number {
