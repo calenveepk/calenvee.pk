@@ -368,15 +368,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 New Arrivals
               </Link>
 
-              <Link
-                to="/shop?filter=top-deals"
-                className="flex items-center space-x-1 text-gray-800 hover:text-[#F97316] transition-colors group"
-              >
-                <span>Top Deals</span>
-                <span className="px-1.5 py-0.2 text-[9px] font-black uppercase tracking-wider bg-red-600 text-white rounded">
-                  Hot
-                </span>
-              </Link>
 
               <Link
                 to="/best-sellers"
