@@ -57,15 +57,15 @@ export const HeroSection: React.FC = () => {
 
   return (
     <section
-      className="relative w-full bg-[#FAF7F2] border-b border-gray-100 overflow-hidden select-none"
+      className="relative w-full bg-[#FAF7F2] border-b border-gray-100/80 shadow-xs overflow-hidden select-none"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={() => setIsPaused(true)}
       onTouchEnd={() => setIsPaused(false)}
     >
       
-      {/* 1. Full-Bleed Integrated Product Visuals (Right-Anchored in Dedicated 45% Container - No Overlap) */}
-      <div className="absolute top-0 right-0 bottom-0 w-[45%] sm:w-[48%] lg:w-[50%] h-full overflow-hidden pointer-events-none z-0">
+      {/* 1. Full-Bleed Integrated Product Visuals (Right-Anchored in Dedicated Container with Soft Edge Shading, NO Gradients) */}
+      <div className="absolute top-0 right-0 bottom-0 w-[45%] sm:w-[48%] lg:w-[50%] h-full overflow-hidden pointer-events-none z-0 shadow-[-12px_0_24px_-8px_rgba(0,0,0,0.06)]">
         {slides.map((slide, idx) => (
           <img
             key={slide.id || idx}
@@ -79,13 +79,6 @@ export const HeroSection: React.FC = () => {
             loading={idx === 0 ? 'eager' : 'lazy'}
           />
         ))}
-
-        {/* Low-Intensity Seamless Blend Gradient (softly dissolves the left edge into canvas) */}
-        <div className="absolute inset-y-0 left-0 w-8 sm:w-16 lg:w-24 bg-gradient-to-r from-[#FAF7F2] via-[#FAF7F2]/25 to-transparent pointer-events-none" />
-
-        {/* Low-Intensity Top & Bottom Vignette */}
-        <div className="absolute inset-x-0 top-0 h-3 sm:h-6 bg-gradient-to-b from-[#FAF7F2]/20 to-transparent pointer-events-none" />
-        <div className="absolute inset-x-0 bottom-0 h-3 sm:h-6 bg-gradient-to-t from-[#FAF7F2]/20 to-transparent pointer-events-none" />
       </div>
 
       {/* 2. Content Container (Dedicated 55% Left Width - Zero Overlap with Right Visual) */}
@@ -99,17 +92,17 @@ export const HeroSection: React.FC = () => {
               <span>{activeSlide.kicker}</span>
             </div>
 
-            {/* Main Headline & Description with Subtle Low-Intensity Text Shading */}
+            {/* Main Headline & Description with Natural Text Shading */}
             <h1
               className="text-base sm:text-3xl lg:text-4xl font-black text-[#0B132B] tracking-tight leading-[1.15]"
-              style={{ textShadow: '0 1px 2px rgba(255, 255, 255, 0.8), 0 2px 6px rgba(11, 19, 43, 0.05)' }}
+              style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.04)' }}
             >
               {activeSlide.headlinePrefix}<br />
               <span className="text-[#F97316]">{activeSlide.headlineHighlight}</span>
             </h1>
             <p
               className="text-[10px] sm:text-xs lg:text-sm text-gray-600 font-normal leading-relaxed line-clamp-2 sm:line-clamp-none"
-              style={{ textShadow: '0 1px 2px rgba(255, 255, 255, 0.6)' }}
+              style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.04)' }}
             >
               {activeSlide.subtitle}
             </p>
