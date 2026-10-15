@@ -61,7 +61,7 @@ export const ContactPage: React.FC = () => {
     <div className="min-h-screen py-5 sm:py-8 bg-white text-gray-900">
       <SEO
         title="Contact & Customer Care | Calenvee.pk"
-        description="Official contact hub for Calenvee Pakistan. WhatsApp helpline: +923001234567, Instagram/Facebook: @Calenvee.Pk. Inquire about deliveries, order status, or sizing advice."
+        description={`Official contact hub for Calenvee Pakistan. WhatsApp helpline: ${STORE_INFO.whatsappNumber}, Instagram/Facebook: @Calenvee.Pk. Inquire about deliveries, order status, or sizing advice.`}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

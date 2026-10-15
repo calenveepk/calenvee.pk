@@ -2,8 +2,11 @@ import React from 'react';
 import { Truck, Clock, ShieldCheck, MapPin, CheckCircle2, PhoneCall } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
 import { STORE_INFO } from '../utils/formatters';
+import storeSettingsData from '../data/storeSettings.json';
 
 export const ShippingPolicyPage: React.FC = () => {
+  const freeThresholdStr = (storeSettingsData.freeShippingThreshold || 3500).toLocaleString();
+  const feeStr = (storeSettingsData.standardShippingFee || 250).toLocaleString();
   return (
     <div className="min-h-screen py-6 sm:py-10 bg-white text-gray-900">
       <SEO
@@ -80,10 +83,10 @@ export const ShippingPolicyPage: React.FC = () => {
             </p>
             <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 text-emerald-950 space-y-2">
               <p className="font-semibold text-xs sm:text-sm">
-                🚚 <strong>FREE SHIPPING:</strong> Applied automatically on all orders with a cart total of <strong>Rs. 2,999 or above</strong>.
+                🚚 <strong>FREE SHIPPING:</strong> Applied automatically on all orders with a cart total of <strong>Rs. {freeThresholdStr} or above</strong>.
               </p>
               <p className="text-xs text-emerald-800">
-                For orders below Rs. 2,999, a flat delivery fee of <strong>Rs. 200</strong> is charged nationwide regardless of weight.
+                For orders below Rs. {freeThresholdStr}, a flat delivery fee of <strong>Rs. {feeStr}</strong> is charged nationwide regardless of weight.
               </p>
             </div>
           </section>

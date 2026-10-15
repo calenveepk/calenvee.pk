@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Product, ProductVariantColor, ProductVariantSize, CartItem, PromoCode } from '../types';
+import { Product, ProductVariantColor, ProductVariantSize, CartItem, PromoCode, Deal } from '../types';
 import { AVAILABLE_PROMOS } from '../data/promotions';
 import storeSettingsData from '../data/storeSettings.json';
+import dealsData from '../data/deals.json';
+import { calculateCartTotals, getEffectivePrice } from '../utils/pricing';
 
 interface CartContextType {
   items: CartItem[];
@@ -14,6 +16,8 @@ interface CartContextType {
   totalItems: number;
   subtotal: number;
   discount: number;
+  dealSavings: number;
+  deals: Deal[];
   shippingFee: number;
   finalTotal: number;
   appliedPromo: PromoCode | null;
@@ -168,19 +172,23 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAppliedPromo(null);
   };
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const dealsList = (dealsData as Deal[]) || [];
+  const cartTotals = calculateCartTotals(
+    items,
+    Date.now(),
+    dealsList,
+    appliedPromo,
+    { freeShippingThreshold, standardShippingFee }
+  );
 
-  const discount = appliedPromo
-    ? Math.round((subtotal * appliedPromo.discountPercentage) / 100)
-    : 0;
-
-  const isFreeShipping = subtotal >= freeShippingThreshold || items.length === 0;
-  const shippingFee = items.length === 0 ? 0 : isFreeShipping ? 0 : standardShippingFee;
-  const finalTotal = Math.max(0, subtotal - discount + shippingFee);
-
-  const amountUntilFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
-  const freeShippingProgress = Math.min(100, Math.round((subtotal / freeShippingThreshold) * 100));
+  const totalItems = cartTotals.itemsCount;
+  const subtotal = cartTotals.subtotal;
+  const discount = cartTotals.couponDiscount;
+  const shippingFee = cartTotals.shippingFee;
+  const finalTotal = cartTotals.finalTotal;
+  const dealSavings = cartTotals.dealSavings;
+  const amountUntilFreeShipping = cartTotals.amountUntilFreeShipping;
+  const freeShippingProgress = cartTotals.freeShippingProgress;
 
   return (
     <CartContext.Provider
@@ -195,6 +203,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         totalItems,
         subtotal,
         discount,
+        dealSavings,
+        deals: dealsList,
         shippingFee,
         finalTotal,
         appliedPromo,

@@ -864,6 +864,26 @@ function handleCreateOrder(payload) {
     })).setMimeType(ContentService.MimeType.JSON);
   }
 
+  const cfg = getDynamicStoreSettings();
+  let calculatedSubtotal = 0;
+  itemsList.forEach(item => {
+    const itemQty = Number(item.quantity || 1);
+    const itemPrice = Number(item.price || (item.product && item.product.price) || 0);
+    calculatedSubtotal += itemPrice * itemQty;
+  });
+  if (calculatedSubtotal === 0 && total > 0) {
+    calculatedSubtotal = total;
+  }
+  const discount = Math.max(0, Number(order.discount || 0));
+  const netSubtotal = Math.max(0, calculatedSubtotal - discount);
+  const calculatedShippingFee = netSubtotal >= cfg.freeShippingThreshold ? 0 : cfg.deliveryFee;
+  const calculatedTotal = netSubtotal + calculatedShippingFee;
+
+  order.subtotal = calculatedSubtotal;
+  order.discount = discount;
+  order.shippingFee = calculatedShippingFee;
+  order.total = calculatedTotal;
+
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const ordersSheet = ss.getSheetByName("Orders") || ss.getActiveSheet();
   const itemsSheet = ss.getSheetByName("OrderItems");
@@ -952,7 +972,7 @@ function handleCreateOrder(payload) {
     order.city || "Pakistan",
     address,
     paymentMethodUpper,
-    total,
+    calculatedTotal,
     "Placed", // Order status is Placed upon checkout!
     initialCourier, // Unassigned on placement (-)
     initialTracking, // Unassigned on placement (-)

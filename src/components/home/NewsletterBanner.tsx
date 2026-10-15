@@ -5,7 +5,14 @@ import homeContentData from '../../data/homeContent.json';
 export const NewsletterBanner: React.FC = () => {
   const [email, setEmail] = useState('');
   const [honeypot, setHoneypot] = useState('');
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(() => {
+    try {
+      const stored = localStorage.getItem('calenvee_subscribers');
+      return stored ? JSON.parse(stored).length > 0 : false;
+    } catch {
+      return false;
+    }
+  });
 
   const newsletter = homeContentData.newsletter || {
     title: 'Stay in the Loop',
@@ -17,12 +24,20 @@ export const NewsletterBanner: React.FC = () => {
     e.preventDefault();
     if (honeypot) return;
 
-    if (email.trim()) {
+    const trimmed = email.trim().toLowerCase();
+    if (trimmed) {
+      try {
+        const stored = localStorage.getItem('calenvee_subscribers');
+        const subscribers: string[] = stored ? JSON.parse(stored) : [];
+        if (!subscribers.includes(trimmed)) {
+          subscribers.push(trimmed);
+          localStorage.setItem('calenvee_subscribers', JSON.stringify(subscribers));
+        }
+      } catch (err) {
+        console.warn('Failed to save subscriber:', err);
+      }
       setIsSubscribed(true);
-      setTimeout(() => {
-        setIsSubscribed(false);
-        setEmail('');
-      }, 5000);
+      setEmail('');
     }
   };
 

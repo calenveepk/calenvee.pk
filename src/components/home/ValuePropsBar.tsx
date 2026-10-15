@@ -1,11 +1,13 @@
 import React from 'react';
 import { Truck, RotateCcw, ShieldCheck, Headphones } from 'lucide-react';
 import homeContentData from '../../data/homeContent.json';
+import storeSettingsData from '../../data/storeSettings.json';
 
 export const ValuePropsBar: React.FC = () => {
+  const freeThresholdStr = (storeSettingsData.freeShippingThreshold || 3500).toLocaleString();
   const customProps = homeContentData.valueProps || [
-    { title: 'Free Shipping', subtitle: 'On orders over Rs. 3,999' },
-    { title: 'Easy Returns', subtitle: '7-day return policy' },
+    { title: 'Free Shipping', subtitle: `On orders over Rs. ${freeThresholdStr}` },
+    { title: 'Easy Returns', subtitle: '7-Day Replacement Guarantee' },
     { title: 'Secure Payments', subtitle: '100% Cash on Delivery & Raast' },
     { title: '24/7 Support', subtitle: "We're here to help on WhatsApp" },
   ];

@@ -5,6 +5,7 @@ import { Product } from '../../types';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { formatPKR } from '../../utils/formatters';
+import { getEffectivePrice } from '../../utils/pricing';
 
 interface ProductCardProps {
   product: Product;
@@ -19,15 +20,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
-  const { addItem } = useCart();
+  const { addItem, deals } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+
+  const pricing = getEffectivePrice(product, Date.now(), deals);
 
   const isFavorited = isInWishlist(product.id);
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addItem(product, product.colors?.[0] || { name: 'Standard', hex: '#111111', inStock: true });
+    addItem(
+      { ...product, price: pricing.effectivePrice },
+      product.colors?.[0] || { name: 'Standard', hex: '#111111', inStock: true }
+    );
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1600);
   };
@@ -146,11 +152,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           {/* Price Container */}
           <div className="flex flex-col sm:flex-row sm:items-baseline gap-x-1.5 leading-tight min-w-0">
             <span className="text-xs sm:text-sm font-black text-[#0B132B] whitespace-nowrap">
-              {formatPKR(product.price)}
+              {formatPKR(pricing.effectivePrice)}
             </span>
-            {product.originalPrice > product.price && (
+            {pricing.originalPrice > pricing.effectivePrice && (
               <span className="text-[9px] sm:text-xs text-gray-400 line-through whitespace-nowrap">
-                {formatPKR(product.originalPrice)}
+                {formatPKR(pricing.originalPrice)}
               </span>
             )}
           </div>

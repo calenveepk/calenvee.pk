@@ -13,6 +13,7 @@ import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { CATEGORIES } from '../../data/categories';
 import { PRODUCTS } from '../../data/products';
+import storeSettingsData from '../../data/storeSettings.json';
 import { formatPKR } from '../../utils/formatters';
 import { getLiveSuggestions } from '../../utils/searchEngine';
 
@@ -487,8 +488,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Helpline Info */}
             <div className="pt-4 border-t border-gray-100 text-xs text-gray-500 space-y-1">
               <p className="font-bold text-gray-800">Helpline &amp; WhatsApp</p>
-              <p className="font-mono text-[#F97316]">+92 300 1234567</p>
-              <p className="text-[10px] text-gray-400">Nationwide Cash On Delivery (7-10 Working Days)</p>
+              <a
+                href={`https://wa.me/${storeSettingsData.whatsappRaw}`}
+                className="font-mono text-[#F97316] hover:underline block"
+              >
+                {storeSettingsData.whatsappNumber}
+              </a>
+              <p className="text-[10px] text-gray-400">{storeSettingsData.deliveryWindow}</p>
             </div>
           </div>
         </div>

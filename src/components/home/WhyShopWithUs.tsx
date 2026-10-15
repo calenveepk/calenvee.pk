@@ -1,12 +1,13 @@
 import React from 'react';
 import { Truck, ShieldCheck, RotateCcw, MessageSquare } from 'lucide-react';
+import storeSettingsData from '../../data/storeSettings.json';
 
 export const WhyShopWithUs: React.FC = () => {
   const pillars = [
     {
       icon: <Truck className="w-6 h-6 text-[#F97316]" />,
       title: 'Cash on Delivery',
-      subtitle: 'Nationwide Cash on Delivery across Pakistan (7-10 Working Days)',
+      subtitle: `${storeSettingsData.deliveryWindow}`,
     },
     {
       icon: <ShieldCheck className="w-6 h-6 text-[#F97316]" />,
@@ -21,7 +22,7 @@ export const WhyShopWithUs: React.FC = () => {
     {
       icon: <MessageSquare className="w-6 h-6 text-[#F97316]" />,
       title: 'Direct WhatsApp Support',
-      subtitle: 'Prompt assistance for order placement at +923001234567',
+      subtitle: `Prompt assistance for order placement at ${storeSettingsData.whatsappNumber}`,
     },
   ];
 

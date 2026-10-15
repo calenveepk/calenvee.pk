@@ -12,6 +12,7 @@ import { searchProducts } from '../utils/searchEngine';
 export const ShopPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryParam = searchParams.get('category') || 'all';
+  const filterParam = searchParams.get('filter') || '';
   const searchQuery = (searchParams.get('search') || searchParams.get('q') || '').trim();
 
   const [selectedCategory, setSelectedCategory] = useState<string>(categoryParam);
@@ -39,6 +40,14 @@ export const ShopPage: React.FC = () => {
         return false;
       }
 
+      // 4. Query filter (e.g. top-deals or trending)
+      if (filterParam === 'top-deals' && product.discountPercentage <= 0) {
+        return false;
+      }
+      if (filterParam === 'trending' && !product.isTrending && !product.isBestSeller) {
+        return false;
+      }
+
       return true;
     }).sort((a, b) => {
       // If search query is active and sort is 'featured', maintain intelligent relevance ranking
@@ -49,7 +58,7 @@ export const ShopPage: React.FC = () => {
       if (sortBy === 'discount') return b.discountPercentage - a.discountPercentage;
       return 0;
     });
-  }, [selectedCategory, sortBy, inStockOnly, searchQuery]);
+  }, [selectedCategory, sortBy, inStockOnly, searchQuery, filterParam]);
 
   const handleCategoryChange = (catSlug: string) => {
     setSelectedCategory(catSlug);

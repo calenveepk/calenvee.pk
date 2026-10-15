@@ -58,10 +58,15 @@
   "trioBanners": {
     "dealOfTheDay": {
       "badge": "Deal of the Day",
-      "title": "Up to 60% Off",
+      "title": "Obsidian Chronograph Flash Drop",
+      "dealId": "deal-obsidian-chrono",
       "productId": "cv-watch-01",
+      "dealPrice": 5999,
+      "startDateTime": "2026-10-15T00:00:00+05:00",
+      "endDateTime": "2026-10-31T23:59:59+05:00",
       "link": "/product/calenvee-obsidian-chrono-edition",
-      "ctaText": "Shop Deals"
+      "ctaText": "Claim Deal Now",
+      "active": true
     },
     "newArrivals": {
       "badge": "New Arrivals",
@@ -84,12 +89,12 @@
     {
       "icon": "Truck",
       "title": "Free Shipping",
-      "subtitle": "On orders over Rs. 3,999"
+      "subtitle": "On orders over Rs. 3,500"
     },
     {
       "icon": "Clock",
       "title": "Easy Returns",
-      "subtitle": "7-day return policy"
+      "subtitle": "7-Day Replacement Guarantee"
     },
     {
       "icon": "ShieldCheck",

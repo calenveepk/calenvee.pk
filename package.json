@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "admin": "node scripts/admin-server.cjs"
+    "admin": "node scripts/admin-server.cjs",
+    "test": "vitest run",
+    "check:integrity": "node scripts/check-integrity.cjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

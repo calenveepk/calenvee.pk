@@ -17,7 +17,7 @@ export const TermsPage: React.FC = () => {
     },
     {
       q: 'How can I pay using JazzCash, EasyPaisa, or Online Bank Transfer?',
-      a: 'During checkout, select "Bank Transfer / Mobile Accounts". You will receive our official account numbers. Once you transfer the payment, simply upload or send the transaction receipt screenshot to our WhatsApp (+92 300 1234567) to confirm your order.',
+      a: `During checkout, select "Bank Transfer / Mobile Accounts". You will receive our official account numbers. Once you transfer the payment, simply upload or send the transaction receipt screenshot to our WhatsApp (${STORE_INFO.whatsappNumber}) to confirm your order.`,
     },
     {
       q: 'What is your exchange and return policy?',

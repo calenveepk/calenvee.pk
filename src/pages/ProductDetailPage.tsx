@@ -5,6 +5,8 @@ import {
   Heart,
   Share2,
   CheckCircle2,
+  Minus,
+  Plus,
 } from 'lucide-react';
 import { PRODUCTS } from '../data/products';
 import { ProductVariantColor, ProductVariantSize } from '../types';
@@ -13,6 +15,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { ProductCard } from '../components/products/ProductCard';
 import { ProductGrid } from '../components/products/ProductGrid';
 import { formatPKR } from '../utils/formatters';
+import { getEffectivePrice } from '../utils/pricing';
 import { SEO } from '../components/common/SEO';
 import {
   RealisticTruckIcon,
@@ -47,13 +50,14 @@ export const ProductDetailPage: React.FC = () => {
   const [copiedLink, setCopiedLink] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
 
-  const { addItem, setIsOpen: setIsCartOpen } = useCart();
+  const { addItem, setIsOpen: setIsCartOpen, deals } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
+  const pricing = getEffectivePrice(product, Date.now(), deals);
   const isFavorited = isInWishlist(product.id);
 
   const handleAddToCart = () => {
-    addItem(product, selectedColor, selectedSize, quantity);
+    addItem({ ...product, price: pricing.effectivePrice }, selectedColor, selectedSize, quantity);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2400);
   };
@@ -97,7 +101,7 @@ export const ProductDetailPage: React.FC = () => {
       '@type': 'Offer',
       url: `https://calenvee.pk/product/${product.slug}`,
       priceCurrency: 'PKR',
-      price: product.price,
+      price: pricing.effectivePrice,
       priceValidUntil: '2027-12-31',
       itemCondition: 'https://schema.org/NewCondition',
       availability: product.inStock
@@ -108,13 +112,17 @@ export const ProductDetailPage: React.FC = () => {
         name: 'Calenvee.pk',
       },
     },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: (product.rating || 5).toString(),
-      reviewCount: (product.reviewsCount || 120).toString(),
-      bestRating: '5',
-      worstRating: '1',
-    },
+    ...((product.reviews?.length || product.reviewsCount)
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: (product.rating || 5).toString(),
+            reviewCount: (product.reviews?.length || product.reviewsCount || 1).toString(),
+            bestRating: '5',
+            worstRating: '1',
+          },
+        }
+      : {}),
   };
 
   return (
@@ -218,11 +226,11 @@ export const ProductDetailPage: React.FC = () => {
                 {/* Price */}
                 <div className="pt-2 flex items-baseline space-x-3">
                   <span className="text-2xl font-extrabold text-[#0B132B]">
-                    {formatPKR(product.price)}
+                    {formatPKR(pricing.effectivePrice)}
                   </span>
-                  {product.originalPrice > product.price && (
+                  {pricing.originalPrice > pricing.effectivePrice && (
                     <span className="text-sm text-gray-400 line-through">
-                      {formatPKR(product.originalPrice)}
+                      {formatPKR(pricing.originalPrice)}
                     </span>
                   )}
                 </div>
@@ -293,10 +301,33 @@ export const ProductDetailPage: React.FC = () => {
 
               {/* Purchase Actions */}
               <div className="space-y-3 pt-3 border-t border-gray-100">
-                <div className="flex gap-3">
+                <div className="flex items-center gap-3">
+                  {/* Quantity Stepper */}
+                  <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1 border border-gray-200 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      className="w-8 h-8 flex items-center justify-center rounded-md bg-white hover:bg-gray-200 text-gray-700 shadow-2xs active:scale-90 transition-all cursor-pointer"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="text-xs font-bold px-2.5 text-gray-900 min-w-[24px] text-center">
+                      {quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => q + 1)}
+                      className="w-8 h-8 flex items-center justify-center rounded-md bg-white hover:bg-gray-200 text-gray-700 shadow-2xs active:scale-90 transition-all cursor-pointer"
+                      aria-label="Increase quantity"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
                   <button
                     onClick={handleAddToCart}
-                    className={`flex-1 py-3.5 px-6 font-bold text-xs uppercase tracking-wider rounded-lg transition-all flex items-center justify-center space-x-2 shadow-md active:scale-98 ${
+                    className={`flex-1 py-3.5 px-6 font-bold text-xs uppercase tracking-wider rounded-lg transition-all flex items-center justify-center space-x-2 shadow-md active:scale-98 cursor-pointer ${
                       isAdded
                         ? 'bg-emerald-600 text-white'
                         : 'bg-[#F97316] hover:bg-[#EA580C] text-white'
@@ -391,11 +422,11 @@ export const ProductDetailPage: React.FC = () => {
           </span>
           <div className="flex items-baseline space-x-1.5">
             <span className="text-sm font-black text-[#0B132B]">
-              {formatPKR(product.price)}
+              {formatPKR(pricing.effectivePrice)}
             </span>
-            {product.originalPrice > product.price && (
+            {pricing.originalPrice > pricing.effectivePrice && (
               <span className="text-[10px] text-gray-400 line-through">
-                {formatPKR(product.originalPrice)}
+                {formatPKR(pricing.originalPrice)}
               </span>
             )}
           </div>

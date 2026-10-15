@@ -26,6 +26,7 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsPage } from './pages/TermsPage';
 import { ShippingPolicyPage } from './pages/ShippingPolicyPage';
 import { ReturnsRefundsPage } from './pages/ReturnsRefundsPage';
+import { TrackOrderPage } from './pages/TrackOrderPage';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -72,6 +73,8 @@ export function App() {
                 <Route path="/returns-refunds" element={<ReturnsRefundsPage />} />
                 <Route path="/return-policy" element={<ReturnsRefundsPage />} />
                 <Route path="/refund-policy" element={<ReturnsRefundsPage />} />
+                <Route path="/track-order" element={<TrackOrderPage />} />
+                <Route path="/track" element={<TrackOrderPage />} />
                 <Route path="/reviews" element={<ReviewsPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/wishlist" element={<WishlistPage />} />

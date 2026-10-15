@@ -176,7 +176,7 @@ export const CheckoutPage: React.FC = () => {
     const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
     const pakPhoneRegex = /^((\+92)|(0092)|(92)|(0))?3[0-9]{9}$/;
     if (!pakPhoneRegex.test(cleanPhone)) {
-      setFormError('Please enter a valid Pakistani mobile number (e.g. 0300-1234567 or +923001234567).');
+      setFormError('Please enter a valid Pakistani mobile number (e.g. 0300-1122334 or 0321-9876543).');
       return;
     }
 

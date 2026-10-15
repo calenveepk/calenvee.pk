@@ -11,7 +11,7 @@ import {
 import storeSettingsData from '../../data/storeSettings.json';
 
 export const Footer: React.FC = () => {
-  const whatsappUrl = `https://wa.me/${storeSettingsData.whatsappRaw || '923001234567'}`;
+  const whatsappUrl = `https://wa.me/${storeSettingsData.whatsappRaw}`;
   const slogan = storeSettingsData.storeSlogan || 'Shop Smart, Live Better';
   return (
     <footer className="bg-[#081320] text-gray-300 border-t border-slate-800">
@@ -123,7 +123,7 @@ export const Footer: React.FC = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/shipping-policy" className="hover:text-white transition-colors">
+                  <Link to="/track-order" className="hover:text-white transition-colors">
                     Track Order
                   </Link>
                 </li>

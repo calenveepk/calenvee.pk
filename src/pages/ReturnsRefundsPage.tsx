@@ -3,8 +3,11 @@ import { RotateCcw, ShieldCheck, CheckCircle2, AlertCircle, PhoneCall, ArrowRigh
 import { Link } from 'react-router-dom';
 import { SEO } from '../components/common/SEO';
 import { STORE_INFO } from '../utils/formatters';
+import storeSettingsData from '../data/storeSettings.json';
 
 export const ReturnsRefundsPage: React.FC = () => {
+  const feeStr = (storeSettingsData.standardShippingFee || 250).toLocaleString();
+  const whatsappUrl = `https://wa.me/${storeSettingsData.whatsappRaw}?text=${encodeURIComponent('Hello Calenvee! I would like to request an exchange/return for my order.')}`;
   return (
     <div className="min-h-screen py-6 sm:py-10 bg-white text-gray-900">
       <SEO
@@ -119,7 +122,7 @@ export const ReturnsRefundsPage: React.FC = () => {
             <ul className="list-disc pl-5 space-y-1.5 text-gray-700">
               <li><strong>Prepaid Orders (JazzCash / EasyPaisa / Bank Transfer):</strong> Refunds will be sent directly to your originating mobile account or bank account within <strong>3 to 5 business days</strong> after item receipt and inspection.</li>
               <li><strong>Cash on Delivery (COD) Orders:</strong> Refunds are disbursed directly to your provided JazzCash or EasyPaisa account upon return parcel receipt.</li>
-              <li>Courier shipping charges (Rs. 200) are non-refundable unless the return is due to our error or a defective item.</li>
+              <li>Courier shipping charges (Rs. {feeStr}) are non-refundable unless the return is due to our error or a defective item.</li>
             </ul>
           </section>
 
@@ -140,7 +143,7 @@ export const ReturnsRefundsPage: React.FC = () => {
               </div>
               <div className="pt-2">
                 <a
-                  href={`https://wa.me/923001234567?text=${encodeURIComponent('Hello Calenvee! I would like to request an exchange/return for my order.')}`}
+                  href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center space-x-2 px-4 py-2 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs rounded-lg transition-colors"

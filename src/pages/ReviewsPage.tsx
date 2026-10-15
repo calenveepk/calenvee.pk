@@ -6,7 +6,15 @@ import { SEO } from '../components/common/SEO';
 import { RealisticStarIcon } from '../components/common/RealisticIcons';
 
 export const ReviewsPage: React.FC = () => {
-  const [reviewsList, setReviewsList] = useState<CampusStory[]>(ALL_CAMPUS_REVIEWS);
+  const [reviewsList, setReviewsList] = useState<CampusStory[]>(() => {
+    try {
+      const stored = localStorage.getItem('calenvee_user_reviews');
+      const userRevs = stored ? JSON.parse(stored) : [];
+      return [...userRevs, ...ALL_CAMPUS_REVIEWS];
+    } catch {
+      return ALL_CAMPUS_REVIEWS;
+    }
+  });
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState<boolean>(false);
 
@@ -18,6 +26,22 @@ export const ReviewsPage: React.FC = () => {
   const [formTitle, setFormTitle] = useState('');
   const [formText, setFormText] = useState('');
   const [isSubmittedSuccess, setIsSubmittedSuccess] = useState(false);
+
+  const totalReviewsCount = reviewsList.length;
+  const avgRatingNum = totalReviewsCount > 0
+    ? reviewsList.reduce((acc, r) => acc + r.rating, 0) / totalReviewsCount
+    : 5;
+  const avgRatingStr = avgRatingNum.toFixed(1);
+  const satisfiedCount = reviewsList.filter((r) => r.rating >= 4).length;
+  const satisfactionPct = totalReviewsCount > 0
+    ? Math.round((satisfiedCount / totalReviewsCount) * 100)
+    : 100;
+
+  const ratingBreakdown = [5, 4, 3, 2, 1].map((stars) => {
+    const count = reviewsList.filter((r) => Math.round(r.rating) === stars).length;
+    const pct = totalReviewsCount > 0 ? Math.round((count / totalReviewsCount) * 100) : 0;
+    return { stars, pct, count: String(count) };
+  });
 
   const filteredReviews = selectedCity === 'all'
     ? reviewsList
@@ -35,21 +59,30 @@ export const ReviewsPage: React.FC = () => {
 
     const newReview: CampusStory = {
       id: `user-rev-${Date.now()}`,
-      studentName: formName,
+      studentName: formName.trim(),
       university: `${formCity}, Pakistan`,
       major: 'Verified Client',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
       productBought: formProduct,
       rating: formRating,
       date: 'Just now',
-      reviewTitle: formTitle || 'Delighted with the craftsmanship',
-      reviewText: formText,
-      tags: ['Verified Buyer', 'Direct Review'],
+      reviewTitle: formTitle.trim() || 'Verified Purchase',
+      reviewText: formText.trim(),
+      tags: ['Verified Buyer', 'Client Review'],
       campusBadge: 'Verified Purchase',
       likes: 1,
     };
 
-    setReviewsList([newReview, ...reviewsList]);
+    const updated = [newReview, ...reviewsList];
+    setReviewsList(updated);
+    try {
+      const stored = localStorage.getItem('calenvee_user_reviews');
+      const userRevs = stored ? JSON.parse(stored) : [];
+      localStorage.setItem('calenvee_user_reviews', JSON.stringify([newReview, ...userRevs]));
+    } catch (err) {
+      console.warn('Could not save user review:', err);
+    }
+
     setIsSubmittedSuccess(true);
     setTimeout(() => {
       setIsSubmittedSuccess(false);
@@ -63,7 +96,7 @@ export const ReviewsPage: React.FC = () => {
   return (
     <div className="min-h-screen py-5 sm:py-8 bg-white text-gray-900">
       <SEO
-        title="Client Reviews (4.9★) | Calenvee.pk"
+        title={`Client Reviews (${avgRatingStr}★) | Calenvee.pk`}
         description="Read genuine verified reviews from clients across Pakistan who wear Calenvee timepieces, anti-tarnish jewelry, and fashion accessories."
       />
 
@@ -84,32 +117,26 @@ export const ReviewsPage: React.FC = () => {
           {/* Left: Overall Score */}
           <div className="md:col-span-4 text-center md:text-left space-y-2 border-b md:border-b-0 md:border-r border-gray-200 pb-6 md:pb-0 md:pr-8">
             <div className="text-5xl sm:text-6xl font-extrabold text-[#0B132B]">
-              4.9<span className="text-[#F97316] text-2xl font-light">/5</span>
+              {avgRatingStr}<span className="text-[#F97316] text-2xl font-light">/5</span>
             </div>
             <div className="flex items-center justify-center md:justify-start space-x-1 text-amber-500">
-              {[...Array(5)].map((_, i) => (
+              {[...Array(Math.round(avgRatingNum))].map((_, i) => (
                 <RealisticStarIcon key={i} size={18} />
               ))}
             </div>
             <p className="text-xs text-gray-500 font-normal">
-              Based on 1,280+ verified client ratings nationwide
+              Based on {totalReviewsCount} verified client {totalReviewsCount === 1 ? 'review' : 'reviews'} nationwide
             </p>
             <div className="pt-1">
               <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold inline-block border border-emerald-200">
-                98% Client Satisfaction Rate
+                {satisfactionPct}% Client Satisfaction Rate
               </span>
             </div>
           </div>
 
           {/* Middle: Rating Bars */}
           <div className="md:col-span-5 space-y-2 text-xs">
-            {[
-              { stars: 5, pct: 92, count: '1,177' },
-              { stars: 4, pct: 6, count: '77' },
-              { stars: 3, pct: 2, count: '24' },
-              { stars: 2, pct: 0, count: '2' },
-              { stars: 1, pct: 0, count: '0' },
-            ].map((bar) => (
+            {ratingBreakdown.map((bar) => (
               <div key={bar.stars} className="flex items-center space-x-3">
                 <span className="w-12 text-gray-600 font-mono">{bar.stars} Stars</span>
                 <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">

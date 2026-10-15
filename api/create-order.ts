@@ -22,6 +22,7 @@ interface VercelRes extends ServerResponse {
 const require = createRequire(import.meta.url);
 const productsData: any[] = require('../src/data/products.json');
 const promotionsData: { promos: Record<string, any> } = require('../src/data/promotions.json');
+const storeSettingsData: any = require('../src/data/storeSettings.json');
 
 const productCatalog = new Map<string, any>(productsData.map((p) => [p.id, p]));
 
@@ -213,7 +214,7 @@ function generateLuxuryInvoiceHtml(order: {
         <div style="font-size: 12px; color: #475569; margin-bottom: 12px;">
           Have questions or want to update your delivery address?
         </div>
-        <a href="https://wa.me/923337905840?text=Hi%20Calenvee,%20I%20have%20a%20question%20about%20Order%20${order.orderNumber}" 
+        <a href="https://wa.me/${storeSettingsData.whatsappRaw || '923001234567'}?text=Hi%20Calenvee,%20I%20have%20a%20question%20about%20Order%20${order.orderNumber}" 
            style="display: inline-block; background-color: #25D366; color: #FFFFFF; font-weight: 700; font-size: 13px; text-decoration: none; padding: 10px 22px; border-radius: 8px;">
           💬 Chat with Us on WhatsApp
         </a>
@@ -223,8 +224,8 @@ function generateLuxuryInvoiceHtml(order: {
     <!-- Footer -->
     <tr>
       <td style="padding: 24px; text-align: center; font-size: 11px; color: #94A3B8; line-height: 1.6;">
-        Calenvee Pakistan &bull; Building 14-C, 4th Commercial Lane, Zamzama DHA Phase 5, Karachi<br />
-        Website: <a href="https://calenvee.pk" style="color: #F97316; text-decoration: none;">calenvee.pk</a> &bull; Email: <a href="mailto:support@calenvee.pk" style="color: #F97316; text-decoration: none;">support@calenvee.pk</a>
+        Calenvee Pakistan &bull; ${storeSettingsData.address || 'Serving All Pakistan Cities'}<br />
+        Website: <a href="https://calenvee.pk" style="color: #F97316; text-decoration: none;">calenvee.pk</a> &bull; Email: <a href="mailto:${storeSettingsData.supportEmail || 'calenvee.pk@gmail.com'}" style="color: #F97316; text-decoration: none;">${storeSettingsData.supportEmail || 'calenvee.pk@gmail.com'}</a>
       </td>
     </tr>
   </table>
@@ -359,9 +360,10 @@ export default async function handler(req: VercelReq, res: VercelRes) {
       : (deliveryNotes ? deliveryNotes.trim() : '');
 
     // 5. Shipping Fee Calculation
-    // Free Shipping threshold across Pakistan: Orders >= Rs. 5,999
+    const freeShippingThreshold = Number(storeSettingsData.freeShippingThreshold || 3500);
+    const standardShippingFee = Number(storeSettingsData.standardShippingFee || 250);
     const netSubtotal = Math.max(0, calculatedSubtotal - calculatedDiscount);
-    const calculatedShippingFee = netSubtotal >= 5999 ? 0 : 350;
+    const calculatedShippingFee = netSubtotal >= freeShippingThreshold ? 0 : standardShippingFee;
     const calculatedTotal = netSubtotal + calculatedShippingFee;
 
     // 6. Supabase Client Initialization

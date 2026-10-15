@@ -1,110 +1,86 @@
 [
   {
-    "id": "cs-01",
-    "studentName": "Hamza Tariq",
-    "university": "Lahore, Pakistan",
-    "major": "Verified Client",
+    "id": "rev-01",
+    "customerName": "Hamza Tariq",
+    "city": "Lahore",
     "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=300&q=80",
     "productBought": "Calenvee Obsidian Chrono Edition",
     "rating": 5,
     "date": "March 12, 2026",
     "reviewTitle": "Exceeded all expectations — looks better in person",
     "reviewText": "The weight of the chrono, the tactile feel of the crown, and the deep obsidian matte finish are on par with international timepieces. Outstanding presentation box.",
-    "tags": [
-      "Verified Buyer",
-      "Watches"
-    ],
-    "campusBadge": "Top Reviewer",
+    "tags": ["Verified Buyer", "Watches"],
+    "verifiedBuyer": true,
     "likes": 84
   },
   {
-    "id": "cs-02",
-    "studentName": "Zainab Shah",
-    "university": "Islamabad, Pakistan",
-    "major": "Verified Client",
+    "id": "rev-02",
+    "customerName": "Zainab Shah",
+    "city": "Islamabad",
     "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
     "productBought": "Calenvee Vanilla Clouds Eau de Parfum (50ml)",
     "rating": 5,
     "date": "March 05, 2026",
     "reviewTitle": "Sophisticated Madagascar vanilla, lasts 8+ hours",
     "reviewText": "Two sprays in the morning and it radiates with subtle elegance throughout the entire day. The bottle is heavy glass and arrived securely packaged.",
-    "tags": [
-      "Verified Buyer",
-      "Fragrances"
-    ],
-    "campusBadge": "Featured Client",
+    "tags": ["Verified Buyer", "Fragrances"],
+    "verifiedBuyer": true,
     "likes": 67
   },
   {
-    "id": "cs-03",
-    "studentName": "Bilal Farooq",
-    "university": "Karachi, Pakistan",
-    "major": "Verified Client",
+    "id": "rev-03",
+    "customerName": "Bilal Farooq",
+    "city": "Karachi",
     "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
     "productBought": "Calenvee 8mm Miami Cuban Link Chain",
     "rating": 5,
     "date": "March 15, 2026",
     "reviewTitle": "Water-tested in humidity: zero tarnish or skin discoloration",
     "reviewText": "Been wearing it daily in Karachi humidity and showers for over 6 weeks. Still blindingly polished. The box clasp mechanism is exceptionally sturdy.",
-    "tags": [
-      "Verified Buyer",
-      "Jewelry"
-    ],
-    "campusBadge": "Long-term Wearer",
+    "tags": ["Verified Buyer", "Jewelry"],
+    "verifiedBuyer": true,
     "likes": 52
   },
   {
-    "id": "cs-04",
-    "studentName": "Mahnoor Asif",
-    "university": "Lahore, Pakistan",
-    "major": "Verified Client",
+    "id": "rev-04",
+    "customerName": "Mahnoor Asif",
+    "city": "Lahore",
     "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80",
     "productBought": "Calenvee Tokyo Noir Acetate Square Frames",
     "rating": 5,
     "date": "February 28, 2026",
     "reviewTitle": "Incredible proportions and acetate density",
     "reviewText": "Chic silhouette and solid weight. Fits comfortably on the nose bridge without sliding during sunny afternoons.",
-    "tags": [
-      "Verified Buyer",
-      "Eyewear"
-    ],
-    "campusBadge": "Verified Purchase",
+    "tags": ["Verified Buyer", "Eyewear"],
+    "verifiedBuyer": true,
     "likes": 49
   },
   {
-    "id": "cs-05",
-    "studentName": "Danyal Siddiqui",
-    "university": "Karachi, Pakistan",
-    "major": "Verified Client",
+    "id": "rev-05",
+    "customerName": "Danyal Siddiqui",
+    "city": "Karachi",
     "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
     "productBought": "Calenvee Onyx Sovereign Signet Ring",
     "rating": 5,
     "date": "March 08, 2026",
     "reviewTitle": "Cash on delivery was under 48 hours in Karachi",
     "reviewText": "Ordered on Tuesday night, parcel was at my doorstep on Thursday morning. The ring came in a velvet slide box with a microfiber polishing cloth.",
-    "tags": [
-      "Verified Buyer",
-      "Jewelry"
-    ],
-    "campusBadge": "Fast Dispatch",
+    "tags": ["Verified Buyer", "Jewelry"],
+    "verifiedBuyer": true,
     "likes": 41
   },
   {
-    "id": "cs-06",
-    "studentName": "Eman Qureshi",
-    "university": "Islamabad, Pakistan",
-    "major": "Verified Client",
+    "id": "rev-06",
+    "customerName": "Eman Qureshi",
+    "city": "Islamabad",
     "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80",
     "productBought": "Calenvee Heavyweight Canvas Everyday Tote",
     "rating": 5,
     "date": "March 07, 2026",
     "reviewTitle": "Accommodates my 15-inch laptop and essentials with ease",
     "reviewText": "The canvas is rigid 16oz cotton and the metal zipper on top provides complete peace of mind while commuting. Uncompromising quality.",
-    "tags": [
-      "Verified Buyer",
-      "Bags"
-    ],
-    "campusBadge": "Daily Essential",
+    "tags": ["Verified Buyer", "Bags"],
+    "verifiedBuyer": true,
     "likes": 38
   }
 ]

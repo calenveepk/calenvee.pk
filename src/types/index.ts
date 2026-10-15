@@ -115,3 +115,16 @@ export interface ShopifyConfig {
   useLiveApi: boolean;
 }
 
+export interface Deal {
+  id: string;
+  productId: string;
+  badge: string;
+  title: string;
+  dealPrice: number;
+  discountPercentage?: number;
+  startDateTime: string; // ISO 8601 with +05:00, e.g. 2026-10-15T00:00:00+05:00
+  endDateTime: string;   // ISO 8601 with +05:00, e.g. 2026-10-31T23:59:59+05:00
+  active: boolean;
+  stockLimit?: number;
+}
+
