@@ -36,7 +36,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   const isAloneLg = count % 4 === 1;
 
   return (
-    <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6 ${className}`}>
+    <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-6 ${className}`}>
       {products.map((product, index) => {
         const isLast = index === count - 1;
 
@@ -47,7 +47,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
           // Mobile (2 columns): If alone on row, span 2 columns & center horizontally
           if (isAloneMobile) {
             wrapperClasses += ' col-span-2 flex justify-center';
-            innerClasses += ' max-w-[calc(50%-0.4375rem)]';
+            innerClasses += ' max-w-[calc(50%-0.25rem)] sm:max-w-[calc(50%-0.5rem)]';
           } else {
             wrapperClasses += ' col-span-1 block';
           }

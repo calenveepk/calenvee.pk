@@ -118,7 +118,7 @@ export const ProductDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen py-6 sm:py-10 bg-white text-gray-900">
+    <div className="min-h-screen py-4 sm:py-10 bg-white text-gray-900 pb-28 lg:pb-12">
       <SEO
         title={`${product.name} | Calenvee.pk`}
         description={product.shortDescription || product.description}
@@ -129,9 +129,9 @@ export const ProductDetailPage: React.FC = () => {
         schema={productSchema}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
-        <div className="flex items-center space-x-2 text-xs text-gray-500 pb-3 mb-2 overflow-x-auto whitespace-nowrap">
+        <div className="flex items-center space-x-2 text-xs text-gray-500 pb-2.5 mb-2 overflow-x-auto whitespace-nowrap">
           <Link to="/" className="hover:text-[#F97316] transition-colors">Home</Link>
           <span>/</span>
           <Link to={`/category/${product.category}`} className="hover:text-[#F97316] transition-colors">
@@ -142,18 +142,18 @@ export const ProductDetailPage: React.FC = () => {
         </div>
 
         {/* Product Details Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 bg-white p-6 sm:p-10 rounded-2xl border border-gray-200 shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-12 bg-white p-3.5 sm:p-10 rounded-xl sm:rounded-2xl border border-gray-100 sm:border-gray-200 shadow-xs sm:shadow-sm">
           {/* Left: Gallery (7 cols) */}
-          <div className="lg:col-span-7 space-y-4">
-            <div className="aspect-[4/5] w-full rounded-xl overflow-hidden bg-gray-50 relative border border-gray-200 flex items-center justify-center">
+          <div className="lg:col-span-7 space-y-3 sm:space-y-4">
+            <div className="aspect-[4/5] sm:aspect-square w-full rounded-xl overflow-hidden bg-gray-50 relative border border-gray-100 flex items-center justify-center">
               <img
                 src={product.images[activeImageIndex] || product.images[0]}
                 alt={product.name}
-                className="w-full h-full object-contain p-6"
+                className="w-full h-full object-contain p-2 sm:p-6"
               />
               {product.discountPercentage > 0 && (
-                <div className="absolute top-4 left-4">
-                  <span className="px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-[#F97316] text-white rounded shadow-xs">
+                <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
+                  <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-xs font-black uppercase tracking-wider bg-[#F97316] text-white rounded shadow-xs">
                     Save {product.discountPercentage}%
                   </span>
                 </div>
@@ -383,9 +383,47 @@ export const ProductDetailPage: React.FC = () => {
         )}
       </div>
 
+      {/* Sticky Mobile Conversion Bar — Sits conveniently right above mobile bottom navigation */}
+      <div className="lg:hidden fixed bottom-14 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-gray-200 px-3.5 py-2.5 flex items-center justify-between shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
+        <div className="flex flex-col min-w-0 pr-2">
+          <span className="text-[11px] text-gray-500 font-semibold truncate max-w-[160px]">
+            {product.name}
+          </span>
+          <div className="flex items-baseline space-x-1.5">
+            <span className="text-sm font-black text-[#0B132B]">
+              {formatPKR(product.price)}
+            </span>
+            {product.originalPrice > product.price && (
+              <span className="text-[10px] text-gray-400 line-through">
+                {formatPKR(product.originalPrice)}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <button
+          onClick={handleAddToCart}
+          className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider text-white shadow-md active:scale-95 flex items-center space-x-1.5 shrink-0 cursor-pointer ${
+            isAdded ? 'bg-emerald-600' : 'bg-[#F97316] hover:bg-[#EA580C]'
+          }`}
+        >
+          {isAdded ? (
+            <>
+              <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+              <span>Added!</span>
+            </>
+          ) : (
+            <>
+              <ShoppingBag className="w-3.5 h-3.5 text-white" />
+              <span>Order with COD</span>
+            </>
+          )}
+        </button>
+      </div>
+
       {/* Floating Added to Bag Pill */}
       {isAdded && (
-        <div className="fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#0B132B] text-white px-5 py-2.5 rounded-full shadow-2xl border border-white/10 flex items-center gap-3 animate-bounce">
+        <div className="fixed bottom-28 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#0B132B] text-white px-5 py-2.5 rounded-full shadow-2xl border border-white/10 flex items-center gap-3 animate-bounce">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span className="text-xs font-medium">Added to Bag</span>
           <button

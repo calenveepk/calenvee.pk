@@ -21,20 +21,20 @@ export const HeroSection: React.FC = () => {
 
   return (
     <section className="w-full bg-[#FAF7F2] border-b border-gray-100 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-center">
           
           {/* Left Content Column (7 cols) */}
-          <div className="lg:col-span-6 space-y-4 sm:space-y-6 text-left">
+          <div className="lg:col-span-6 space-y-3.5 sm:space-y-6 text-left">
             
             {/* Kicker Pill matching reference */}
-            <div className="inline-flex items-center space-x-1 text-xs font-bold uppercase tracking-widest text-[#F97316]">
+            <div className="inline-flex items-center space-x-1 text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-[#F97316]">
               <span>{hero.kicker}</span>
             </div>
 
             {/* Main Headline matching reference */}
             <div className="space-y-2">
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-[#0B132B] tracking-tight leading-[1.12]">
+              <h1 className="text-2xl sm:text-5xl lg:text-6xl font-black text-[#0B132B] tracking-tight leading-[1.15]">
                 {hero.headlinePrefix}<br />
                 <span className="text-[#F97316]">{hero.headlineHighlight}</span>
               </h1>
@@ -43,11 +43,11 @@ export const HeroSection: React.FC = () => {
               </p>
             </div>
 
-            {/* Shop Now CTA Button */}
+            {/* Shop Now CTA Button — Full width on mobile for instant thumb action */}
             <div className="pt-1 sm:pt-2">
               <Link
                 to={hero.ctaLink || '/shop'}
-                className="inline-flex items-center space-x-2.5 px-7 py-3.5 sm:px-8 sm:py-4 bg-[#081320] hover:bg-[#F97316] text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider rounded-xl shadow-lg hover:shadow-orange-500/20 transition-all duration-200 active:scale-95 group"
+                className="w-full sm:w-auto inline-flex items-center justify-center space-x-2.5 px-7 py-3.5 sm:px-8 sm:py-4 bg-[#081320] hover:bg-[#F97316] text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider rounded-xl shadow-lg hover:shadow-orange-500/20 transition-all duration-200 active:scale-95 group"
               >
                 <span>{hero.ctaText || 'Shop Now'}</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -55,17 +55,17 @@ export const HeroSection: React.FC = () => {
             </div>
 
             {/* 3 Trust Points matching reference */}
-            <div className="pt-4 sm:pt-6 border-t border-gray-200/60 flex items-center gap-4 sm:gap-6 flex-wrap text-gray-700">
-              <div className="flex items-center space-x-2 text-xs font-semibold text-gray-800">
-                <ShieldCheck className="w-4 h-4 text-[#F97316]" />
+            <div className="pt-3.5 sm:pt-6 border-t border-gray-200/60 flex items-center justify-between sm:justify-start gap-2 sm:gap-6 flex-wrap text-gray-700">
+              <div className="flex items-center space-x-1.5 text-[11px] sm:text-xs font-bold text-gray-800">
+                <ShieldCheck className="w-4 h-4 text-[#F97316] shrink-0" />
                 <span>{hero.trustPoints?.[0]?.text || 'Cash on Delivery'}</span>
               </div>
-              <div className="flex items-center space-x-2 text-xs font-semibold text-gray-800">
-                <Award className="w-4 h-4 text-[#F97316]" />
+              <div className="flex items-center space-x-1.5 text-[11px] sm:text-xs font-bold text-gray-800">
+                <Award className="w-4 h-4 text-[#F97316] shrink-0" />
                 <span>{hero.trustPoints?.[1]?.text || 'Premium Quality'}</span>
               </div>
-              <div className="flex items-center space-x-2 text-xs font-semibold text-gray-800">
-                <Truck className="w-4 h-4 text-[#F97316]" />
+              <div className="flex items-center space-x-1.5 text-[11px] sm:text-xs font-bold text-gray-800">
+                <Truck className="w-4 h-4 text-[#F97316] shrink-0" />
                 <span>{hero.trustPoints?.[2]?.text || 'Nationwide Shipping'}</span>
               </div>
             </div>

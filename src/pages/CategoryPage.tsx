@@ -72,9 +72,9 @@ export const CategoryPage: React.FC = () => {
         keywords={category.seoKeywords.join(', ')}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 space-y-6 sm:space-y-12">
         {/* Breadcrumb — Centered */}
-        <div className="flex items-center justify-center space-x-2 text-xs text-gray-500 -mb-4 sm:-mb-6">
+        <div className="flex items-center justify-center space-x-2 text-xs text-gray-500 -mb-3 sm:-mb-6">
           <Link to="/" className="hover:text-[#F97316] transition-colors">Home</Link>
           <span>/</span>
           <Link to="/shop" className="hover:text-[#F97316] transition-colors">Collections</Link>
@@ -83,7 +83,7 @@ export const CategoryPage: React.FC = () => {
         </div>
 
         {/* Category Hero Banner — Centered */}
-        <div className="relative rounded-2xl overflow-hidden bg-gray-900 text-white p-6 sm:p-10 lg:p-12 shadow-lg text-center flex flex-col items-center">
+        <div className="relative rounded-xl sm:rounded-2xl overflow-hidden bg-gray-900 text-white p-4 sm:p-10 lg:p-12 shadow-lg text-center flex flex-col items-center">
           <div className="absolute inset-0 z-0">
             <img
               src={category.image}

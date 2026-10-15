@@ -240,13 +240,13 @@ export const CheckoutPage: React.FC = () => {
     : '';
 
   return (
-    <div className="min-h-screen py-8 sm:py-12 bg-gray-50 text-gray-900">
+    <div className="min-h-screen py-5 sm:py-12 bg-gray-50 text-gray-900">
       <SEO
         title="Checkout | Calenvee.pk"
         description="Checkout with Cash on Delivery or Mobile Accounts. Expected 7-10 Working Days Delivery across Pakistan."
       />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-2.5 sm:px-6 lg:px-8">
         {/* If Order is Confirmed, Show Digital Invoice Receipt */}
         {completedOrder ? (
           <div className="max-w-3xl mx-auto space-y-6">
@@ -494,7 +494,7 @@ export const CheckoutPage: React.FC = () => {
 
             {/* Left: Customer Info & Shipping (7 cols) */}
             <div className="lg:col-span-7 space-y-6">
-              <div className="bg-white p-5 sm:p-7 rounded-2xl border border-gray-200 shadow-sm space-y-5">
+              <div className="bg-white p-3.5 sm:p-7 rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm space-y-4 sm:space-y-5">
                 <div className="space-y-1">
                   <h2 className="text-xl sm:text-2xl font-extrabold text-[#0B132B]">
                     Delivery Address

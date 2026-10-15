@@ -51,7 +51,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   return (
     <div
-      className="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300"
+      className="group relative flex flex-col bg-white rounded-xl sm:rounded-2xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-300"
       onMouseEnter={() => {
         if (product.images.length > 1) setCurrentImageIndex(1);
       }}
@@ -59,22 +59,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         setCurrentImageIndex(0);
       }}
     >
-      {/* Product Image Frame */}
-      <div className="relative aspect-square w-full overflow-hidden bg-gray-50/70 flex items-center justify-center p-3 sm:p-4">
+      {/* Product Image Frame — Minimal padding on mobile for maximum product visibility */}
+      <div className="relative aspect-square w-full overflow-hidden bg-gray-50/80 flex items-center justify-center p-1.5 sm:p-3.5">
         
         {/* Top-Left Badge */}
         {showBadge && (product.isBestSeller || product.discountPercentage > 0 || product.isNewDrop) && (
-          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10 pointer-events-none">
+          <div className="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">
             {product.isBestSeller ? (
-              <span className="px-2 py-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-[#F97316] text-white rounded-md shadow-2xs">
+              <span className="px-1.5 py-0.5 text-[8px] sm:text-[10px] font-black uppercase tracking-wider bg-[#F97316] text-white rounded shadow-2xs">
                 HOT
               </span>
             ) : product.discountPercentage > 0 ? (
-              <span className="px-2 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider bg-[#081320] text-white rounded-md shadow-2xs">
+              <span className="px-1.5 py-0.5 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider bg-[#081320] text-white rounded shadow-2xs">
                 -{product.discountPercentage}%
               </span>
             ) : product.isNewDrop ? (
-              <span className="px-2 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider bg-emerald-600 text-white rounded-md shadow-2xs">
+              <span className="px-1.5 py-0.5 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider bg-emerald-600 text-white rounded shadow-2xs">
                 NEW
               </span>
             ) : null}
@@ -84,11 +84,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Top-Right Wishlist Heart Button */}
         <button
           onClick={handleWishlistToggle}
-          className="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-gray-400 hover:text-red-500 shadow-2xs border border-gray-100 flex items-center justify-center transition-all duration-200 active:scale-90"
+          className="absolute top-2 right-2 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 hover:bg-white text-gray-400 hover:text-red-500 shadow-2xs border border-gray-100 flex items-center justify-center transition-all duration-200 active:scale-90"
           aria-label={isFavorited ? 'Remove from wishlist' : 'Add to wishlist'}
         >
           <Heart
-            className={`w-4 h-4 transition-colors ${
+            className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors ${
               isFavorited ? 'text-red-500 fill-red-500' : 'text-gray-400'
             }`}
           />
@@ -98,7 +98,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {onQuickView && (
           <button
             onClick={handleQuickViewClick}
-            className="absolute bottom-2.5 right-2.5 z-10 p-1.5 rounded-full bg-white/90 hover:bg-white text-gray-700 hover:text-[#F97316] shadow-sm border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="hidden sm:flex absolute bottom-2.5 right-2.5 z-10 p-1.5 rounded-full bg-white/90 hover:bg-white text-gray-700 hover:text-[#F97316] shadow-sm border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity"
             title="Quick view"
           >
             <Eye className="w-3.5 h-3.5" />
@@ -115,76 +115,61 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </Link>
       </div>
 
-      {/* Product Information — Center-aligned in mobile view, left-aligned on desktop */}
-      <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between space-y-2 bg-white text-center sm:text-left items-center sm:items-start">
-        <div className="space-y-1 w-full flex flex-col items-center sm:items-start">
+      {/* Product Information — Clean left alignment maximizing width utilization */}
+      <div className="p-2 sm:p-3.5 flex-1 flex flex-col justify-between space-y-1.5 bg-white text-left items-start">
+        <div className="space-y-0.5 sm:space-y-1 w-full text-left">
           {/* Title */}
-          <Link to={`/product/${product.slug}`} className="block w-full text-center sm:text-left">
-            <h3 className="text-xs sm:text-sm font-bold text-gray-900 group-hover:text-[#F97316] line-clamp-1 transition-colors text-center sm:text-left">
+          <Link to={`/product/${product.slug}`} className="block w-full text-left">
+            <h3 className="text-xs sm:text-sm font-bold text-gray-900 group-hover:text-[#F97316] line-clamp-1 transition-colors text-left leading-snug">
               {product.name}
             </h3>
           </Link>
 
-          {/* Category Label */}
-          <div className="text-[11px] text-gray-400 font-medium text-center sm:text-left">
-            {product.categoryLabel || product.category}
-          </div>
-
-          {/* Star Rating with Count (Centered on mobile) */}
-          <div className="flex items-center justify-center sm:justify-start space-x-1 pt-0.5">
-            <div className="flex items-center text-amber-400">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-3 h-3 ${
-                    i < Math.floor(product.rating || 5)
-                      ? 'fill-amber-400 text-amber-400'
-                      : 'text-gray-200'
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="text-[10px] sm:text-[11px] text-gray-400 font-medium">
-              ({formatReviews(product.reviewsCount || 120)})
+          {/* Category & Rating Row on Mobile */}
+          <div className="flex items-center justify-between text-left w-full pt-0.5">
+            <span className="text-[10px] sm:text-[11px] text-gray-400 font-medium truncate max-w-[65%]">
+              {product.categoryLabel || product.category}
             </span>
+
+            {/* Compact Star Rating */}
+            <div className="flex items-center space-x-0.5 shrink-0">
+              <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-amber-400 text-amber-400" />
+              <span className="text-[9px] sm:text-[10px] font-bold text-gray-600">
+                {product.rating || 5}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Bottom Row: Pricing & Cart Button */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-2 pt-2 border-t border-gray-50 w-full mt-auto">
-          {/* Price Container: Single line, no awkward breaking */}
-          <div className="flex flex-wrap items-baseline justify-center sm:justify-start gap-x-1.5 whitespace-nowrap min-w-0">
-            <span className="text-xs sm:text-sm font-extrabold text-[#0B132B] whitespace-nowrap">
+        {/* Bottom Row: Price & Touch-Friendly Add to Cart Button */}
+        <div className="flex items-center justify-between gap-1 pt-1.5 border-t border-gray-100 w-full mt-auto">
+          {/* Price Container */}
+          <div className="flex flex-col sm:flex-row sm:items-baseline gap-x-1.5 leading-tight min-w-0">
+            <span className="text-xs sm:text-sm font-black text-[#0B132B] whitespace-nowrap">
               {formatPKR(product.price)}
             </span>
             {product.originalPrice > product.price && (
-              <span className="text-[10px] sm:text-xs text-gray-400 line-through whitespace-nowrap">
+              <span className="text-[9px] sm:text-xs text-gray-400 line-through whitespace-nowrap">
                 {formatPKR(product.originalPrice)}
               </span>
             )}
           </div>
 
-          {/* Quick Add Cart Button: Full-width button with label on mobile, neat square icon button on desktop */}
+          {/* Touch-Friendly Add to Bag Button */}
           <button
             onClick={handleQuickAdd}
-            className={`w-full sm:w-9 h-8 sm:h-9 shrink-0 rounded-lg border transition-all duration-200 active:scale-95 shadow-2xs flex items-center justify-center space-x-1.5 sm:space-x-0 cursor-pointer ${
+            className={`h-7 w-7 sm:h-8 sm:w-8 shrink-0 rounded-lg border transition-all duration-200 active:scale-90 shadow-2xs flex items-center justify-center cursor-pointer ${
               isAdded
                 ? 'bg-emerald-600 border-emerald-600 text-white'
-                : 'border-gray-200 hover:border-[#F97316] hover:bg-[#F97316] text-gray-700 hover:text-white'
+                : 'border-gray-200 bg-gray-50 hover:border-[#F97316] hover:bg-[#F97316] text-gray-800 hover:text-white'
             }`}
             title={isAdded ? 'Added to bag' : 'Add to cart'}
             aria-label={isAdded ? 'Added to bag' : 'Add to cart'}
           >
             {isAdded ? (
-              <>
-                <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-white" />
-                <span className="text-[11px] font-bold uppercase sm:hidden">Added!</span>
-              </>
+              <Check className="w-3.5 h-3.5 text-white" />
             ) : (
-              <>
-                <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                <span className="text-[11px] font-bold uppercase sm:hidden">Add to Cart</span>
-              </>
+              <ShoppingBag className="w-3.5 h-3.5" />
             )}
           </button>
         </div>

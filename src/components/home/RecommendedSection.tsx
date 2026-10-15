@@ -24,11 +24,11 @@ export const RecommendedSection: React.FC<RecommendedSectionProps> = ({ onQuickV
     .filter((p): p is Product => p !== undefined);
 
   return (
-    <section className="bg-white py-6 sm:py-10">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+    <section className="bg-white py-5 sm:py-10">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
         
         {/* Section Header: Center aligned on mobile */}
-        <div className="flex flex-col sm:flex-row items-center justify-between text-center sm:text-left gap-1.5 sm:gap-0 mb-5 sm:mb-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between text-center sm:text-left gap-1.5 sm:gap-0 mb-4 sm:mb-8 px-1 sm:px-0">
           <div className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2 text-center sm:text-left">
             <h2 className="text-xl sm:text-2xl font-extrabold text-[#0B132B] tracking-tight">
               Recommended for You
@@ -48,7 +48,7 @@ export const RecommendedSection: React.FC<RecommendedSectionProps> = ({ onQuickV
         </div>
 
         {/* 5-Column Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 lg:gap-5">
           {recommendedProducts.map((product) => (
             <ProductCard
               key={product.id}

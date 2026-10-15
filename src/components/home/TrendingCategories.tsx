@@ -22,19 +22,19 @@ export const TrendingCategories: React.FC = () => {
           </Link>
         </div>
 
-        {/* Circular / Soft-Rounded Categories Row (Scrollable on mobile, flex grid on desktop) */}
-        <div className="flex overflow-x-auto scrollbar-none snap-x snap-mandatory gap-4 sm:gap-6 pb-2 sm:pb-0 justify-start sm:justify-between items-start">
+        {/* Circular / Soft-Rounded Categories Row (Full-bleed edge-to-edge scrollable on mobile) */}
+        <div className="flex overflow-x-auto scrollbar-none snap-x snap-mandatory gap-3 sm:gap-6 pb-2 sm:pb-0 justify-start sm:justify-between items-start -mx-3 px-3 sm:mx-0 sm:px-0">
           {CATEGORIES.map((cat) => (
             <div
               key={cat.id}
-              className="flex-shrink-0 w-24 sm:w-28 lg:w-32 snap-center text-center"
+              className="flex-shrink-0 w-[78px] sm:w-28 lg:w-32 snap-center text-center"
             >
               <Link
                 to={`/category/${cat.slug}`}
-                className="group flex flex-col items-center space-y-2.5 text-center"
+                className="group flex flex-col items-center space-y-1.5 sm:space-y-2.5 text-center"
               >
                 {/* Circular Image Container */}
-                <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full overflow-hidden bg-gray-50 border-2 border-gray-100 group-hover:border-[#F97316] group-hover:shadow-md transition-all duration-300 p-1 flex items-center justify-center mx-auto">
+                <div className="w-[66px] h-[66px] sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full overflow-hidden bg-gray-50 border-2 border-gray-100 group-hover:border-[#F97316] group-hover:shadow-md transition-all duration-300 p-0.5 sm:p-1 flex items-center justify-center mx-auto">
                   <img
                     src={cat.image}
                     alt={cat.name}
@@ -44,7 +44,7 @@ export const TrendingCategories: React.FC = () => {
                 </div>
 
                 {/* Category Name */}
-                <span className="text-xs sm:text-sm font-bold text-gray-800 group-hover:text-[#F97316] transition-colors leading-tight line-clamp-1 text-center">
+                <span className="text-[11px] sm:text-sm font-bold text-gray-800 group-hover:text-[#F97316] transition-colors leading-tight line-clamp-1 text-center">
                   {cat.name}
                 </span>
               </Link>

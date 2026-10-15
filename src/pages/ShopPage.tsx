@@ -76,7 +76,7 @@ export const ShopPage: React.FC = () => {
         description="Browse the complete collection of Calenvee timepieces, minimalist jewelry, eyewear, and everyday essentials in Pakistan with Cash on Delivery."
       />
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
         
         {/* Editorial Page Banner / Search Results Header */}
         <div className="mb-6 text-center space-y-2 border-b border-gray-100 pb-5 flex flex-col items-center">

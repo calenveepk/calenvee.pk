@@ -27,11 +27,11 @@ export const NewsletterBanner: React.FC = () => {
   };
 
   return (
-    <section className="bg-white py-6 sm:py-10">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+    <section className="bg-white py-5 sm:py-10">
+      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
         
         {/* Banner matching reference mockup: Center aligned on mobile */}
-        <div className="rounded-2xl bg-[#FAF7F2] p-6 sm:p-8 lg:p-10 border border-stone-200/80 shadow-2xs">
+        <div className="rounded-xl sm:rounded-2xl bg-[#FAF7F2] p-4 sm:p-8 lg:p-10 border border-stone-200/80 shadow-2xs">
           <div className="flex flex-col lg:flex-row items-center justify-between text-center lg:text-left gap-6 lg:gap-8">
             
             {/* Left: Envelope Graphic + Text (Centered on mobile) */}
