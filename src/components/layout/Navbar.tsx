@@ -96,10 +96,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         
         {/* Main Header Row */}
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5">
-          <div className="flex items-center justify-between gap-3 sm:gap-6">
+          <div className="relative flex items-center justify-between gap-3 sm:gap-6">
             
-            {/* Left: Mobile Menu Button & Brand Logo */}
-            <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+            {/* Left: Mobile Menu Button & Desktop Brand Logo */}
+            <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 z-10">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="lg:hidden p-2 text-gray-700 hover:text-black hover:bg-gray-100 rounded-lg transition-colors -ml-1"
@@ -108,11 +108,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
 
-              <Link to="/" className="flex items-center group">
+              {/* Desktop Logo (hidden on mobile, visible on md and up) */}
+              <Link to="/" className="hidden md:flex items-center group">
                 <img
                   src="/logo.png"
                   alt="Calenvee.pk"
-                  className="h-8 sm:h-9 md:h-10 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
+                  className="h-9 md:h-10 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
+                />
+              </Link>
+            </div>
+
+            {/* Mobile Centered Brand Logo (strictly center-aligned & slightly zoomed in on mobile screens) */}
+            <div className="md:hidden absolute left-1/2 -translate-x-1/2 flex items-center justify-center">
+              <Link to="/" className="flex items-center group py-0.5">
+                <img
+                  src="/logo.png"
+                  alt="Calenvee.pk"
+                  className="h-9 w-auto object-contain transform scale-110 transition-transform duration-200 group-hover:scale-115"
                 />
               </Link>
             </div>
@@ -194,7 +206,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             {/* Right: Actions (Wishlist & Cart only — NO duplicate search button, NO account button) */}
-            <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+            <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0 z-10">
               
               {/* Wishlist Button */}
               <Link

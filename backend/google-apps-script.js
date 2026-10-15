@@ -1440,7 +1440,7 @@ function getUniversalEmailHeader(cfg) {
       <td class="header-cell" style="background-color: ${cfg.brandNavy}; padding: 24px 20px 20px 20px; text-align: center;">
         <div style="margin: 0 auto 8px auto; text-align: center;">
           <a href="https://calenvee.pk" target="_blank" style="text-decoration: none; display: inline-block; outline: none; border: none; cursor: default;">
-            <img src="${cfg.logoUrl}" alt="${cfg.storeName}" width="140" style="width: 140px; max-width: 140px; height: auto; display: block; margin: 0 auto; border: 0; outline: none; text-decoration: none; pointer-events: none;" />
+            <img src="${cfg.logoUrl}" alt="${cfg.storeName}" width="160" style="width: 160px; max-width: 160px; height: auto; display: block; margin: 0 auto; border: 0; outline: none; text-decoration: none; pointer-events: none;" />
           </a>
         </div>
         <p style="color: ${cfg.brandOrange}; font-size: 10px; margin: 0; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
@@ -2191,7 +2191,7 @@ function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
         <tr>
           <td class="header-cell" style="background-color: ${cfg.brandNavy}; padding: 24px 20px; text-align: center;">
             <a href="https://calenvee.pk" target="_blank" style="text-decoration: none; display: inline-block;">
-              <img src="${cfg.logoUrl}" alt="${cfg.storeName}" width="120" style="max-height: 38px; width: 120px; margin-bottom: 8px; display: block; margin-left: auto; margin-right: auto; border: 0; outline: none; pointer-events: none;" />
+              <img src="${cfg.logoUrl}" alt="${cfg.storeName}" width="145" style="max-height: 44px; width: 145px; margin-bottom: 8px; display: block; margin-left: auto; margin-right: auto; border: 0; outline: none; pointer-events: none;" />
             </a>
             <div style="color: #FFFFFF; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">NEW ORDER PLACED (PENDING CONFIRMATION)</div>
             <div style="color: ${cfg.brandOrange}; font-size: 10px; font-weight: bold; margin-top: 4px; letter-spacing: 1.5px;">${cfg.storeTagline}</div>
