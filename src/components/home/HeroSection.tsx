@@ -64,7 +64,7 @@ export const HeroSection: React.FC = () => {
       onTouchEnd={() => setIsPaused(false)}
     >
       
-      {/* 1. Full-Bleed Integrated Product Visuals (Right-Anchored, Pure Background with NO Gradient Shading) */}
+      {/* 1. Full-Bleed Integrated Product Visuals (Right-Anchored with Low-Intensity Soft Blend) */}
       <div className="absolute top-0 right-0 bottom-0 w-[50%] sm:w-[52%] lg:w-[55%] h-full overflow-hidden pointer-events-none z-0">
         {slides.map((slide, idx) => (
           <img
@@ -79,6 +79,13 @@ export const HeroSection: React.FC = () => {
             loading={idx === 0 ? 'eager' : 'lazy'}
           />
         ))}
+
+        {/* Low-Intensity Seamless Blend Gradient (softly dissolves the left edge into the canvas without fog) */}
+        <div className="absolute inset-y-0 left-0 w-10 sm:w-20 lg:w-28 bg-gradient-to-r from-[#FAF7F2] via-[#FAF7F2]/30 to-transparent pointer-events-none" />
+
+        {/* Low-Intensity Top & Bottom Vignette */}
+        <div className="absolute inset-x-0 top-0 h-4 sm:h-8 bg-gradient-to-b from-[#FAF7F2]/20 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-4 sm:h-8 bg-gradient-to-t from-[#FAF7F2]/20 to-transparent pointer-events-none" />
       </div>
 
       {/* 2. Content Container (Slightly reduced height for sleek panoramic viewport presence) */}
@@ -92,12 +99,18 @@ export const HeroSection: React.FC = () => {
               <span>{activeSlide.kicker}</span>
             </div>
 
-            {/* Main Headline & Description */}
-            <h1 className="text-lg sm:text-3xl lg:text-4xl font-black text-[#0B132B] tracking-tight leading-[1.12]">
+            {/* Main Headline & Description with Subtle Low-Intensity Text Shading */}
+            <h1
+              className="text-lg sm:text-3xl lg:text-4xl font-black text-[#0B132B] tracking-tight leading-[1.12]"
+              style={{ textShadow: '0 1px 2px rgba(255, 255, 255, 0.8), 0 2px 6px rgba(11, 19, 43, 0.05)' }}
+            >
               {activeSlide.headlinePrefix}<br />
               <span className="text-[#F97316]">{activeSlide.headlineHighlight}</span>
             </h1>
-            <p className="text-[11px] sm:text-xs lg:text-sm text-gray-600 font-normal leading-relaxed line-clamp-2 sm:line-clamp-none max-w-sm sm:max-w-md">
+            <p
+              className="text-[11px] sm:text-xs lg:text-sm text-gray-600 font-normal leading-relaxed line-clamp-2 sm:line-clamp-none max-w-sm sm:max-w-md"
+              style={{ textShadow: '0 1px 2px rgba(255, 255, 255, 0.6)' }}
+            >
               {activeSlide.subtitle}
             </p>
           </div>

@@ -2844,8 +2844,8 @@ Ready to commit and deploy changes.</pre>
 
     function switchHeroSlideTab(tabNum) {
       for (let i = 1; i <= 3; i++) {
-        const panel = document.getElementById(`heroSlidePanel_${i}`);
-        const btn = document.getElementById(`heroTabBtn${i}`);
+        const panel = document.getElementById('heroSlidePanel_' + i);
+        const btn = document.getElementById('heroTabBtn' + i);
         if (panel) {
           if (i === tabNum) {
             panel.classList.remove('hidden');
@@ -2974,7 +2974,7 @@ Ready to commit and deploy changes.</pre>
     }
 
     function updateHeroPreview(url, slideNum = 1) {
-      const img = document.getElementById(`heroImagePreview_${slideNum}`);
+      const img = document.getElementById('heroImagePreview_' + slideNum);
       if (img) img.src = url || '/placeholder-image.png';
       if (slideNum === 1) {
         const legacyImg = document.getElementById('heroImagePreview');
@@ -2999,14 +2999,14 @@ Ready to commit and deploy changes.</pre>
           });
           const result = await res.json();
           if (result.success && result.url) {
-            const input = document.getElementById(`hero_image_${slideNum}`);
+            const input = document.getElementById('hero_image_' + slideNum);
             if (input) input.value = result.url;
             updateHeroPreview(result.url, slideNum);
             if (slideNum === 1) {
               const legacy = document.getElementById('hero_image');
               if (legacy) legacy.value = result.url;
             }
-            showToast(`Hero Slide ${slideNum} image uploaded!`);
+            showToast('Hero Slide ' + slideNum + ' image uploaded!');
           }
         } catch (err) {
           showToast('Image upload failed', true);
@@ -3042,17 +3042,25 @@ Ready to commit and deploy changes.</pre>
       // Build up to 3 slides
       const heroSlides = [];
       for (let i = 1; i <= 3; i++) {
-        const img = (document.getElementById(`hero_image_${i}`)?.value || '').trim();
-        const kicker = (document.getElementById(`hero_kicker_${i}`)?.value || '').trim();
-        const prefix = (document.getElementById(`hero_headlinePrefix_${i}`)?.value || '').trim();
-        const highlight = (document.getElementById(`hero_headlineHighlight_${i}`)?.value || '').trim();
-        const sub = (document.getElementById(`hero_subtitle_${i}`)?.value || '').trim();
-        const ctaText = (document.getElementById(`hero_ctaText_${i}`)?.value || '').trim() || 'Shop Now';
-        const ctaLink = (document.getElementById(`hero_ctaLink_${i}`)?.value || '').trim() || '/shop';
+        const imgInput = document.getElementById('hero_image_' + i);
+        const kickerInput = document.getElementById('hero_kicker_' + i);
+        const prefixInput = document.getElementById('hero_headlinePrefix_' + i);
+        const highlightInput = document.getElementById('hero_headlineHighlight_' + i);
+        const subInput = document.getElementById('hero_subtitle_' + i);
+        const ctaTextInput = document.getElementById('hero_ctaText_' + i);
+        const ctaLinkInput = document.getElementById('hero_ctaLink_' + i);
+
+        const img = (imgInput ? imgInput.value : '').trim();
+        const kicker = (kickerInput ? kickerInput.value : '').trim();
+        const prefix = (prefixInput ? prefixInput.value : '').trim();
+        const highlight = (highlightInput ? highlightInput.value : '').trim();
+        const sub = (subInput ? subInput.value : '').trim();
+        const ctaText = (ctaTextInput ? ctaTextInput.value : '').trim() || 'Shop Now';
+        const ctaLink = (ctaLinkInput ? ctaLinkInput.value : '').trim() || '/shop';
 
         if (i === 1 || img || prefix || highlight) {
           heroSlides.push({
-            id: `slide-${i}`,
+            id: 'slide-' + i,
             kicker: kicker || 'QUALITY. STYLE. EVERYDAY.',
             headlinePrefix: prefix || (i === 1 ? 'Everything You Love,' : ''),
             headlineHighlight: highlight || (i === 1 ? 'All in One Place.' : ''),
