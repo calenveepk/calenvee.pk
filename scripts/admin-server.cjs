@@ -25,44 +25,64 @@ let lastCloudSyncTime = null;
 let lastCloudSyncStatus = 'synced'; // 'idle' | 'syncing' | 'synced' | 'error'
 let lastCloudSyncError = null;
 
-async function syncToCloud(action, data = {}) {
+// Sequential sync queue to prevent concurrent request collisions on Google Apps Script
+let syncQueue = Promise.resolve();
+
+async function syncToCloud(action, data = {}, retries = 1) {
   if (!APPS_SCRIPT_URL) return { success: false, reason: 'No APPS_SCRIPT_URL' };
-  try {
+
+  return syncQueue = syncQueue.catch(() => {}).then(async () => {
     lastCloudSyncStatus = 'syncing';
     console.log(`[CloudSync] ⚡ Sending action "${action}" to Google Sheets Webhook...`);
-    
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
 
-    const res = await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, ...data, syncedAt: new Date().toISOString() }),
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout for Google cold starts
 
-    if (res.ok) {
-      const text = await res.text();
-      let json = {};
-      try { json = JSON.parse(text); } catch (_) { json = { text }; }
-      console.log(`[CloudSync] ✓ Action "${action}" completed:`, json.message || 'OK');
-      lastCloudSyncTime = new Date().toISOString();
-      lastCloudSyncStatus = 'synced';
-      lastCloudSyncError = null;
-      return { success: true, response: json };
-    } else {
-      console.warn(`[CloudSync] Webhook response status ${res.status}`);
-      lastCloudSyncStatus = 'error';
-      lastCloudSyncError = `HTTP ${res.status}`;
-      return { success: false, status: res.status };
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action, ...data, syncedAt: new Date().toISOString() }),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const text = await res.text();
+          let json = {};
+          try { json = JSON.parse(text); } catch (_) { json = { text }; }
+          console.log(`[CloudSync] ✓ Action "${action}" completed:`, json.message || 'OK');
+          lastCloudSyncTime = new Date().toISOString();
+          lastCloudSyncStatus = 'synced';
+          lastCloudSyncError = null;
+          return { success: true, response: json };
+        }
+
+        // If Google returned 404/503 during deployment switch or cold start, retry once
+        if (attempt < retries && (res.status === 404 || res.status >= 500)) {
+          console.warn(`[CloudSync] Webhook returned status ${res.status} (deployment propagating). Retrying in 2.5s...`);
+          await new Promise(r => setTimeout(r, 2500));
+          continue;
+        }
+
+        console.warn(`[CloudSync] Webhook response status ${res.status}`);
+        lastCloudSyncStatus = 'error';
+        lastCloudSyncError = `HTTP ${res.status}`;
+        return { success: false, status: res.status };
+      } catch (err) {
+        if (attempt < retries && (err.name === 'AbortError' || (err.message && err.message.includes('abort')))) {
+          console.warn(`[CloudSync] Cold start timeout on "${action}". Retrying in 2s...`);
+          await new Promise(r => setTimeout(r, 2000));
+          continue;
+        }
+        console.warn(`[CloudSync] Cloud sync note (${action}):`, err.message);
+        lastCloudSyncStatus = 'error';
+        lastCloudSyncError = err.message;
+        return { success: false, error: err.message };
+      }
     }
-  } catch (err) {
-    console.warn(`[CloudSync] Cloud sync note (${action}):`, err.message);
-    lastCloudSyncStatus = 'error';
-    lastCloudSyncError = err.message;
-    return { success: false, error: err.message };
-  }
+  });
 }
 
 // Ensure public/products directory exists
@@ -3268,7 +3288,7 @@ const server = http.createServer(async (req, res) => {
         let orders = [];
         if (APPS_SCRIPT_URL) {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 8000);
+          const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout for Google cold starts
           const cloudRes = await fetch(`${APPS_SCRIPT_URL}?action=get_orders`, { signal: controller.signal });
           clearTimeout(timeoutId);
           if (cloudRes.ok) {
