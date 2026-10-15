@@ -7,11 +7,20 @@
     "ctaText": "Shop Now",
     "ctaLink": "/shop",
     "trustPoints": [
-      { "text": "Cash on Delivery", "icon": "ShieldCheck" },
-      { "text": "Premium Quality", "icon": "Award" },
-      { "text": "Nationwide Shipping", "icon": "Truck" }
+      {
+        "text": "Cash on Delivery",
+        "icon": "ShieldCheck"
+      },
+      {
+        "text": "Premium Quality",
+        "icon": "Award"
+      },
+      {
+        "text": "Nationwide Shipping",
+        "icon": "Truck"
+      }
     ],
-    "image": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80"
+    "image": "/products/1792090700779-luxury_essentials_still_life.png"
   },
   "trioBanners": {
     "dealOfTheDay": {
@@ -66,4 +75,3 @@
     "buttonText": "Subscribe"
   }
 }
-
