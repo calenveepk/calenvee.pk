@@ -1,0 +1,22 @@
+[
+  {
+    "rowIndex": 2,
+    "orderId": "CAL-ORD-1000010",
+    "timestamp": "2026-10-15T08:03:29.678Z",
+    "customerName": "Anas Jameel",
+    "phone": "3061274106",
+    "email": "muhammadanasjameel@gmail.com",
+    "city": "Faisalabad",
+    "address": "Qamar Boys Hostel Opposite Children Hospital near GC university new Campus Fasilabad",
+    "paymentMethod": "COD",
+    "total": 5349,
+    "status": "Dispatched",
+    "courier": "Post Ex",
+    "trackingNumber": "PEX86486527",
+    "itemsSummary": "Smart Watch Pro — Fitness & Health Edition (x1) - Rs. 4999",
+    "notes": "",
+    "confirmationEmailSent": "Yes",
+    "dispatchEmailSent": "Yes",
+    "receiptProof": "Cash on Delivery"
+  }
+]
