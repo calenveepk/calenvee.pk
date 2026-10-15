@@ -6,6 +6,40 @@
     "subtitle": "Shop top-quality products across watches, jewelry, handbags, sunglasses, and fragrances with unbeatable prices and a seamless Cash on Delivery experience nationwide.",
     "ctaText": "Shop Now",
     "ctaLink": "/shop",
+    "image": "/products/1792091254271-luxury_essentials_still_life__1_.webp",
+    "autoIntervalSeconds": 5,
+    "slides": [
+      {
+        "id": "slide-1",
+        "kicker": "QUALITY. STYLE. EVERYDAY.",
+        "headlinePrefix": "Everything You Love,",
+        "headlineHighlight": "All in One Place.",
+        "subtitle": "Shop top-quality products across watches, jewelry, handbags, sunglasses, and fragrances with unbeatable prices and a seamless Cash on Delivery experience nationwide.",
+        "ctaText": "Shop Now",
+        "ctaLink": "/shop",
+        "image": "/products/1792091254271-luxury_essentials_still_life__1_.webp"
+      },
+      {
+        "id": "slide-2",
+        "kicker": "TIMEPIECES & CHRONOGRAPHS",
+        "headlinePrefix": "Signature Watches,",
+        "headlineHighlight": "Engineered For Prestige.",
+        "subtitle": "Explore timeless automatic movements, royal gold accents, and sapphire-crystal durability crafted to make every second memorable.",
+        "ctaText": "Explore Watches",
+        "ctaLink": "/category/watches",
+        "image": "/hero/calenvee_hero_gold.jpg"
+      },
+      {
+        "id": "slide-3",
+        "kicker": "CURATED LUXURY DROP",
+        "headlinePrefix": "Contemporary Accents,",
+        "headlineHighlight": "Defined by Elegance.",
+        "subtitle": "Elevate your daily presence with anti-tarnish waterproof jewelry, designer accessories, and artisan everyday essentials.",
+        "ctaText": "View Collection",
+        "ctaLink": "/category/jewelry",
+        "image": "/hero/hero_podium_collection.jpg"
+      }
+    ],
     "trustPoints": [
       {
         "text": "Cash on Delivery",
@@ -19,8 +53,7 @@
         "text": "Nationwide Shipping",
         "icon": "Truck"
       }
-    ],
-    "image": "/products/1792091254271-luxury_essentials_still_life__1_.webp"
+    ]
   },
   "trioBanners": {
     "dealOfTheDay": {

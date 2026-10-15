@@ -387,72 +387,212 @@ function getAdminHtml() {
         </button>
       </div>
 
-      <!-- 1. HERO BANNER SECTION -->
+      <!-- 1. HERO BANNER SECTION (MULTI-SLIDE ROTATION) -->
       <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-xs space-y-6">
-        <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
+        <div class="border-b border-slate-100 pb-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
             <h3 class="text-base font-bold text-[#0B132B] flex items-center gap-2">
               <span class="w-6 h-6 rounded-lg bg-orange-50 text-[#F97316] flex items-center justify-center text-xs font-black">1</span>
-              <span>Hero Banner Section</span>
+              <span>Hero Banner Section (Up to 3 Rotating Slides)</span>
             </h3>
-            <p class="text-xs text-slate-500">The primary high-impact presentation at the very top of your homepage.</p>
+            <p class="text-xs text-slate-500">Upload up to 3 images with custom headings, kicker, and text that rotate automatically at regular intervals.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="text-[11px] font-bold text-slate-600">Rotation Interval:</label>
+            <select id="hero_autoInterval" class="py-1 px-2.5 rounded-lg border border-slate-300 font-semibold text-xs text-slate-800 focus:outline-none focus:border-[#F97316]">
+              <option value="3">Every 3 Seconds</option>
+              <option value="4">Every 4 Seconds</option>
+              <option value="5" selected>Every 5 Seconds (Recommended)</option>
+              <option value="6">Every 6 Seconds</option>
+              <option value="8">Every 8 Seconds</option>
+            </select>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">Kicker Badge (Top Small Text)</label>
-            <input type="text" id="hero_kicker" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-mono text-xs focus:outline-none focus:border-[#F97316]" placeholder="QUALITY. STYLE. EVERYDAY.">
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">Headline Prefix</label>
-            <input type="text" id="hero_headlinePrefix" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-bold focus:outline-none focus:border-[#F97316]" placeholder="Everything You Love,">
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">Headline Highlight (Colored Text)</label>
-            <input type="text" id="hero_headlineHighlight" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-bold text-[#F97316] focus:outline-none focus:border-[#F97316]" placeholder="All in One Place.">
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">Primary Button Text &amp; URL</label>
-            <div class="flex gap-2">
-              <input type="text" id="hero_ctaText" class="w-1/2 py-2 px-3 rounded-lg border border-slate-300 font-semibold focus:outline-none focus:border-[#F97316]" placeholder="Shop Now">
-              <input type="text" id="hero_ctaLink" class="w-1/2 py-2 px-3 rounded-lg border border-slate-300 font-mono text-[11px] focus:outline-none focus:border-[#F97316]" placeholder="/shop">
-            </div>
-          </div>
+        <!-- Slide Selector Tabs -->
+        <div class="flex items-center gap-2 border-b border-slate-200 pb-2">
+          <button type="button" onclick="switchHeroSlideTab(1)" id="heroTabBtn1" class="px-4 py-2 rounded-xl text-xs font-bold bg-[#F97316] text-white shadow-xs transition flex items-center gap-1.5">
+            <span>Slide 1 (Primary)</span>
+          </button>
+          <button type="button" onclick="switchHeroSlideTab(2)" id="heroTabBtn2" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition flex items-center gap-1.5">
+            <span>Slide 2</span>
+          </button>
+          <button type="button" onclick="switchHeroSlideTab(3)" id="heroTabBtn3" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition flex items-center gap-1.5">
+            <span>Slide 3</span>
+          </button>
         </div>
 
-        <div class="text-xs">
-          <label class="block font-semibold text-slate-700 mb-1">Subtitle / Brand Description</label>
-          <textarea id="hero_subtitle" rows="2" class="w-full py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:border-[#F97316]" placeholder="Shop top-quality products across watches, jewelry, handbags..."></textarea>
-        </div>
-
-        <!-- Hero Image Upload & Preview -->
-        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 text-xs">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <!-- ================= SLIDE 1 PANEL ================= -->
+        <div id="heroSlidePanel_1" class="space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Slide 1 — Default Primary Showcase</span>
+            <span class="text-[11px] px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-bold">Active</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div>
-              <span class="font-bold text-slate-900 block">Hero Right-Side Visual Banner</span>
-              <span class="text-[11px] text-slate-500">Provide image URL or upload directly from your computer.</span>
+              <label class="block font-semibold text-slate-700 mb-1">Kicker Badge (Top Small Text)</label>
+              <input type="text" id="hero_kicker_1" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-mono text-xs focus:outline-none focus:border-[#F97316]" placeholder="QUALITY. STYLE. EVERYDAY.">
             </div>
-            <label class="cursor-pointer bg-[#0B132B] hover:bg-slate-800 text-white text-xs font-bold py-2 px-4 rounded-xl shadow transition inline-flex items-center gap-1.5">
-              <svg class="w-3.5 h-3.5 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-              <span>Upload Image from PC</span>
-              <input type="file" accept="image/*" class="hidden" onchange="handleHeroFileUpload(event)">
-            </label>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Headline Prefix</label>
+              <input type="text" id="hero_headlinePrefix_1" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-bold focus:outline-none focus:border-[#F97316]" placeholder="Everything You Love,">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Headline Highlight (Colored Text)</label>
+              <input type="text" id="hero_headlineHighlight_1" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-bold text-[#F97316] focus:outline-none focus:border-[#F97316]" placeholder="All in One Place.">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Primary Button Text &amp; URL</label>
+              <div class="flex gap-2">
+                <input type="text" id="hero_ctaText_1" class="w-1/2 py-2 px-3 rounded-lg border border-slate-300 font-semibold focus:outline-none focus:border-[#F97316]" placeholder="Shop Now">
+                <input type="text" id="hero_ctaLink_1" class="w-1/2 py-2 px-3 rounded-lg border border-slate-300 font-mono text-[11px] focus:outline-none focus:border-[#F97316]" placeholder="/shop">
+              </div>
+            </div>
           </div>
-          <div class="flex flex-col sm:flex-row gap-4 items-center">
-            <div class="w-full sm:w-48 h-28 bg-white rounded-xl border border-slate-200 overflow-hidden flex items-center justify-center p-1">
-              <img id="heroImagePreview" src="" alt="Hero preview" class="w-full h-full object-cover rounded-lg" onerror="this.src='/placeholder-image.png'">
+          <div class="text-xs">
+            <label class="block font-semibold text-slate-700 mb-1">Subtitle / Slide Description</label>
+            <textarea id="hero_subtitle_1" rows="2" class="w-full py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:border-[#F97316]" placeholder="Shop top-quality products across watches, jewelry, handbags..."></textarea>
+          </div>
+          <!-- Slide 1 Image Upload & Preview -->
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 text-xs">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <span class="font-bold text-slate-900 block">Slide 1 Right-Side Product Visual</span>
+                <span class="text-[11px] text-slate-500">Provide direct image URL or upload file directly from your computer.</span>
+              </div>
+              <label class="cursor-pointer bg-[#0B132B] hover:bg-slate-800 text-white text-xs font-bold py-2 px-4 rounded-xl shadow transition inline-flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                <span>Upload Slide 1 Image</span>
+                <input type="file" accept="image/*" class="hidden" onchange="handleHeroFileUpload(event, 1)">
+              </label>
             </div>
-            <div class="flex-1 w-full">
-              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Hero Image URL:</label>
-              <input type="text" id="hero_image" oninput="updateHeroPreview(this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-mono text-[11px] focus:outline-none focus:border-[#F97316]" placeholder="/hero/my-hero.jpg or https://...">
+            <div class="flex flex-col sm:flex-row gap-4 items-center">
+              <div class="w-full sm:w-48 h-28 bg-white rounded-xl border border-slate-200 overflow-hidden flex items-center justify-center p-1">
+                <img id="heroImagePreview_1" src="" alt="Slide 1 Preview" class="w-full h-full object-cover rounded-lg" onerror="this.src='/placeholder-image.png'">
+              </div>
+              <div class="flex-1 w-full">
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Slide 1 Image URL:</label>
+                <input type="text" id="hero_image_1" oninput="updateHeroPreview(this.value, 1)" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-mono text-[11px] focus:outline-none focus:border-[#F97316]" placeholder="/products/hero-1.webp">
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- 3 Trust Points -->
-        <div class="text-xs space-y-2">
-          <span class="font-bold text-slate-900 block">3 Trust Points (Under CTA Button)</span>
+        <!-- ================= SLIDE 2 PANEL ================= -->
+        <div id="heroSlidePanel_2" class="space-y-4 hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Slide 2 — Second Rotation</span>
+            <span class="text-[11px] px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 font-bold">Rotation 2</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Kicker Badge (Top Small Text)</label>
+              <input type="text" id="hero_kicker_2" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-mono text-xs focus:outline-none focus:border-[#F97316]" placeholder="TIMEPIECES & CHRONOGRAPHS">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Headline Prefix</label>
+              <input type="text" id="hero_headlinePrefix_2" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-bold focus:outline-none focus:border-[#F97316]" placeholder="Signature Watches,">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Headline Highlight (Colored Text)</label>
+              <input type="text" id="hero_headlineHighlight_2" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-bold text-[#F97316] focus:outline-none focus:border-[#F97316]" placeholder="Engineered For Prestige.">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Primary Button Text &amp; URL</label>
+              <div class="flex gap-2">
+                <input type="text" id="hero_ctaText_2" class="w-1/2 py-2 px-3 rounded-lg border border-slate-300 font-semibold focus:outline-none focus:border-[#F97316]" placeholder="Explore Watches">
+                <input type="text" id="hero_ctaLink_2" class="w-1/2 py-2 px-3 rounded-lg border border-slate-300 font-mono text-[11px] focus:outline-none focus:border-[#F97316]" placeholder="/category/watches">
+              </div>
+            </div>
+          </div>
+          <div class="text-xs">
+            <label class="block font-semibold text-slate-700 mb-1">Subtitle / Slide Description</label>
+            <textarea id="hero_subtitle_2" rows="2" class="w-full py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:border-[#F97316]" placeholder="Explore timeless automatic movements, royal gold accents, and sapphire durability..."></textarea>
+          </div>
+          <!-- Slide 2 Image Upload & Preview -->
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 text-xs">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <span class="font-bold text-slate-900 block">Slide 2 Right-Side Product Visual</span>
+                <span class="text-[11px] text-slate-500">Provide direct image URL or upload file directly from your computer.</span>
+              </div>
+              <label class="cursor-pointer bg-[#0B132B] hover:bg-slate-800 text-white text-xs font-bold py-2 px-4 rounded-xl shadow transition inline-flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                <span>Upload Slide 2 Image</span>
+                <input type="file" accept="image/*" class="hidden" onchange="handleHeroFileUpload(event, 2)">
+              </label>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4 items-center">
+              <div class="w-full sm:w-48 h-28 bg-white rounded-xl border border-slate-200 overflow-hidden flex items-center justify-center p-1">
+                <img id="heroImagePreview_2" src="" alt="Slide 2 Preview" class="w-full h-full object-cover rounded-lg" onerror="this.src='/placeholder-image.png'">
+              </div>
+              <div class="flex-1 w-full">
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Slide 2 Image URL:</label>
+                <input type="text" id="hero_image_2" oninput="updateHeroPreview(this.value, 2)" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-mono text-[11px] focus:outline-none focus:border-[#F97316]" placeholder="/hero/calenvee_hero_gold.jpg">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= SLIDE 3 PANEL ================= -->
+        <div id="heroSlidePanel_3" class="space-y-4 hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Slide 3 — Third Rotation</span>
+            <span class="text-[11px] px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 font-bold">Rotation 3</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Kicker Badge (Top Small Text)</label>
+              <input type="text" id="hero_kicker_3" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-mono text-xs focus:outline-none focus:border-[#F97316]" placeholder="CURATED LUXURY DROP">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Headline Prefix</label>
+              <input type="text" id="hero_headlinePrefix_3" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-bold focus:outline-none focus:border-[#F97316]" placeholder="Contemporary Accents,">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Headline Highlight (Colored Text)</label>
+              <input type="text" id="hero_headlineHighlight_3" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-bold text-[#F97316] focus:outline-none focus:border-[#F97316]" placeholder="Defined by Elegance.">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Primary Button Text &amp; URL</label>
+              <div class="flex gap-2">
+                <input type="text" id="hero_ctaText_3" class="w-1/2 py-2 px-3 rounded-lg border border-slate-300 font-semibold focus:outline-none focus:border-[#F97316]" placeholder="View Collection">
+                <input type="text" id="hero_ctaLink_3" class="w-1/2 py-2 px-3 rounded-lg border border-slate-300 font-mono text-[11px] focus:outline-none focus:border-[#F97316]" placeholder="/category/jewelry">
+              </div>
+            </div>
+          </div>
+          <div class="text-xs">
+            <label class="block font-semibold text-slate-700 mb-1">Subtitle / Slide Description</label>
+            <textarea id="hero_subtitle_3" rows="2" class="w-full py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:border-[#F97316]" placeholder="Elevate your daily presence with anti-tarnish waterproof jewelry, designer accessories..."></textarea>
+          </div>
+          <!-- Slide 3 Image Upload & Preview -->
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 text-xs">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <span class="font-bold text-slate-900 block">Slide 3 Right-Side Product Visual</span>
+                <span class="text-[11px] text-slate-500">Provide direct image URL or upload file directly from your computer.</span>
+              </div>
+              <label class="cursor-pointer bg-[#0B132B] hover:bg-slate-800 text-white text-xs font-bold py-2 px-4 rounded-xl shadow transition inline-flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                <span>Upload Slide 3 Image</span>
+                <input type="file" accept="image/*" class="hidden" onchange="handleHeroFileUpload(event, 3)">
+              </label>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4 items-center">
+              <div class="w-full sm:w-48 h-28 bg-white rounded-xl border border-slate-200 overflow-hidden flex items-center justify-center p-1">
+                <img id="heroImagePreview_3" src="" alt="Slide 3 Preview" class="w-full h-full object-cover rounded-lg" onerror="this.src='/placeholder-image.png'">
+              </div>
+              <div class="flex-1 w-full">
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Slide 3 Image URL:</label>
+                <input type="text" id="hero_image_3" oninput="updateHeroPreview(this.value, 3)" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-mono text-[11px] focus:outline-none focus:border-[#F97316]" placeholder="/hero/hero_podium_collection.jpg">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Trust Points (Shared across all Hero slides) -->
+        <div class="text-xs space-y-2 pt-2 border-t border-slate-100">
+          <span class="font-bold text-slate-900 block">3 Trust Points (Displayed Under CTA Button)</span>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label class="block text-[11px] text-slate-500 mb-0.5">Trust Point 1</label>
@@ -468,6 +608,16 @@ function getAdminHtml() {
             </div>
           </div>
         </div>
+
+        <!-- Hidden inputs for backward-compatibility -->
+        <input type="hidden" id="hero_kicker">
+        <input type="hidden" id="hero_headlinePrefix">
+        <input type="hidden" id="hero_headlineHighlight">
+        <input type="hidden" id="hero_subtitle">
+        <input type="hidden" id="hero_ctaText">
+        <input type="hidden" id="hero_ctaLink">
+        <input type="hidden" id="hero_image">
+        <img id="heroImagePreview" class="hidden">
       </div>
 
       <!-- 2. PROMOTIONAL TRIO BANNERS -->
@@ -2692,21 +2842,82 @@ Ready to commit and deploy changes.</pre>
       }
     }
 
+    function switchHeroSlideTab(tabNum) {
+      for (let i = 1; i <= 3; i++) {
+        const panel = document.getElementById(`heroSlidePanel_${i}`);
+        const btn = document.getElementById(`heroTabBtn${i}`);
+        if (panel) {
+          if (i === tabNum) {
+            panel.classList.remove('hidden');
+          } else {
+            panel.classList.add('hidden');
+          }
+        }
+        if (btn) {
+          if (i === tabNum) {
+            btn.className = 'px-4 py-2 rounded-xl text-xs font-bold bg-[#F97316] text-white shadow-xs transition flex items-center gap-1.5';
+          } else {
+            btn.className = 'px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition flex items-center gap-1.5';
+          }
+        }
+      }
+    }
+
     function populateHomeContentFields() {
       const h = homeContentData.hero || {};
       const t = homeContentData.trioBanners || {};
       const v = homeContentData.valueProps || [];
       const n = homeContentData.newsletter || {};
 
-      // Hero
-      document.getElementById('hero_kicker').value = h.kicker || '';
-      document.getElementById('hero_headlinePrefix').value = h.headlinePrefix || '';
-      document.getElementById('hero_headlineHighlight').value = h.headlineHighlight || '';
-      document.getElementById('hero_subtitle').value = h.subtitle || '';
-      document.getElementById('hero_ctaText').value = h.ctaText || 'Shop Now';
-      document.getElementById('hero_ctaLink').value = h.ctaLink || '/shop';
-      document.getElementById('hero_image').value = h.image || '';
-      updateHeroPreview(h.image || '');
+      // Hero (Multi-slide support up to 3 slides)
+      const slides = (Array.isArray(h.slides) && h.slides.length > 0) ? h.slides : [h];
+      const s1 = slides[0] || h || {};
+      const s2 = slides[1] || {};
+      const s3 = slides[2] || {};
+
+      // Slide 1
+      if (document.getElementById('hero_kicker_1')) document.getElementById('hero_kicker_1').value = s1.kicker || 'QUALITY. STYLE. EVERYDAY.';
+      if (document.getElementById('hero_headlinePrefix_1')) document.getElementById('hero_headlinePrefix_1').value = s1.headlinePrefix || 'Everything You Love,';
+      if (document.getElementById('hero_headlineHighlight_1')) document.getElementById('hero_headlineHighlight_1').value = s1.headlineHighlight || 'All in One Place.';
+      if (document.getElementById('hero_subtitle_1')) document.getElementById('hero_subtitle_1').value = s1.subtitle || '';
+      if (document.getElementById('hero_ctaText_1')) document.getElementById('hero_ctaText_1').value = s1.ctaText || 'Shop Now';
+      if (document.getElementById('hero_ctaLink_1')) document.getElementById('hero_ctaLink_1').value = s1.ctaLink || '/shop';
+      if (document.getElementById('hero_image_1')) document.getElementById('hero_image_1').value = s1.image || '';
+      updateHeroPreview(s1.image || '', 1);
+
+      // Slide 2
+      if (document.getElementById('hero_kicker_2')) document.getElementById('hero_kicker_2').value = s2.kicker || '';
+      if (document.getElementById('hero_headlinePrefix_2')) document.getElementById('hero_headlinePrefix_2').value = s2.headlinePrefix || '';
+      if (document.getElementById('hero_headlineHighlight_2')) document.getElementById('hero_headlineHighlight_2').value = s2.headlineHighlight || '';
+      if (document.getElementById('hero_subtitle_2')) document.getElementById('hero_subtitle_2').value = s2.subtitle || '';
+      if (document.getElementById('hero_ctaText_2')) document.getElementById('hero_ctaText_2').value = s2.ctaText || 'Shop Now';
+      if (document.getElementById('hero_ctaLink_2')) document.getElementById('hero_ctaLink_2').value = s2.ctaLink || '/shop';
+      if (document.getElementById('hero_image_2')) document.getElementById('hero_image_2').value = s2.image || '';
+      updateHeroPreview(s2.image || '', 2);
+
+      // Slide 3
+      if (document.getElementById('hero_kicker_3')) document.getElementById('hero_kicker_3').value = s3.kicker || '';
+      if (document.getElementById('hero_headlinePrefix_3')) document.getElementById('hero_headlinePrefix_3').value = s3.headlinePrefix || '';
+      if (document.getElementById('hero_headlineHighlight_3')) document.getElementById('hero_headlineHighlight_3').value = s3.headlineHighlight || '';
+      if (document.getElementById('hero_subtitle_3')) document.getElementById('hero_subtitle_3').value = s3.subtitle || '';
+      if (document.getElementById('hero_ctaText_3')) document.getElementById('hero_ctaText_3').value = s3.ctaText || 'Shop Now';
+      if (document.getElementById('hero_ctaLink_3')) document.getElementById('hero_ctaLink_3').value = s3.ctaLink || '/shop';
+      if (document.getElementById('hero_image_3')) document.getElementById('hero_image_3').value = s3.image || '';
+      updateHeroPreview(s3.image || '', 3);
+
+      // Auto rotation interval
+      if (document.getElementById('hero_autoInterval')) {
+        document.getElementById('hero_autoInterval').value = String(h.autoIntervalSeconds || 5);
+      }
+
+      // Legacy fallback bindings
+      if (document.getElementById('hero_kicker')) document.getElementById('hero_kicker').value = s1.kicker || '';
+      if (document.getElementById('hero_headlinePrefix')) document.getElementById('hero_headlinePrefix').value = s1.headlinePrefix || '';
+      if (document.getElementById('hero_headlineHighlight')) document.getElementById('hero_headlineHighlight').value = s1.headlineHighlight || '';
+      if (document.getElementById('hero_subtitle')) document.getElementById('hero_subtitle').value = s1.subtitle || '';
+      if (document.getElementById('hero_ctaText')) document.getElementById('hero_ctaText').value = s1.ctaText || 'Shop Now';
+      if (document.getElementById('hero_ctaLink')) document.getElementById('hero_ctaLink').value = s1.ctaLink || '/shop';
+      if (document.getElementById('hero_image')) document.getElementById('hero_image').value = s1.image || '';
 
       // Trust points
       const tp = h.trustPoints || [];
@@ -2762,16 +2973,20 @@ Ready to commit and deploy changes.</pre>
       document.getElementById('news_btn').value = n.buttonText || 'Subscribe';
     }
 
-    function updateHeroPreview(url) {
-      const img = document.getElementById('heroImagePreview');
+    function updateHeroPreview(url, slideNum = 1) {
+      const img = document.getElementById(`heroImagePreview_${slideNum}`);
       if (img) img.src = url || '/placeholder-image.png';
+      if (slideNum === 1) {
+        const legacyImg = document.getElementById('heroImagePreview');
+        if (legacyImg) legacyImg.src = url || '/placeholder-image.png';
+      }
     }
 
     function updateNewArrivalsPreview(url) {
       // preview helper
     }
 
-    async function handleHeroFileUpload(e) {
+    async function handleHeroFileUpload(e, slideNum = 1) {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -2784,9 +2999,14 @@ Ready to commit and deploy changes.</pre>
           });
           const result = await res.json();
           if (result.success && result.url) {
-            document.getElementById('hero_image').value = result.url;
-            updateHeroPreview(result.url);
-            showToast('Hero image uploaded!');
+            const input = document.getElementById(`hero_image_${slideNum}`);
+            if (input) input.value = result.url;
+            updateHeroPreview(result.url, slideNum);
+            if (slideNum === 1) {
+              const legacy = document.getElementById('hero_image');
+              if (legacy) legacy.value = result.url;
+            }
+            showToast(`Hero Slide ${slideNum} image uploaded!`);
           }
         } catch (err) {
           showToast('Image upload failed', true);
@@ -2819,20 +3039,50 @@ Ready to commit and deploy changes.</pre>
     }
 
     async function saveHomeContent() {
+      // Build up to 3 slides
+      const heroSlides = [];
+      for (let i = 1; i <= 3; i++) {
+        const img = (document.getElementById(`hero_image_${i}`)?.value || '').trim();
+        const kicker = (document.getElementById(`hero_kicker_${i}`)?.value || '').trim();
+        const prefix = (document.getElementById(`hero_headlinePrefix_${i}`)?.value || '').trim();
+        const highlight = (document.getElementById(`hero_headlineHighlight_${i}`)?.value || '').trim();
+        const sub = (document.getElementById(`hero_subtitle_${i}`)?.value || '').trim();
+        const ctaText = (document.getElementById(`hero_ctaText_${i}`)?.value || '').trim() || 'Shop Now';
+        const ctaLink = (document.getElementById(`hero_ctaLink_${i}`)?.value || '').trim() || '/shop';
+
+        if (i === 1 || img || prefix || highlight) {
+          heroSlides.push({
+            id: `slide-${i}`,
+            kicker: kicker || 'QUALITY. STYLE. EVERYDAY.',
+            headlinePrefix: prefix || (i === 1 ? 'Everything You Love,' : ''),
+            headlineHighlight: highlight || (i === 1 ? 'All in One Place.' : ''),
+            subtitle: sub,
+            ctaText: ctaText,
+            ctaLink: ctaLink,
+            image: img || (i === 1 ? '/products/1792091254271-luxury_essentials_still_life__1_.webp' : '')
+          });
+        }
+      }
+
+      const autoSec = parseInt(document.getElementById('hero_autoInterval')?.value || '5', 10) || 5;
+      const s1 = heroSlides[0] || {};
+
       const payload = {
         hero: {
-          kicker: document.getElementById('hero_kicker').value.trim(),
-          headlinePrefix: document.getElementById('hero_headlinePrefix').value.trim(),
-          headlineHighlight: document.getElementById('hero_headlineHighlight').value.trim(),
-          subtitle: document.getElementById('hero_subtitle').value.trim(),
-          ctaText: document.getElementById('hero_ctaText').value.trim() || 'Shop Now',
-          ctaLink: document.getElementById('hero_ctaLink').value.trim() || '/shop',
+          kicker: s1.kicker,
+          headlinePrefix: s1.headlinePrefix,
+          headlineHighlight: s1.headlineHighlight,
+          subtitle: s1.subtitle,
+          ctaText: s1.ctaText || 'Shop Now',
+          ctaLink: s1.ctaLink || '/shop',
+          image: s1.image,
+          autoIntervalSeconds: autoSec,
+          slides: heroSlides,
           trustPoints: [
             { text: document.getElementById('hero_trust1').value.trim() || 'Cash on Delivery', icon: 'ShieldCheck' },
             { text: document.getElementById('hero_trust2').value.trim() || 'Premium Quality', icon: 'Award' },
             { text: document.getElementById('hero_trust3').value.trim() || 'Nationwide Shipping', icon: 'Truck' }
-          ],
-          image: document.getElementById('hero_image').value.trim()
+          ]
         },
         trioBanners: {
           dealOfTheDay: {

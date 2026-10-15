@@ -162,7 +162,29 @@ function setupSheet() {
       ["jazzcashNumber", "03001234567", "Payments", now],
       ["bankName", "Meezan Bank", "Payments", now],
       ["bankTitle", "Calenvee Private Limited", "Payments", now],
-      ["bankIban", "PK12MEZN0001234567890123", "Payments", now]
+      ["bankIban", "PK12MEZN0001234567890123", "Payments", now],
+      ["heroRotationIntervalSeconds", 5, "Hero Section", now],
+      ["heroSlide1_image", "/products/1792091254271-luxury_essentials_still_life__1_.webp", "Hero Section", now],
+      ["heroSlide1_kicker", "QUALITY. STYLE. EVERYDAY.", "Hero Section", now],
+      ["heroSlide1_headlinePrefix", "Everything You Love,", "Hero Section", now],
+      ["heroSlide1_headlineHighlight", "All in One Place.", "Hero Section", now],
+      ["heroSlide1_subtitle", "Shop top-quality products across watches, jewelry, handbags, sunglasses, and fragrances with unbeatable prices and a seamless Cash on Delivery experience nationwide.", "Hero Section", now],
+      ["heroSlide1_ctaText", "Shop Now", "Hero Section", now],
+      ["heroSlide1_ctaLink", "/shop", "Hero Section", now],
+      ["heroSlide2_image", "/hero/calenvee_hero_gold.jpg", "Hero Section", now],
+      ["heroSlide2_kicker", "TIMEPIECES & CHRONOGRAPHS", "Hero Section", now],
+      ["heroSlide2_headlinePrefix", "Signature Watches,", "Hero Section", now],
+      ["heroSlide2_headlineHighlight", "Engineered For Prestige.", "Hero Section", now],
+      ["heroSlide2_subtitle", "Explore timeless automatic movements, royal gold accents, and sapphire-crystal durability crafted to make every second memorable.", "Hero Section", now],
+      ["heroSlide2_ctaText", "Explore Watches", "Hero Section", now],
+      ["heroSlide2_ctaLink", "/category/watches", "Hero Section", now],
+      ["heroSlide3_image", "/hero/hero_podium_collection.jpg", "Hero Section", now],
+      ["heroSlide3_kicker", "CURATED LUXURY DROP", "Hero Section", now],
+      ["heroSlide3_headlinePrefix", "Contemporary Accents,", "Hero Section", now],
+      ["heroSlide3_headlineHighlight", "Defined by Elegance.", "Hero Section", now],
+      ["heroSlide3_subtitle", "Elevate your daily presence with anti-tarnish waterproof jewelry, designer accessories, and artisan everyday essentials.", "Hero Section", now],
+      ["heroSlide3_ctaText", "View Collection", "Hero Section", now],
+      ["heroSlide3_ctaLink", "/category/jewelry", "Hero Section", now]
     ];
     settingsSheet.getRange(2, 1, defaultSettingsRows.length, defaultSettingsRows[0].length).setValues(defaultSettingsRows);
   }
@@ -1106,7 +1128,29 @@ function handleSyncSettings(payload) {
     ["bankName", (p.bank && p.bank.bankName) || "", "Payments", now],
     ["bankTitle", (p.bank && p.bank.accountTitle) || "", "Payments", now],
     ["bankNumber", (p.bank && p.bank.accountNumber) || "", "Payments", now],
-    ["bankIban", (p.bank && p.bank.iban) || "", "Payments", now]
+    ["bankIban", (p.bank && p.bank.iban) || "", "Payments", now],
+    ["heroRotationIntervalSeconds", (payload.hero && payload.hero.autoIntervalSeconds) || 5, "Hero Section", now],
+    ["heroSlide1_image", (payload.hero && payload.hero.slides && payload.hero.slides[0] && payload.hero.slides[0].image) || (payload.hero && payload.hero.image) || "/products/1792091254271-luxury_essentials_still_life__1_.webp", "Hero Section", now],
+    ["heroSlide1_kicker", (payload.hero && payload.hero.slides && payload.hero.slides[0] && payload.hero.slides[0].kicker) || "QUALITY. STYLE. EVERYDAY.", "Hero Section", now],
+    ["heroSlide1_headlinePrefix", (payload.hero && payload.hero.slides && payload.hero.slides[0] && payload.hero.slides[0].headlinePrefix) || "Everything You Love,", "Hero Section", now],
+    ["heroSlide1_headlineHighlight", (payload.hero && payload.hero.slides && payload.hero.slides[0] && payload.hero.slides[0].headlineHighlight) || "All in One Place.", "Hero Section", now],
+    ["heroSlide1_subtitle", (payload.hero && payload.hero.slides && payload.hero.slides[0] && payload.hero.slides[0].subtitle) || "", "Hero Section", now],
+    ["heroSlide1_ctaText", (payload.hero && payload.hero.slides && payload.hero.slides[0] && payload.hero.slides[0].ctaText) || "Shop Now", "Hero Section", now],
+    ["heroSlide1_ctaLink", (payload.hero && payload.hero.slides && payload.hero.slides[0] && payload.hero.slides[0].ctaLink) || "/shop", "Hero Section", now],
+    ["heroSlide2_image", (payload.hero && payload.hero.slides && payload.hero.slides[1] && payload.hero.slides[1].image) || "/hero/calenvee_hero_gold.jpg", "Hero Section", now],
+    ["heroSlide2_kicker", (payload.hero && payload.hero.slides && payload.hero.slides[1] && payload.hero.slides[1].kicker) || "TIMEPIECES & CHRONOGRAPHS", "Hero Section", now],
+    ["heroSlide2_headlinePrefix", (payload.hero && payload.hero.slides && payload.hero.slides[1] && payload.hero.slides[1].headlinePrefix) || "Signature Watches,", "Hero Section", now],
+    ["heroSlide2_headlineHighlight", (payload.hero && payload.hero.slides && payload.hero.slides[1] && payload.hero.slides[1].headlineHighlight) || "Engineered For Prestige.", "Hero Section", now],
+    ["heroSlide2_subtitle", (payload.hero && payload.hero.slides && payload.hero.slides[1] && payload.hero.slides[1].subtitle) || "", "Hero Section", now],
+    ["heroSlide2_ctaText", (payload.hero && payload.hero.slides && payload.hero.slides[1] && payload.hero.slides[1].ctaText) || "Explore Watches", "Hero Section", now],
+    ["heroSlide2_ctaLink", (payload.hero && payload.hero.slides && payload.hero.slides[1] && payload.hero.slides[1].ctaLink) || "/category/watches", "Hero Section", now],
+    ["heroSlide3_image", (payload.hero && payload.hero.slides && payload.hero.slides[2] && payload.hero.slides[2].image) || "/hero/hero_podium_collection.jpg", "Hero Section", now],
+    ["heroSlide3_kicker", (payload.hero && payload.hero.slides && payload.hero.slides[2] && payload.hero.slides[2].kicker) || "CURATED LUXURY DROP", "Hero Section", now],
+    ["heroSlide3_headlinePrefix", (payload.hero && payload.hero.slides && payload.hero.slides[2] && payload.hero.slides[2].headlinePrefix) || "Contemporary Accents,", "Hero Section", now],
+    ["heroSlide3_headlineHighlight", (payload.hero && payload.hero.slides && payload.hero.slides[2] && payload.hero.slides[2].headlineHighlight) || "Defined by Elegance.", "Hero Section", now],
+    ["heroSlide3_subtitle", (payload.hero && payload.hero.slides && payload.hero.slides[2] && payload.hero.slides[2].subtitle) || "", "Hero Section", now],
+    ["heroSlide3_ctaText", (payload.hero && payload.hero.slides && payload.hero.slides[2] && payload.hero.slides[2].ctaText) || "View Collection", "Hero Section", now],
+    ["heroSlide3_ctaLink", (payload.hero && payload.hero.slides && payload.hero.slides[2] && payload.hero.slides[2].ctaLink) || "/category/jewelry", "Hero Section", now]
   ];
 
   const lastRow = sheet.getLastRow();
