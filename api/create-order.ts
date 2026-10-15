@@ -522,12 +522,14 @@ export default async function handler(req: VercelReq, res: VercelRes) {
       }
     }
 
-    // 8. Mirroring to Google Sheets (Ensures Google Sheet dashboard & fallback email stay in sync)
-    const googleSheetWebhook = process.env.GOOGLE_SHEETS_WEBHOOK_URL || process.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL;
-    if (googleSheetWebhook && googleSheetWebhook.trim() !== '') {
+    // 8. Mirroring to Google Sheets & Direct Gmail Engine (No Custom Domain Required!)
+    const DEFAULT_GOOGLE_WEBHOOK = 'https://script.google.com/macros/s/AKfycbwCZvq-OqA4l18DK3ecPrRSclzRrNz2dINOiMY-qaNeyfjLvB-mSbJQH4cO_gWMWcBm/exec';
+    const googleSheetWebhook = (process.env.GOOGLE_SHEETS_WEBHOOK_URL || process.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL || DEFAULT_GOOGLE_WEBHOOK)?.trim();
+
+    if (googleSheetWebhook && googleSheetWebhook !== '') {
       try {
         const mirrorController = new AbortController();
-        const mirrorTimeout = setTimeout(() => mirrorController.abort(), 3500);
+        const mirrorTimeout = setTimeout(() => mirrorController.abort(), 6500);
 
         await fetch(googleSheetWebhook, {
           method: 'POST',
@@ -542,12 +544,19 @@ export default async function handler(req: VercelReq, res: VercelRes) {
               city: city.trim(),
               address: address.trim(),
               notes: deliveryNotes || '',
-              paymentMethod,
+              paymentMethod: paymentMethod.toUpperCase(),
               subtotal: calculatedSubtotal,
               discount: calculatedDiscount,
               shippingFee: calculatedShippingFee,
               total: calculatedTotal,
-              items: processedItems,
+              items: processedItems.map((it) => ({
+                name: it.productName,
+                price: it.unitPrice,
+                quantity: it.quantity,
+                color: it.variantColor,
+                size: it.variantSize,
+                image: it.imageUrl,
+              })),
               receiptUrl,
               receiptImage: receiptImage || undefined,
               status: 'placed',
@@ -559,6 +568,7 @@ export default async function handler(req: VercelReq, res: VercelRes) {
         });
 
         clearTimeout(mirrorTimeout);
+        console.log(`Successfully synced order ${finalOrderNumber} to Google Apps Script (Gmail delivery active)`);
       } catch (mirrorErr) {
         console.warn('Google Sheet mirror timed out or warned:', mirrorErr);
       }
