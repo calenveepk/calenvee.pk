@@ -48,6 +48,7 @@ function generateLuxuryInvoiceHtml(order: {
   }>;
   subtotal: number;
   discount: number;
+  promoCode?: string;
   shippingFee: number;
   total: number;
   createdAt: string;
@@ -184,7 +185,7 @@ function generateLuxuryInvoiceHtml(order: {
                   order.discount > 0
                     ? `
                 <tr>
-                  <td style="padding: 4px 0; color: #16A34A;">Discount Applied:</td>
+                  <td style="padding: 4px 0; color: #16A34A;">Discount Applied${order.promoCode ? ` (${order.promoCode})` : ''}:</td>
                   <td style="padding: 4px 0; text-align: right; font-weight: 600; color: #16A34A;">-Rs. ${order.discount.toLocaleString()}</td>
                 </tr>`
                     : ''
@@ -343,13 +344,19 @@ export default async function handler(req: VercelReq, res: VercelRes) {
 
     // 4. Promo Code Calculation
     let calculatedDiscount = 0;
+    let validatedPromoCode: string | null = null;
     if (promoCode && typeof promoCode === 'string') {
       const cleanCode = promoCode.trim().toUpperCase();
       const promoDef = promotionsData.promos?.[cleanCode];
       if (promoDef && calculatedSubtotal >= (promoDef.minOrderValue || 0)) {
         calculatedDiscount = Math.round(calculatedSubtotal * ((promoDef.discountPercentage || 0) / 100));
+        validatedPromoCode = cleanCode;
       }
     }
+
+    const orderNotesWithPromo = validatedPromoCode && calculatedDiscount > 0
+      ? [deliveryNotes ? deliveryNotes.trim() : '', `[Coupon: ${validatedPromoCode} (-Rs. ${calculatedDiscount.toLocaleString()})]`].filter(Boolean).join(' | ')
+      : (deliveryNotes ? deliveryNotes.trim() : '');
 
     // 5. Shipping Fee Calculation
     // Free Shipping threshold across Pakistan: Orders >= Rs. 5,999
@@ -407,7 +414,7 @@ export default async function handler(req: VercelReq, res: VercelRes) {
           phone: cleanPhone,
           city: city.trim(),
           address: address.trim(),
-          delivery_notes: deliveryNotes ? deliveryNotes.trim() : '',
+          delivery_notes: orderNotesWithPromo,
           payment_method: paymentMethod,
           subtotal: calculatedSubtotal,
           discount: calculatedDiscount,
@@ -467,7 +474,7 @@ export default async function handler(req: VercelReq, res: VercelRes) {
           phone: cleanPhone,
           city: city.trim(),
           address: address.trim(),
-          deliveryNotes,
+          deliveryNotes: orderNotesWithPromo,
           paymentMethod,
           items: processedItems.map((it) => ({
             name: it.productName,
@@ -480,6 +487,7 @@ export default async function handler(req: VercelReq, res: VercelRes) {
           })),
           subtotal: calculatedSubtotal,
           discount: calculatedDiscount,
+          promoCode: validatedPromoCode || (promoCode ? String(promoCode).toUpperCase() : undefined),
           shippingFee: calculatedShippingFee,
           total: calculatedTotal,
           createdAt: new Date().toISOString(),
@@ -490,10 +498,11 @@ export default async function handler(req: VercelReq, res: VercelRes) {
 
         // 1. Send Management Alert Email directly to store owner (always succeeds on Resend test domain)
         try {
+          const discountAlertTag = calculatedDiscount > 0 ? ` [Coupon: ${validatedPromoCode || promoCode} -Rs. ${calculatedDiscount.toLocaleString()}]` : '';
           await resend.emails.send({
             from: `Calenvee Orders <${senderEmail}>`,
             to: [storeAlertEmail],
-            subject: `🚨 NEW ORDER RECEIVED: ${finalOrderNumber} — Rs. ${calculatedTotal.toLocaleString()}`,
+            subject: `🚨 NEW ORDER RECEIVED: ${finalOrderNumber} — Rs. ${calculatedTotal.toLocaleString()}${discountAlertTag}`,
             html: invoiceHtml,
           });
           console.log(`Successfully sent management alert email for ${finalOrderNumber} to ${storeAlertEmail}`);
@@ -543,10 +552,11 @@ export default async function handler(req: VercelReq, res: VercelRes) {
               phone: cleanPhone,
               city: city.trim(),
               address: address.trim(),
-              notes: deliveryNotes || '',
+              notes: orderNotesWithPromo,
               paymentMethod: paymentMethod.toUpperCase(),
               subtotal: calculatedSubtotal,
               discount: calculatedDiscount,
+              promoCode: validatedPromoCode || (promoCode ? String(promoCode).toUpperCase() : ''),
               shippingFee: calculatedShippingFee,
               total: calculatedTotal,
               items: processedItems.map((it) => ({

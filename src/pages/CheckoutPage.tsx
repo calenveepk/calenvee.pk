@@ -14,6 +14,7 @@ import {
   Trash2,
   Mail,
   ArrowRight,
+  Tag,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useCart } from '../context/CartContext';
@@ -37,7 +38,29 @@ import {
 import { PAYMENT_ACCOUNTS } from '../data/paymentAccounts';
 
 export const CheckoutPage: React.FC = () => {
-  const { items, subtotal, discount, shippingFee, finalTotal, clearCart, removeItem } = useCart();
+  const {
+    items,
+    subtotal,
+    discount,
+    shippingFee,
+    finalTotal,
+    clearCart,
+    removeItem,
+    appliedPromo,
+    applyPromoCode,
+    removePromoCode,
+  } = useCart();
+
+  const [promoInput, setPromoInput] = useState('');
+  const [promoMessage, setPromoMessage] = useState<{ text: string; isError: boolean } | null>(null);
+
+  const handleApplyPromoOnCheckout = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!promoInput.trim()) return;
+    const res = applyPromoCode(promoInput);
+    setPromoMessage({ text: res.message, isError: !res.success });
+    if (res.success) setPromoInput('');
+  };
 
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
@@ -199,6 +222,7 @@ export const CheckoutPage: React.FC = () => {
       })),
       subtotal,
       discount,
+      promoCode: appliedPromo?.code || undefined,
       shippingFee,
       total: finalTotal,
       createdAt: new Date().toISOString(),
@@ -435,7 +459,7 @@ export const CheckoutPage: React.FC = () => {
                 </div>
                 {completedOrder.discount > 0 && (
                   <div className="flex justify-between text-emerald-600 font-medium">
-                    <span>Discount:</span>
+                    <span>Discount{completedOrder.promoCode ? ` (${completedOrder.promoCode})` : ''}:</span>
                     <span>-{formatPKR(completedOrder.discount)}</span>
                   </div>
                 )}
@@ -1002,6 +1026,50 @@ export const CheckoutPage: React.FC = () => {
                   </div>
                 )}
 
+                {/* Coupon Code Section */}
+                <div className="pt-3 border-t border-gray-100">
+                  {appliedPromo ? (
+                    <div className="flex items-center justify-between p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs">
+                      <div className="flex items-center space-x-1.5 text-emerald-800">
+                        <Tag className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                        <span>
+                          Coupon <strong className="font-mono font-bold text-emerald-900">{appliedPromo.code}</strong> applied ({appliedPromo.discountPercentage}% OFF)
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={removePromoCode}
+                        className="text-xs text-red-500 hover:text-red-700 font-semibold ml-2 hover:underline cursor-pointer"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleApplyPromoOnCheckout} className="space-y-1.5">
+                      <div className="flex space-x-2">
+                        <input
+                          type="text"
+                          placeholder="Coupon code (e.g. CALENVEE10)"
+                          value={promoInput}
+                          onChange={(e) => setPromoInput(e.target.value)}
+                          className="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-[#081320] bg-gray-50 uppercase tracking-wider font-mono placeholder:normal-case placeholder:font-sans"
+                        />
+                        <button
+                          type="submit"
+                          className="px-3.5 py-2 bg-gray-900 hover:bg-[#F97316] text-white text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                      {promoMessage && (
+                        <p className={`text-[11px] ${promoMessage.isError ? 'text-red-500' : 'text-emerald-600 font-medium'}`}>
+                          {promoMessage.text}
+                        </p>
+                      )}
+                    </form>
+                  )}
+                </div>
+
                 {/* Cost Breakdown */}
                 <div className="pt-3 border-t border-gray-100 space-y-2 text-xs text-gray-600">
                   <div className="flex justify-between">
@@ -1011,7 +1079,7 @@ export const CheckoutPage: React.FC = () => {
 
                   {discount > 0 && (
                     <div className="flex justify-between text-emerald-600">
-                      <span>Discount</span>
+                      <span>Discount {appliedPromo ? `(${appliedPromo.code})` : ''}</span>
                       <span className="font-semibold">-{formatPKR(discount)}</span>
                     </div>
                   )}

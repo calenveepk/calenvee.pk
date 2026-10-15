@@ -273,7 +273,7 @@ export const OrderInvoice: React.FC<OrderInvoiceProps> = ({
 
               {order.discount > 0 && (
                 <div className="flex justify-between text-emerald-600 px-1">
-                  <span className="font-medium">Discount Applied</span>
+                  <span className="font-medium">Discount Applied{order.promoCode ? ` (${order.promoCode})` : ''}</span>
                   <span className="font-bold">- {order.discount.toLocaleString()}</span>
                 </div>
               )}

@@ -917,6 +917,9 @@ function handleCreateOrder(payload) {
   const initialTracking = "-";
   const initialCourier = "-";
 
+  const promoTag = order.promoCode && order.discount ? `[Coupon: ${order.promoCode} (-Rs. ${Number(order.discount).toLocaleString()})]` : '';
+  const finalDeliveryNotes = [order.notes, promoTag].filter(Boolean).join(" | ");
+
   // Append with status "Placed" (Internal management team will verify and transition to "Confirmed")
   ordersSheet.appendRow([
     order.orderId,
@@ -932,7 +935,7 @@ function handleCreateOrder(payload) {
     initialCourier, // Unassigned on placement (-)
     initialTracking, // Unassigned on placement (-)
     itemsSummary,
-    order.notes || "",
+    finalDeliveryNotes,
     "No", // Confirmation Email Sent: No (will become Yes when status is set to Confirmed)
     "No", // Dispatch Email Sent: No
     receiptProofCell
@@ -1771,7 +1774,7 @@ function generateCustomerOrderEmailHtml(order, stage) {
               </tr>
               ${order.discount ? `
               <tr>
-                <td style="color: #059669; padding: 4px 0;">Discount Applied:</td>
+                <td style="color: #059669; padding: 4px 0;">Discount Applied${order.promoCode ? ` (${order.promoCode})` : ""}:</td>
                 <td style="text-align: right; font-weight: 600; color: #059669;">- Rs. ${Number(order.discount).toLocaleString()}</td>
               </tr>` : ""}
               <tr>
@@ -2134,7 +2137,8 @@ function generateCustomerOrderCancelledEmailHtml(order, reason) {
 function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
   const cfg = getDynamicStoreSettings();
   const paymentMethodUpper = (order.paymentMethod || "cod").toUpperCase();
-  const subject = `[NEW ORDER PLACED] #${order.orderId} - Rs. ${Number(order.total || 0).toLocaleString()} (${order.customerName}, ${order.city})`;
+  const discountAlertTag = order.discount ? ` [Coupon: ${order.promoCode || 'PROMO'} -Rs. ${Number(order.discount).toLocaleString()}]` : "";
+  const subject = `[NEW ORDER PLACED] #${order.orderId} - Rs. ${Number(order.total || 0).toLocaleString()}${discountAlertTag} (${order.customerName}, ${order.city})`;
 
   const resolvedReceiptUrl = receiptUrl || order.receiptUrl || "";
 
@@ -2149,7 +2153,7 @@ function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
     `City: ${order.city}`,
     `Address: ${order.address}`,
     `Payment Method: ${paymentMethodUpper}`,
-    `Total Payable: Rs. ${Number(order.total || 0).toLocaleString()}`,
+    `Total Payable: Rs. ${Number(order.total || 0).toLocaleString()}${order.discount ? ` (Includes Coupon Discount: -Rs. ${Number(order.discount).toLocaleString()})` : ''}`,
     `Delivery Notes: ${order.notes && order.notes !== 'N/A' && order.notes !== 'None' ? order.notes : 'None'}`
   ];
 
@@ -2211,6 +2215,10 @@ function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
                 <td style="text-align: right;">
                   <span style="font-size: 11px; color: #64748B; text-transform: uppercase;">Total Payable</span>
                   <div style="font-size: 22px; font-weight: 800; color: ${cfg.brandOrange};">Rs. ${Number(order.total || 0).toLocaleString()}</div>
+                  ${order.discount ? `
+                  <div style="font-size: 11px; font-weight: 700; color: #059669; margin-top: 3px;">
+                    Coupon Applied: ${order.promoCode || 'PROMO'} (-Rs. ${Number(order.discount).toLocaleString()})
+                  </div>` : ''}
                 </td>
               </tr>
             </table>
@@ -2225,6 +2233,13 @@ function sendOwnerNewOrderAlertEmail(order, receiptBlob, receiptUrl) {
                 <tr><td style="color: #64748B; font-weight: 700; padding: 2px 0;">City:</td><td style="font-weight: bold; color: #1E293B; padding: 2px 0;">${order.city}</td></tr>
                 <tr><td style="color: #64748B; font-weight: 700; padding: 2px 0;">Address:</td><td style="color: #1E293B; padding: 2px 0;">${order.address}</td></tr>
                 <tr><td style="color: #64748B; font-weight: 700; padding: 2px 0;">Payment:</td><td style="font-weight: bold; color: #0B132B; text-transform: uppercase; padding: 2px 0;">${paymentMethodUpper}</td></tr>
+                ${order.discount ? `
+                <tr>
+                  <td style="color: #64748B; font-weight: 700; padding: 2px 0;">Coupon Discount:</td>
+                  <td style="color: #059669; font-weight: bold; padding: 2px 0;">
+                    ${order.promoCode ? order.promoCode + ' ' : ''}(-Rs. ${Number(order.discount).toLocaleString()})
+                  </td>
+                </tr>` : ''}
                 ${resolvedReceiptUrl ? `
                 <tr>
                   <td style="color: #64748B; vertical-align: top; padding-top: 6px;">Payment Proof:</td>
