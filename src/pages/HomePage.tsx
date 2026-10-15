@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { SEO } from '../components/common/SEO';
 import { HeroSection } from '../components/home/HeroSection';
 import { TrendingCategories } from '../components/home/TrendingCategories';
-import { PromotionalTrioBanners } from '../components/home/PromotionalTrioBanners';
+import { FreshFindsBanner } from '../components/home/FreshFindsBanner';
 import { TrendingNowSection } from '../components/home/TrendingNowSection';
+import { MemberExclusiveBanner } from '../components/home/MemberExclusiveBanner';
 import { ValuePropsBar } from '../components/home/ValuePropsBar';
 import { RecommendedSection } from '../components/home/RecommendedSection';
+import { DiscountOfferBanner } from '../components/home/DiscountOfferBanner';
 import { CustomerReviewsMarquee } from '../components/home/CustomerReviewsMarquee';
 import { NewsletterBanner } from '../components/home/NewsletterBanner';
 import { QuickViewModal } from '../components/common/QuickViewModal';
@@ -28,22 +30,28 @@ export const HomePage: React.FC = () => {
       {/* 2. Shop By Category (Circular thumbnails, no Home & Living, no Baby Kids, no Grocery) */}
       <TrendingCategories />
 
-      {/* 3. 3-Card Banner Row (Deal of the Day with Top Selling Watch + Fresh Finds + Member Exclusive) */}
-      <PromotionalTrioBanners />
+      {/* 3. Fresh Finds / New Arrivals Showcase */}
+      <FreshFindsBanner />
 
       {/* 4. Trending Now (Top selling products last 1 week strictly from Calenvee categories) */}
       <TrendingNowSection onQuickView={setQuickViewProduct} />
 
-      {/* 5. 4-Column Value Propositions Bar (Free Shipping, Easy Returns, Secure Payments, 24/7 Support) */}
+      {/* 5. Member Exclusive Section (Moved below Trending Now) */}
+      <MemberExclusiveBanner />
+
+      {/* 6. 4-Column Value Propositions Bar (Free Shipping, Easy Returns, Secure Payments, 24/7 Support) */}
       <ValuePropsBar />
 
-      {/* 6. Recommended for You (Curated products strictly relating to Calenvee categories) */}
+      {/* 7. Recommended for You (Curated products strictly relating to Calenvee categories) */}
       <RecommendedSection onQuickView={setQuickViewProduct} />
 
-      {/* 7. Customer Reviews Social Proof Marquee */}
+      {/* 8. Discount Offer Section (Moved below Recommended for You) */}
+      <DiscountOfferBanner />
+
+      {/* 9. Customer Reviews Social Proof Marquee */}
       <CustomerReviewsMarquee />
 
-      {/* 8. Stay in the Loop — Newsletter Email Signup Banner */}
+      {/* 10. Stay in the Loop — Newsletter Email Signup Banner */}
       <NewsletterBanner />
 
       {/* Quick View Modal */}
