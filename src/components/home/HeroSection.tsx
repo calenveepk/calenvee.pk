@@ -65,13 +65,13 @@ export const HeroSection: React.FC = () => {
     >
       
       {/* 1. Full-Bleed Integrated Product Visuals (Right-Anchored with Low-Intensity Soft Blend) */}
-      <div className="absolute top-0 right-0 bottom-0 w-[50%] sm:w-[52%] lg:w-[55%] h-full overflow-hidden pointer-events-none z-0">
+      <div className="absolute top-0 right-0 bottom-0 w-[52%] sm:w-[54%] lg:w-[55%] h-full overflow-hidden pointer-events-none z-0">
         {slides.map((slide, idx) => (
           <img
             key={slide.id || idx}
             src={slide.image}
             alt={slide.headlineHighlight || `Calenvee Slide ${idx + 1}`}
-            className={`absolute inset-0 w-full h-full object-cover object-[60%_center] sm:object-center transition-all duration-700 ease-in-out ${
+            className={`absolute inset-0 w-full h-full object-cover object-[68%_center] sm:object-center transition-all duration-700 ease-in-out ${
               idx === currentIndex
                 ? 'opacity-100 scale-100'
                 : 'opacity-0 scale-105 pointer-events-none'
@@ -81,16 +81,16 @@ export const HeroSection: React.FC = () => {
         ))}
 
         {/* Low-Intensity Seamless Blend Gradient (softly dissolves the left edge into the canvas without fog) */}
-        <div className="absolute inset-y-0 left-0 w-10 sm:w-20 lg:w-28 bg-gradient-to-r from-[#FAF7F2] via-[#FAF7F2]/30 to-transparent pointer-events-none" />
+        <div className="absolute inset-y-0 left-0 w-14 sm:w-22 lg:w-32 bg-gradient-to-r from-[#FAF7F2] via-[#FAF7F2]/30 to-transparent pointer-events-none" />
 
         {/* Low-Intensity Top & Bottom Vignette */}
         <div className="absolute inset-x-0 top-0 h-4 sm:h-8 bg-gradient-to-b from-[#FAF7F2]/20 to-transparent pointer-events-none" />
         <div className="absolute inset-x-0 bottom-0 h-4 sm:h-8 bg-gradient-to-t from-[#FAF7F2]/20 to-transparent pointer-events-none" />
       </div>
 
-      {/* 2. Content Container (Slightly reduced height for sleek panoramic viewport presence) */}
-      <div className="relative z-10 max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-3.5 sm:py-6 lg:py-8 min-h-[260px] sm:min-h-[340px] lg:min-h-[400px] flex items-center">
-        <div className="w-[66%] sm:w-[56%] lg:max-w-xl space-y-2 sm:space-y-3.5 text-left">
+      {/* 2. Content Container (Expanded mobile width for comfortable typography and CTA) */}
+      <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3.5 sm:py-6 lg:py-8 min-h-[260px] sm:min-h-[340px] lg:min-h-[400px] flex items-center">
+        <div className="w-[82%] sm:w-[62%] lg:max-w-xl space-y-2 sm:space-y-3.5 text-left">
           
           {/* Dynamic Slide Content (Animated Keyed Transition) */}
           <div key={currentIndex} className="space-y-1.5 sm:space-y-2 transition-all duration-300">
@@ -108,7 +108,7 @@ export const HeroSection: React.FC = () => {
               <span className="text-[#F97316]">{activeSlide.headlineHighlight}</span>
             </h1>
             <p
-              className="text-[11px] sm:text-xs lg:text-sm text-gray-600 font-normal leading-relaxed line-clamp-2 sm:line-clamp-none max-w-sm sm:max-w-md"
+              className="text-[11px] sm:text-xs lg:text-sm text-gray-600 font-normal leading-relaxed line-clamp-2 sm:line-clamp-none max-w-xs sm:max-w-md"
               style={{ textShadow: '0 1px 2px rgba(255, 255, 255, 0.6)' }}
             >
               {activeSlide.subtitle}
