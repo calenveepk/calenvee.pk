@@ -485,56 +485,83 @@ export default async function handler(req: VercelReq, res: VercelRes) {
           createdAt: new Date().toISOString(),
         });
 
-        const storeAlertEmail = process.env.STORE_ALERT_EMAIL || 'orders@calenvee.pk';
-        const senderEmail = process.env.RESEND_FROM_EMAIL || 'orders@calenvee.pk';
+        const storeAlertEmail = process.env.STORE_ALERT_EMAIL || 'calenvee.pk@gmail.com';
+        const senderEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 
-        await resend.emails.send({
-          from: `Calenvee Orders <${senderEmail}>`,
-          to: [email.trim()],
-          bcc: [storeAlertEmail],
-          subject: `Order Confirmed: ${finalOrderNumber} — Calenvee.pk`,
-          html: invoiceHtml,
-        });
+        // 1. Send Management Alert Email directly to store owner (always succeeds on Resend test domain)
+        try {
+          await resend.emails.send({
+            from: `Calenvee Orders <${senderEmail}>`,
+            to: [storeAlertEmail],
+            subject: `🚨 NEW ORDER RECEIVED: ${finalOrderNumber} — Rs. ${calculatedTotal.toLocaleString()}`,
+            html: invoiceHtml,
+          });
+          console.log(`Successfully sent management alert email for ${finalOrderNumber} to ${storeAlertEmail}`);
+        } catch (adminEmailErr) {
+          console.warn('Management alert email dispatch warning:', adminEmailErr);
+        }
 
-        // Mark confirmation email sent in DB if connected
-        if (supabaseUrl && supabaseServiceKey && orderRowId) {
-          const supabase = createClient(supabaseUrl, supabaseServiceKey, { auth: { persistSession: false } });
-          await supabase.from('orders').update({ confirmation_email_sent: true }).eq('id', orderRowId);
+        // 2. Send Customer Confirmation Email
+        try {
+          const custResult = await resend.emails.send({
+            from: `Calenvee Orders <${senderEmail}>`,
+            to: [email.trim()],
+            subject: `Order Confirmed: ${finalOrderNumber} — Calenvee.pk`,
+            html: invoiceHtml,
+          });
+
+          if (!custResult.error && supabaseUrl && supabaseServiceKey && orderRowId) {
+            const supabase = createClient(supabaseUrl, supabaseServiceKey, { auth: { persistSession: false } });
+            await supabase.from('orders').update({ confirmation_email_sent: true }).eq('id', orderRowId);
+          }
+        } catch (customerEmailErr: any) {
+          console.warn('Customer confirmation email notice (Domain verification needed on resend.com/domains):', customerEmailErr?.message || customerEmailErr);
         }
       } catch (emailErr) {
         console.warn('Resend email dispatch error:', emailErr);
       }
     }
 
-    // 8. Asynchronous Mirroring to Google Sheets (Zero Disruption)
+    // 8. Mirroring to Google Sheets (Ensures Google Sheet dashboard & fallback email stay in sync)
     const googleSheetWebhook = process.env.GOOGLE_SHEETS_WEBHOOK_URL || process.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL;
     if (googleSheetWebhook && googleSheetWebhook.trim() !== '') {
-      fetch(googleSheetWebhook, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({
-          action: 'create_order',
-          order: {
-            orderId: finalOrderNumber,
-            customerName,
-            email,
-            phone: cleanPhone,
-            city,
-            address,
-            notes: deliveryNotes,
-            paymentMethod,
-            subtotal: calculatedSubtotal,
-            discount: calculatedDiscount,
-            shippingFee: calculatedShippingFee,
-            total: calculatedTotal,
-            items: processedItems,
-            receiptUrl,
-            status: 'placed',
-            createdAt: new Date().toISOString(),
-          },
-          timestamp: new Date().toISOString(),
-        }),
-      }).catch((err) => console.warn('Background Google Sheet mirror error:', err));
+      try {
+        const mirrorController = new AbortController();
+        const mirrorTimeout = setTimeout(() => mirrorController.abort(), 3500);
+
+        await fetch(googleSheetWebhook, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'create_order',
+            order: {
+              orderId: finalOrderNumber,
+              customerName: customerName.trim(),
+              email: email.trim(),
+              phone: cleanPhone,
+              city: city.trim(),
+              address: address.trim(),
+              notes: deliveryNotes || '',
+              paymentMethod,
+              subtotal: calculatedSubtotal,
+              discount: calculatedDiscount,
+              shippingFee: calculatedShippingFee,
+              total: calculatedTotal,
+              items: processedItems,
+              receiptUrl,
+              receiptImage: receiptImage || undefined,
+              status: 'placed',
+              createdAt: new Date().toISOString(),
+            },
+            timestamp: new Date().toISOString(),
+          }),
+          signal: mirrorController.signal,
+        });
+
+        clearTimeout(mirrorTimeout);
+      } catch (mirrorErr) {
+        console.warn('Google Sheet mirror timed out or warned:', mirrorErr);
+      }
     }
 
     // 9. Return Secure JSON Response
