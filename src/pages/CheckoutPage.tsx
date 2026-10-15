@@ -54,6 +54,7 @@ export const CheckoutPage: React.FC = () => {
   const [completedOrder, setCompletedOrder] = useState<OrderDetails | null>(null);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [botHoneypot, setBotHoneypot] = useState('');
+  const [formError, setFormError] = useState<string | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   const handleReceiptUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,7 +129,7 @@ export const CheckoutPage: React.FC = () => {
     e.preventDefault();
 
     if (items.length === 0) {
-      alert('Your cart is empty. Please add items before placing an order.');
+      setFormError('Your cart is empty. Please add items before placing an order.');
       return;
     }
 
@@ -138,22 +139,37 @@ export const CheckoutPage: React.FC = () => {
       return;
     }
 
-    if (!fullName.trim() || !phone.trim() || !address.trim()) {
-      alert('Please fill in your name, mobile number, and complete delivery address.');
+    if (!fullName.trim()) {
+      setFormError('Please enter your full name.');
+      return;
+    }
+
+    if (!address.trim()) {
+      setFormError('Please provide your complete delivery street address.');
+      return;
+    }
+
+    // Pakistani Mobile Number Regex: 03XXXXXXXXX or +923XXXXXXXXX
+    const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+    const pakPhoneRegex = /^((\+92)|(0092)|(92)|(0))?3[0-9]{9}$/;
+    if (!pakPhoneRegex.test(cleanPhone)) {
+      setFormError('Please enter a valid Pakistani mobile number (e.g. 0300-1234567 or +923001234567).');
       return;
     }
 
     if (city === 'Other City' && !customCity.trim()) {
-      alert('Please enter your city name in the input box.');
+      setFormError('Please enter your city name in the input box.');
       return;
     }
 
-    if (!email.trim() || !email.includes('@')) {
-      alert('Please provide a valid Gmail / Email address so we can deliver your official invoice.');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email.trim() || !emailRegex.test(email.trim())) {
+      setFormError('Please provide a valid Gmail / Email address so we can deliver your official invoice and tracking link.');
       return;
     }
 
-    // Open confirmation modal to ask customer before final placement
+    // Clear any previous error and open confirmation modal
+    setFormError(null);
     setIsConfirmModalOpen(true);
   };
 
@@ -196,6 +212,9 @@ export const CheckoutPage: React.FC = () => {
       const result = await submitOrderToBackend(newOrder);
       if (result && result.orderId) {
         newOrder.orderId = result.orderId;
+      }
+      if (result && result.calculatedTotal !== undefined) {
+        newOrder.total = result.calculatedTotal;
       }
     } catch (err) {
       console.warn('Backend sync error:', err);
@@ -483,6 +502,25 @@ export const CheckoutPage: React.FC = () => {
                 </div>
 
                 <form id="checkout-form" onSubmit={handlePlaceOrder} className="space-y-3.5">
+                  {/* Validation Error Alert Banner */}
+                  {formError && (
+                    <div className="bg-red-50 border border-red-200 text-red-800 rounded-xl p-3.5 flex items-start space-x-3 mb-2 animate-fadeIn">
+                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1 text-xs">
+                        <strong className="block font-bold">Please check your details:</strong>
+                        <p className="mt-0.5">{formError}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setFormError(null)}
+                        className="text-red-400 hover:text-red-700 font-bold text-sm px-1"
+                        aria-label="Dismiss error"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+
                   {/* Invisible Honeypot field for bot protection */}
                   <input
                     type="text"
@@ -504,7 +542,10 @@ export const CheckoutPage: React.FC = () => {
                         type="text"
                         required
                         value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
+                        onChange={(e) => {
+                          setFullName(e.target.value);
+                          if (formError) setFormError(null);
+                        }}
                         placeholder="e.g. Daniyal Aslam"
                         className="w-full bg-white border border-gray-300 rounded-lg px-3.5 py-2.5 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#F97316]"
                       />
@@ -518,7 +559,10 @@ export const CheckoutPage: React.FC = () => {
                         type="tel"
                         required
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
+                        onChange={(e) => {
+                          setPhone(e.target.value);
+                          if (formError) setFormError(null);
+                        }}
                         placeholder="0300-1234567"
                         className="w-full bg-white border border-gray-300 rounded-lg px-3.5 py-2.5 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#F97316]"
                       />
@@ -528,13 +572,18 @@ export const CheckoutPage: React.FC = () => {
                   {/* Email & City */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Email Address (Optional)
+                      <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center justify-between">
+                        <span>Email Address *</span>
+                        <span className="font-normal text-gray-500 text-[10px]">For Official Invoice &amp; Tracking</span>
                       </label>
                       <input
                         type="email"
+                        required
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          if (formError) setFormError(null);
+                        }}
                         placeholder="e.g. daniyal@gmail.com"
                         className="w-full bg-white border border-gray-300 rounded-lg px-3.5 py-2.5 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#F97316]"
                       />

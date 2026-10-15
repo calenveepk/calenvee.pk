@@ -3,14 +3,16 @@ import { OrderDetails } from '../types';
 export interface OrderSubmissionResult {
   success: boolean;
   orderId: string;
-  source: 'google_sheets' | 'local_fallback';
+  source: 'supabase' | 'google_sheets' | 'local_fallback';
   message: string;
+  calculatedTotal?: number;
 }
 
 /**
- * Calenvee Order Dispatch Service
- * Sends order data to the Google Apps Script webhook (Google Sheets + Gmail)
- * with robust offline/network fallback.
+ * Calenvee Multi-Tier Order Dispatch Service
+ * Primary: Vercel Serverless + Supabase PostgreSQL + Resend Email API (/api/create-order)
+ * Secondary: Google Apps Script Webhook (Google Sheets fallback mirroring)
+ * Tertiary: Local storage offline recovery
  */
 const DEFAULT_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwCZvq-OqA4l18DK3ecPrRSclzRrNz2dINOiMY-qaNeyfjLvB-mSbJQH4cO_gWMWcBm/exec';
 
@@ -28,21 +30,79 @@ export async function submitOrderToBackend(order: OrderDetails): Promise<OrderSu
     };
   }
 
-  // Always cache locally in localStorage first for resilience
+  // Tier 1: Try Primary Secure Serverless Endpoint (/api/create-order)
   try {
-    const savedOrders = JSON.parse(localStorage.getItem('calenvee_orders') || '[]');
-    localStorage.setItem('calenvee_orders', JSON.stringify([order, ...savedOrders]));
-  } catch (err) {
-    console.warn('Could not cache order to localStorage:', err);
+    const serverlessController = new AbortController();
+    const serverlessTimeout = setTimeout(() => serverlessController.abort(), 10000);
+
+    const payload = {
+      customerName: order.customerName,
+      email: order.email,
+      phone: order.phone,
+      city: order.city,
+      address: order.address,
+      deliveryNotes: order.notes,
+      paymentMethod: order.paymentMethod,
+      promoCode: order.promoCode,
+      items: order.items.map((it) => ({
+        productId: it.product?.id || it.id,
+        quantity: it.quantity,
+        variantColor: it.selectedColor?.name || (it as any).color || 'Standard',
+        variantSize: it.selectedSize?.name || (it as any).size || 'Standard',
+      })),
+      receiptImage: order.receiptImage,
+      receiptFileName: order.receiptFileName,
+      receiptFileSize: order.receiptFileSize,
+    };
+
+    const apiResponse = await fetch('/api/create-order', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+      signal: serverlessController.signal,
+    });
+
+    clearTimeout(serverlessTimeout);
+
+    if (apiResponse.ok) {
+      const data = await apiResponse.json();
+      if (data && data.success) {
+        const serverOrderId = data.orderId || order.orderId;
+        order.orderId = serverOrderId;
+        if (data.total !== undefined) {
+          order.total = data.total;
+        }
+
+        // Cache confirmed order locally
+        try {
+          const savedOrders = JSON.parse(localStorage.getItem('calenvee_orders') || '[]');
+          localStorage.setItem('calenvee_orders', JSON.stringify([order, ...savedOrders]));
+        } catch (storageErr) {
+          console.warn('Local caching warning:', storageErr);
+        }
+
+        return {
+          success: true,
+          orderId: serverOrderId,
+          source: 'supabase',
+          message: data.message || 'Order confirmed and recorded in secure database.',
+          calculatedTotal: data.total,
+        };
+      }
+    }
+  } catch (apiError) {
+    // /api/create-order may not be available when running Vite standalone without Vercel CLI
+    console.info('Serverless API /api/create-order unreachable or local dev mode, falling back to secondary tier:', apiError);
   }
 
-  // If webhook URL is configured, POST to Google Apps Script Webhook
+  // Tier 2: Google Apps Script Webhook Fallback
   if (webhookUrl && webhookUrl.trim() !== '') {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 12000);
 
     try {
-      // Google Apps Script requires text/plain or no-cors mode to avoid CORS preflight blocks
       const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
@@ -60,6 +120,14 @@ export async function submitOrderToBackend(order: OrderDetails): Promise<OrderSu
 
       if (response.ok) {
         const data = await response.json();
+        // Cache order locally
+        try {
+          const savedOrders = JSON.parse(localStorage.getItem('calenvee_orders') || '[]');
+          localStorage.setItem('calenvee_orders', JSON.stringify([order, ...savedOrders]));
+        } catch (storageErr) {
+          console.warn('Local caching warning:', storageErr);
+        }
+
         return {
           success: true,
           orderId: data.orderId || order.orderId,
@@ -69,16 +137,22 @@ export async function submitOrderToBackend(order: OrderDetails): Promise<OrderSu
       }
     } catch (networkError) {
       clearTimeout(timeoutId);
-      console.warn('Backend webhook submission took too long or failed, order preserved locally:', networkError);
+      console.warn('Google Sheets webhook timed out or failed, saving locally:', networkError);
     }
   }
 
-  // Fallback mode (when webhook URL is not configured yet or network is interrupted)
+  // Tier 3: Local Offline Fallback Mode
+  try {
+    const savedOrders = JSON.parse(localStorage.getItem('calenvee_orders') || '[]');
+    localStorage.setItem('calenvee_orders', JSON.stringify([order, ...savedOrders]));
+  } catch (err) {
+    console.warn('Could not cache order to localStorage:', err);
+  }
+
   return {
     success: true,
     orderId: order.orderId,
     source: 'local_fallback',
-    message: 'Order saved locally. Ready for Google Sheets webhook sync.',
+    message: 'Order saved locally. Ready for automated cloud sync.',
   };
 }
-
