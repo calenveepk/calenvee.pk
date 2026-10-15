@@ -20,80 +20,81 @@ export const HeroSection: React.FC = () => {
   };
 
   return (
-    <section className="w-full bg-[#FAF7F2] border-b border-gray-100 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-center">
+    <section className="relative w-full bg-[#FAF7F2] border-b border-gray-100 overflow-hidden">
+      
+      {/* 1. Full-Bleed Integrated Product Visual (Anchored to Right Edge of Screen) */}
+      <div className="absolute top-0 right-0 bottom-0 w-[48%] sm:w-[50%] lg:w-[55%] h-full overflow-hidden pointer-events-none z-0">
+        <img
+          src={hero.image || '/hero/hero_podium_collection.jpg'}
+          alt="Calenvee Luxury Lifestyle Collection"
+          className="w-full h-full object-cover object-[55%_center] sm:object-center transform transition-transform duration-700 hover:scale-102"
+          loading="eager"
+        />
+        
+        {/* Seamless Soft Blend Gradient (fades left edge of image into background) */}
+        <div className="absolute inset-y-0 left-0 w-12 sm:w-28 lg:w-40 bg-gradient-to-r from-[#FAF7F2] via-[#FAF7F2]/60 to-transparent pointer-events-none" />
+        
+        {/* Soft top & bottom edge blending */}
+        <div className="absolute inset-x-0 top-0 h-8 sm:h-12 bg-gradient-to-b from-[#FAF7F2]/40 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-8 sm:h-12 bg-gradient-to-t from-[#FAF7F2]/50 to-transparent pointer-events-none" />
+      </div>
+
+      {/* 2. Content Container (Left Aligned text with right image breathing room) */}
+      <div className="relative z-10 max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-8 sm:py-14 lg:py-20 min-h-[360px] sm:min-h-[440px] lg:min-h-[520px] flex items-center">
+        <div className="w-[56%] sm:w-[52%] lg:max-w-xl space-y-2.5 sm:space-y-6 text-left">
           
-          {/* Left Content Column (7 cols) */}
-          <div className="lg:col-span-6 space-y-3.5 sm:space-y-6 text-left">
-            
-            {/* Kicker Pill matching reference */}
-            <div className="inline-flex items-center space-x-1 text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-[#F97316]">
-              <span>{hero.kicker}</span>
-            </div>
-
-            {/* Main Headline matching reference */}
-            <div className="space-y-2">
-              <h1 className="text-2xl sm:text-5xl lg:text-6xl font-black text-[#0B132B] tracking-tight leading-[1.15]">
-                {hero.headlinePrefix}<br />
-                <span className="text-[#F97316]">{hero.headlineHighlight}</span>
-              </h1>
-              <p className="text-xs sm:text-sm md:text-base text-gray-600 font-normal leading-relaxed max-w-lg">
-                {hero.subtitle}
-              </p>
-            </div>
-
-            {/* Shop Now CTA Button — Full width on mobile for instant thumb action */}
-            <div className="pt-1 sm:pt-2">
-              <Link
-                to={hero.ctaLink || '/shop'}
-                className="w-full sm:w-auto inline-flex items-center justify-center space-x-2.5 px-7 py-3.5 sm:px-8 sm:py-4 bg-[#081320] hover:bg-[#F97316] text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider rounded-xl shadow-lg hover:shadow-orange-500/20 transition-all duration-200 active:scale-95 group"
-              >
-                <span>{hero.ctaText || 'Shop Now'}</span>
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </div>
-
-            {/* 3 Trust Points matching reference */}
-            <div className="pt-3.5 sm:pt-6 border-t border-gray-200/60 flex items-center justify-between sm:justify-start gap-2 sm:gap-6 flex-wrap text-gray-700">
-              <div className="flex items-center space-x-1.5 text-[11px] sm:text-xs font-bold text-gray-800">
-                <ShieldCheck className="w-4 h-4 text-[#F97316] shrink-0" />
-                <span>{hero.trustPoints?.[0]?.text || 'Cash on Delivery'}</span>
-              </div>
-              <div className="flex items-center space-x-1.5 text-[11px] sm:text-xs font-bold text-gray-800">
-                <Award className="w-4 h-4 text-[#F97316] shrink-0" />
-                <span>{hero.trustPoints?.[1]?.text || 'Premium Quality'}</span>
-              </div>
-              <div className="flex items-center space-x-1.5 text-[11px] sm:text-xs font-bold text-gray-800">
-                <Truck className="w-4 h-4 text-[#F97316] shrink-0" />
-                <span>{hero.trustPoints?.[2]?.text || 'Nationwide Shipping'}</span>
-              </div>
-            </div>
-
+          {/* Kicker Pill */}
+          <div className="inline-flex items-center space-x-1.5 text-[10px] sm:text-xs font-black uppercase tracking-widest text-[#F97316]">
+            <span>{hero.kicker}</span>
           </div>
 
-          {/* Right Hero Visual Column (5 cols) matching lifestyle composition */}
-          <div className="lg:col-span-6 relative flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-lg sm:max-w-xl rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border border-stone-200/70 bg-white">
-              <img
-                src={hero.image || '/hero/hero_podium_collection.jpg'}
-                alt="Calenvee Luxury Lifestyle Collection"
-                className="w-full h-full object-cover object-center aspect-[4/3] sm:aspect-[16/11]"
-              />
-              
-              {/* Subtle floating badge */}
-              <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-xl shadow-md border border-gray-100 flex items-center space-x-2.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <div>
-                  <span className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 leading-none">Curated Drop</span>
-                  <span className="text-xs font-extrabold text-gray-900 leading-tight">100% Original Products</span>
-                </div>
-              </div>
+          {/* Main Headline */}
+          <div className="space-y-1 sm:space-y-2">
+            <h1 className="text-xl sm:text-4xl lg:text-5xl font-black text-[#0B132B] tracking-tight leading-[1.14]">
+              {hero.headlinePrefix}<br />
+              <span className="text-[#F97316]">{hero.headlineHighlight}</span>
+            </h1>
+            <p className="text-[11px] sm:text-xs lg:text-sm text-gray-600 font-normal leading-relaxed line-clamp-2 sm:line-clamp-none max-w-md">
+              {hero.subtitle}
+            </p>
+          </div>
+
+          {/* Shop Now CTA Button */}
+          <div className="pt-0.5 sm:pt-2">
+            <Link
+              to={hero.ctaLink || '/shop'}
+              className="inline-flex items-center justify-center space-x-2 px-4 py-2.5 sm:px-7 sm:py-3.5 bg-[#081320] hover:bg-[#F97316] text-white font-extrabold text-[11px] sm:text-xs uppercase tracking-wider rounded-xl shadow-lg hover:shadow-orange-500/20 transition-all duration-200 active:scale-95 group"
+            >
+              <span>{hero.ctaText || 'Shop Now'}</span>
+              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+
+          {/* Trust Badges */}
+          <div className="pt-2 sm:pt-4 border-t border-gray-200/60 flex items-center gap-2 sm:gap-5 flex-wrap text-gray-700">
+            <div className="flex items-center space-x-1 sm:space-x-1.5 text-[10px] sm:text-xs font-bold text-gray-800">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#F97316] shrink-0" />
+              <span>{hero.trustPoints?.[0]?.text || 'Cash on Delivery'}</span>
+            </div>
+            <div className="flex items-center space-x-1 sm:space-x-1.5 text-[10px] sm:text-xs font-bold text-gray-800">
+              <Award className="w-3.5 h-3.5 text-[#F97316] shrink-0" />
+              <span>{hero.trustPoints?.[1]?.text || 'Premium Quality'}</span>
+            </div>
+            <div className="hidden sm:flex items-center space-x-1 sm:space-x-1.5 text-[10px] sm:text-xs font-bold text-gray-800">
+              <Truck className="w-3.5 h-3.5 text-[#F97316] shrink-0" />
+              <span>{hero.trustPoints?.[2]?.text || 'Nationwide Shipping'}</span>
             </div>
           </div>
 
         </div>
       </div>
+
+      {/* 3. Subtle floating quality assurance tag on large screens */}
+      <div className="hidden lg:flex absolute bottom-5 right-8 z-10 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-gray-200/80 shadow-md items-center space-x-2 pointer-events-none">
+        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        <span className="text-[11px] font-extrabold text-gray-900">Curated Drop &bull; 100% Original</span>
+      </div>
+
     </section>
   );
 };
