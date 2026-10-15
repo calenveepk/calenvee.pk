@@ -6,7 +6,7 @@
     "subtitle": "Shop top-quality products across watches, jewelry, handbags, sunglasses, and fragrances with unbeatable prices and a seamless Cash on Delivery experience nationwide.",
     "ctaText": "Shop Now",
     "ctaLink": "/shop",
-    "image": "C:\\Users\\Alsaba\\Documents\\Calenvee\\public\\hero\\Luxury Accessories Still Life with Backpack.png",
+    "image": "/products/1792094717023-luxury_accessories_still_life_with_backpack.png",
     "autoIntervalSeconds": 5,
     "slides": [
       {
@@ -17,7 +17,7 @@
         "subtitle": "Shop top-quality products across watches, jewelry, handbags, sunglasses, and fragrances with unbeatable prices and a seamless Cash on Delivery experience nationwide.",
         "ctaText": "Shop Now",
         "ctaLink": "/shop",
-        "image": "C:\\Users\\Alsaba\\Documents\\Calenvee\\public\\hero\\Luxury Accessories Still Life with Backpack.png"
+        "image": "/products/1792094717023-luxury_accessories_still_life_with_backpack.png"
       },
       {
         "id": "slide-2",
@@ -72,10 +72,10 @@
       "image": "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=400&q=80"
     },
     "memberExclusive": {
-      "badge": "Member Exclusive",
+      "badge": "Limited Time Offer",
       "title": "Extra 10% Off",
       "couponCode": "CALENVEE10",
-      "subtitle": "On prepaid orders this weekend",
+      "subtitle": "On prepaid orders from 1st Nov - 30 Nov 2026",
       "link": "/shop",
       "ctaText": "Shop Now"
     }
