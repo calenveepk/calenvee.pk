@@ -67,7 +67,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ settings }) => {
 
   return (
     <section
-      className="relative w-full bg-[#FAF7F2] border-b border-gray-100/80 shadow-xs overflow-hidden select-none"
+      className="relative w-full bg-white border-b border-gray-100/80 shadow-xs overflow-hidden select-none"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={() => setIsPaused(true)}
@@ -76,10 +76,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ settings }) => {
       
       {/* 1. Full-Bleed Integrated Product Visuals (Seamless edge feathering into background canvas - NO harsh box line or dividing shadow) */}
       <div
-        className="absolute top-0 right-0 bottom-0 w-[50%] sm:w-[50%] lg:w-[52%] h-full overflow-hidden pointer-events-none z-0"
+        className="absolute top-0 right-0 bottom-0 w-[52%] sm:w-[52%] lg:w-[55%] h-full overflow-hidden pointer-events-none z-0"
         style={{
-          WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.15) 6%, rgba(0,0,0,0.7) 18%, black 30%)',
-          maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.15) 6%, rgba(0,0,0,0.7) 18%, black 30%)'
+          WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.08) 6%, rgba(0,0,0,0.6) 18%, black 32%)',
+          maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.08) 6%, rgba(0,0,0,0.6) 18%, black 32%)'
         }}
       >
         {slides.map((slide, idx) => (
@@ -97,9 +97,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ settings }) => {
         ))}
       </div>
 
-      {/* 2. Content Container (Dedicated 55% Left Width - Zero Overlap with Right Visual) */}
-      <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-7 lg:py-9 min-h-[295px] sm:min-h-[360px] lg:min-h-[420px] flex items-center">
-        <div className="w-[55%] sm:w-[52%] lg:max-w-xl space-y-2 sm:space-y-3.5 text-left">
+      {/* 2. Content Container (Zero Overlap with Right Visual) */}
+      <div className="relative z-10 max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-7 lg:py-9 min-h-[295px] sm:min-h-[360px] lg:min-h-[420px] flex items-center">
+        <div className="w-[58%] sm:w-[54%] lg:max-w-xl space-y-2 sm:space-y-3.5 text-left">
           
           {/* Dynamic Slide Content (Animated Keyed Transition) */}
           <div key={currentIndex} className="space-y-1 sm:space-y-2 transition-all duration-300">
@@ -117,7 +117,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ settings }) => {
               <span className="text-[#F97316]">{activeSlide.headlineHighlight}</span>
             </h1>
             <p
-              className="text-[10px] sm:text-xs lg:text-sm text-gray-600 font-normal leading-relaxed line-clamp-2 sm:line-clamp-none"
+              className="text-[10px] sm:text-xs lg:text-sm text-gray-600 font-normal leading-relaxed line-clamp-3 sm:line-clamp-none"
               style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.04)' }}
             >
               {activeSlide.subtitle}
