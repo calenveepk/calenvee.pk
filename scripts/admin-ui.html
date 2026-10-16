@@ -1,0 +1,2186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calenvee Store Manager — Full Shopify-Style Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandNavy: '#0B132B',
+            brandOrange: '#F97316',
+            brandDark: '#070D1E',
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"Space Grotesk"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #F8FAFC; color: #0F172A; }
+    .glass-header { background: rgba(11, 19, 43, 0.98); backdrop-filter: blur(14px); }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .preview-canvas { background: repeating-linear-gradient(45deg, #F1F5F9, #F1F5F9 10px, #E2E8F0 10px, #E2E8F0 20px); }
+  </style>
+</head>
+<body class="font-sans antialiased text-slate-800">
+
+  <!-- TOP APP HEADER -->
+  <header class="glass-header text-white sticky top-0 z-50 shadow-md border-b border-slate-700/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#F97316] to-[#FB923C] flex items-center justify-center font-extrabold text-white text-lg tracking-wider shadow-lg">
+          CV
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            CALENVEE <span class="text-xs py-0.5 px-2 rounded-full bg-orange-500/20 text-[#F97316] font-semibold border border-orange-500/30">Shopify-Style Customizer</span>
+          </h1>
+          <p class="text-[11px] text-slate-400 font-mono tracking-wide" id="headerSlogan">SHOP SMART, LIVE BETTER</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <a href="http://localhost:5173" target="_blank" class="text-xs text-slate-300 hover:text-white flex items-center gap-1.5 py-1.5 px-3 rounded-lg hover:bg-white/10 transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+          <span class="hidden md:inline">Open Storefront</span>
+        </a>
+        <div id="connBadge" class="hidden sm:flex items-center gap-1.5 py-1 px-3 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="connText">Local Server OK</span>
+        </div>
+        <div id="cloudSyncBadge" class="hidden sm:flex items-center gap-1.5 py-1 px-3 rounded-full text-[11px] font-semibold bg-sky-500/20 text-sky-400 border border-sky-500/30">
+          <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+          <span id="cloudSyncText">Cloud Synced</span>
+        </div>
+        <button onclick="triggerCloudSyncAll()" id="syncCloudHeaderBtn" class="flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs py-2 px-3 rounded-xl shadow transition active:scale-95 border border-slate-700" title="Synchronize catalog and store settings to Google Sheets">
+          <svg class="w-3.5 h-3.5 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          <span id="syncCloudBtnText">⚡ Sync Cloud</span>
+        </button>
+        <button onclick="openPublishDiffModal()" id="publishHeaderBtn" class="flex items-center space-x-1.5 bg-[#F97316] hover:bg-[#EA580C] text-white font-bold text-xs py-2 px-3.5 rounded-xl shadow-lg transition active:scale-95">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+          <span>Publish Live</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAVIGATION TABS -->
+  <div class="bg-white border-b border-slate-200 sticky top-16 z-40 shadow-xs overflow-x-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-6 min-w-max">
+      
+      <!-- PRIMARY TAB: SHOPIFY-STYLE THEME CUSTOMIZER -->
+      <button onclick="switchTab('customizer')" id="tab-customizer" class="tab-btn py-3.5 px-1 border-b-2 font-bold text-xs tracking-wide border-[#F97316] text-[#F97316] flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+        <span>🎨 Theme &amp; Page Customizer</span>
+      </button>
+
+      <button onclick="switchTab('products')" id="tab-products" class="tab-btn py-3.5 px-1 border-b-2 font-semibold text-xs tracking-wide border-transparent text-slate-500 hover:text-slate-900 flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+        <span>Products (<span id="productsCount">0</span>)</span>
+      </button>
+
+      <button onclick="switchTab('media')" id="tab-media" class="tab-btn py-3.5 px-1 border-b-2 font-semibold text-xs tracking-wide border-transparent text-slate-500 hover:text-slate-900 flex items-center gap-1.5">
+        <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <span>Media Library</span>
+      </button>
+
+      <button onclick="switchTab('deals')" id="tab-deals" class="tab-btn py-3.5 px-1 border-b-2 font-semibold text-xs tracking-wide border-transparent text-slate-500 hover:text-slate-900 flex items-center gap-1.5">
+        <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span>Deals &amp; Flash Sales</span>
+      </button>
+
+      <button onclick="switchTab('orders')" id="tab-orders" class="tab-btn py-3.5 px-1 border-b-2 font-semibold text-xs tracking-wide border-transparent text-slate-500 hover:text-slate-900 flex items-center gap-1.5">
+        <svg class="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+        <span>Orders &amp; Dispatch (<span id="ordersCount">0</span>)</span>
+      </button>
+
+      <button onclick="switchTab('categories')" id="tab-categories" class="tab-btn py-3.5 px-1 border-b-2 font-semibold text-xs tracking-wide border-transparent text-slate-500 hover:text-slate-900 flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+        <span>Categories (<span id="categoriesCount">0</span>)</span>
+      </button>
+
+      <button onclick="switchTab('promotions')" id="tab-promotions" class="tab-btn py-3.5 px-1 border-b-2 font-semibold text-xs tracking-wide border-transparent text-slate-500 hover:text-slate-900 flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+        <span>Coupons &amp; Promo Codes</span>
+      </button>
+
+      <button onclick="switchTab('reviews')" id="tab-reviews" class="tab-btn py-3.5 px-1 border-b-2 font-semibold text-xs tracking-wide border-transparent text-slate-500 hover:text-slate-900 flex items-center gap-1.5">
+        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+        <span>Reviews (<span id="reviewsCount">0</span>)</span>
+      </button>
+
+      <button onclick="switchTab('publish')" id="tab-publish" class="tab-btn py-3.5 px-1 border-b-2 font-semibold text-xs tracking-wide border-transparent text-slate-500 hover:text-slate-900 flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+        <span>Deploy &amp; Git Sync</span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="w-full">
+
+    <!-- =============================================================== -->
+    <!-- TAB 1: SHOPIFY-STYLE THEME & PAGE CUSTOMIZER                    -->
+    <!-- =============================================================== -->
+    <div id="content-customizer" class="tab-content">
+      
+      <!-- CUSTOMIZER TOP CONTROL BAR -->
+      <div class="bg-white border-b border-slate-200 px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 sticky top-[108px] z-30 shadow-xs">
+        
+        <!-- Left: Page Selector & Draft State -->
+        <div class="flex items-center gap-3">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:inline">Editing Page:</label>
+          <select id="customizerPageSelect" onchange="onCustomizerPageChange()" class="py-1.5 px-3 rounded-xl border border-slate-300 font-bold text-xs bg-slate-50 text-[#0B132B] focus:outline-none focus:border-[#F97316] shadow-xs">
+            <option value="home">🏠 Home Page (/)</option>
+            <option value="shop">🛍️ Shop All Catalog (/shop)</option>
+            <option value="about">ℹ️ About Us (/about)</option>
+            <option value="contact">📞 Contact Us (/contact)</option>
+            <option value="shipping">🚚 Shipping Policy (/shipping-policy)</option>
+            <option value="returns">🔄 Returns &amp; Exchanges (/returns)</option>
+            <option value="terms">📜 Terms of Service (/terms)</option>
+            <option value="privacy">🔒 Privacy Policy (/privacy)</option>
+            <option value="reviews">⭐ Customer Reviews (/reviews)</option>
+            <option value="__global__">⚙️ Global Theme &amp; Header/Footer</option>
+          </select>
+
+          <!-- Draft Status Indicator -->
+          <div id="draftStatusBadge" class="flex items-center gap-1.5 py-1 px-2.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span id="draftStatusText">Published (Synced)</span>
+          </div>
+        </div>
+
+        <!-- Middle: Viewport Switcher -->
+        <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <button onclick="setPreviewViewport('desktop')" id="vpBtnDesktop" class="p-1.5 rounded-lg text-xs font-bold bg-white text-slate-800 shadow-xs transition" title="Desktop Viewport (1440px)">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+          </button>
+          <button onclick="setPreviewViewport('tablet')" id="vpBtnTablet" class="p-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition" title="Tablet Viewport (768px)">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+          </button>
+          <button onclick="setPreviewViewport('mobile')" id="vpBtnMobile" class="p-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition" title="Mobile Viewport (390px iPhone)">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+          </button>
+          <div class="h-4 w-px bg-slate-300 mx-1"></div>
+          <button onclick="reloadPreviewIframe()" class="p-1.5 rounded-lg text-xs text-slate-500 hover:text-slate-800 transition" title="Reload Storefront Preview">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          </button>
+        </div>
+
+        <!-- Right: Undo/Redo, History, Save Draft, Publish Live -->
+        <div class="flex items-center gap-2">
+          <button onclick="undoDraftChange()" id="undoBtn" disabled class="p-2 rounded-xl border border-slate-200 text-slate-400 hover:text-slate-700 disabled:opacity-40 transition" title="Undo change (Ctrl+Z)">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a5 5 0 015 5v2M3 10l6-6m-6 6l6 6"></path></svg>
+          </button>
+          <button onclick="redoDraftChange()" id="redoBtn" disabled class="p-2 rounded-xl border border-slate-200 text-slate-400 hover:text-slate-700 disabled:opacity-40 transition" title="Redo change (Ctrl+Y)">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10H11a5 5 0 00-5 5v2m15-7l-6-6m6 6l-6 6"></path></svg>
+          </button>
+          <button onclick="openHistoryModal()" class="py-1.5 px-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-1.5 shadow-xs transition" title="Version Snapshots &amp; One-Click Rollback">
+            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="hidden sm:inline">History</span>
+          </button>
+          <button onclick="saveDraftOnly()" id="saveDraftBtn" class="py-1.5 px-3.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-800 shadow-xs transition active:scale-95">
+            Save Draft
+          </button>
+          <button onclick="openPublishDiffModal()" class="py-1.5 px-4 rounded-xl bg-[#F97316] hover:bg-[#EA580C] text-white text-xs font-bold shadow transition active:scale-95 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <span>Publish Storefront</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- MAIN CUSTOMIZER SPLIT SCREEN -->
+      <div class="flex flex-col lg:flex-row h-[calc(100vh-160px)] overflow-hidden">
+        
+        <!-- LEFT SIDEBAR: SECTIONS LIST & SCHEMA SETTINGS -->
+        <div id="customizerSidebar" class="w-full lg:w-[420px] bg-white border-r border-slate-200 flex flex-col h-full overflow-hidden shadow-xs shrink-0">
+          
+          <!-- STATE 1: SECTIONS LIST HEADER -->
+          <div id="sidebarSectionsHeader" class="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+            <div>
+              <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Page Sections</h2>
+              <p class="text-sm font-extrabold text-[#0B132B]" id="sidebarPageTitle">Home Page</p>
+            </div>
+            <button onclick="openSectionLibraryModal()" class="py-1.5 px-3 rounded-xl bg-[#0B132B] hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 shadow transition">
+              <svg class="w-3.5 h-3.5 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              <span>Add Section</span>
+            </button>
+          </div>
+
+          <!-- STATE 1: SCROLLABLE SECTIONS LIST -->
+          <div id="sidebarSectionsList" class="flex-1 overflow-y-auto p-4 space-y-2.5 custom-scroll">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <!-- STATE 2: SECTION SETTINGS PANEL (HIDDEN BY DEFAULT) -->
+          <div id="sidebarSettingsPanel" class="hidden flex-1 flex flex-col overflow-hidden">
+            <!-- Header with Back Button -->
+            <div class="p-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+              <button onclick="closeSectionSettings()" class="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 py-1 px-2 rounded-lg hover:bg-slate-200 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                <span>Back to Sections</span>
+              </button>
+              <span id="settingsSectionTypeBadge" class="text-[10px] uppercase font-mono font-bold px-2 py-0.5 rounded bg-orange-100 text-[#F97316]">hero</span>
+            </div>
+
+            <!-- Form Content -->
+            <div id="sidebarSettingsForm" class="flex-1 overflow-y-auto p-4 space-y-4 custom-scroll text-xs">
+              <!-- Dynamically rendered schema controls -->
+            </div>
+          </div>
+
+          <!-- STATE 3: GLOBAL THEME SETTINGS (WHEN __GLOBAL__ SELECTED) -->
+          <div id="sidebarGlobalPanel" class="hidden flex-1 overflow-y-auto p-4 space-y-6 custom-scroll text-xs">
+            <!-- Global theme controls rendered dynamically -->
+          </div>
+
+        </div>
+
+        <!-- RIGHT CANVAS: LIVE PREVIEW CONTAINER -->
+        <div class="flex-1 preview-canvas flex flex-col items-center justify-center p-2 sm:p-6 overflow-hidden relative">
+          
+          <!-- Viewport Sizing Container -->
+          <div id="previewContainer" class="w-full h-full max-w-[1440px] bg-white rounded-2xl shadow-2xl border border-slate-300 overflow-hidden flex flex-col transition-all duration-300">
+            <!-- Preview Browser Header Bar -->
+            <div class="bg-slate-100 border-b border-slate-200 px-4 py-2 flex items-center justify-between text-xs text-slate-600 select-none">
+              <div class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-400 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-400 inline-block"></span>
+                <span class="text-[11px] font-mono text-slate-500 ml-2" id="previewUrlBar">http://localhost:5173/?preview=true</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" id="previewViewportLabel">Desktop 1440px</span>
+                <button onclick="reloadPreviewIframe()" class="p-1 hover:text-slate-900 transition" title="Refresh Live Preview">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Iframe Canvas -->
+            <div class="flex-1 relative bg-white">
+              <iframe id="previewIframe" src="http://localhost:5173/?preview=true" class="w-full h-full border-none"></iframe>
+              <div id="previewFallbackOverlay" class="hidden absolute inset-0 bg-white/95 flex flex-col items-center justify-center p-6 text-center">
+                <p class="text-sm font-bold text-slate-700 mb-2">Connecting to Storefront Preview Server...</p>
+                <p class="text-xs text-slate-500 mb-4 max-w-sm">Ensure Vite dev server is running on port 5173 (<code>npm run dev</code>) or click below to launch.</p>
+                <button onclick="reloadPreviewIframe()" class="py-2 px-4 rounded-xl bg-[#0B132B] text-white text-xs font-bold hover:bg-[#F97316] transition">Retry Connection</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- =============================================================== -->
+    <!-- TAB 2: PRODUCTS TAB                                             -->
+    <!-- =============================================================== -->
+    <div id="content-products" class="tab-content hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+        <div class="flex flex-1 items-center space-x-3 w-full sm:w-auto">
+          <div class="relative flex-1 sm:max-w-xs">
+            <input type="text" id="productSearch" oninput="filterProducts()" placeholder="Search products by title..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-[#F97316]">
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+          <select id="categoryFilter" onchange="filterProducts()" class="py-2 px-3 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-[#F97316]">
+            <option value="all">All Categories</option>
+          </select>
+        </div>
+        <button onclick="openProductModal()" class="w-full sm:w-auto flex items-center justify-center space-x-2 bg-[#0B132B] hover:bg-[#1E293B] text-white text-xs font-bold py-2.5 px-5 rounded-xl transition shadow">
+          <svg class="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          <span>Add New Product</span>
+        </button>
+      </div>
+      <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+
+    <!-- =============================================================== -->
+    <!-- TAB 3: MEDIA LIBRARY TAB                                        -->
+    <!-- =============================================================== -->
+    <div id="content-media" class="tab-content hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-[#0B132B]">Media Library &amp; Asset Optimizer</h2>
+          <p class="text-xs text-slate-500 mt-1">Automatic WebP compression, responsive sizes, alt text verification, and catalog usage tracking.</p>
+        </div>
+        <button onclick="openMediaUploadModal()" class="py-2.5 px-5 rounded-xl bg-[#0B132B] hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-2 shadow transition">
+          <svg class="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+          <span>Upload New Image</span>
+        </button>
+      </div>
+
+      <!-- Filters & Stats Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 text-xs">
+        <div class="flex items-center gap-2">
+          <button onclick="filterMediaList('all')" id="mediaFilterAll" class="px-3 py-1.5 rounded-lg font-bold bg-[#F97316] text-white">All (<span id="mediaTotalCount">0</span>)</button>
+          <button onclick="filterMediaList('used')" id="mediaFilterUsed" class="px-3 py-1.5 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">In Use (<span id="mediaUsedCount">0</span>)</button>
+          <button onclick="filterMediaList('unused')" id="mediaFilterUnused" class="px-3 py-1.5 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Unused (<span id="mediaUnusedCount">0</span>)</button>
+          <button onclick="filterMediaList('oversized')" id="mediaFilterOversized" class="px-3 py-1.5 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Oversized &gt;500KB (<span id="mediaOversizedCount">0</span>)</button>
+        </div>
+        <div class="relative w-64">
+          <input type="text" id="mediaSearchInput" oninput="renderMediaGrid()" placeholder="Search filename or alt text..." class="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:outline-none focus:border-[#F97316]">
+          <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+      </div>
+
+      <!-- Media Grid -->
+      <div id="mediaCatalogGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- =============================================================== -->
+    <!-- TAB 4: DEALS & FLASH SALES TAB                                  -->
+    <!-- =============================================================== -->
+    <div id="content-deals" class="tab-content hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-[#0B132B]">Deal of the Day &amp; Flash Sales</h2>
+          <p class="text-xs text-slate-500 mt-1">Real start and end datetimes in PKT (+05:00), reload-proof countdown, automatic deal price calculation.</p>
+        </div>
+        <button onclick="openDealModal()" class="py-2.5 px-5 rounded-xl bg-[#0B132B] hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-2 shadow transition">
+          <svg class="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          <span>Create New Deal</span>
+        </button>
+      </div>
+
+      <div id="dealsListContainer" class="space-y-4">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- =============================================================== -->
+    <!-- TAB 5: ORDERS & DISPATCH TAB                                    -->
+    <!-- =============================================================== -->
+    <div id="content-orders" class="tab-content hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <!-- KPI Stats Bar -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Orders</span>
+          <div class="text-2xl font-extrabold text-[#0B132B] mt-1" id="statTotalOrders">0</div>
+          <span class="text-[10px] text-slate-500">Master database record</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-amber-200 bg-amber-50/20 shadow-xs">
+          <span class="text-[11px] font-bold text-amber-600 uppercase tracking-wider block">Needs Dispatch</span>
+          <div class="text-2xl font-extrabold text-amber-600 mt-1" id="statPendingOrders">0</div>
+          <span class="text-[10px] text-amber-700">Confirmed &amp; processing</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-indigo-200 bg-indigo-50/20 shadow-xs">
+          <span class="text-[11px] font-bold text-indigo-600 uppercase tracking-wider block">In Transit</span>
+          <div class="text-2xl font-extrabold text-indigo-600 mt-1" id="statDispatchedOrders">0</div>
+          <span class="text-[10px] text-indigo-700">With courier riders</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-emerald-200 bg-emerald-50/20 shadow-xs">
+          <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider block">Gross Revenue</span>
+          <div class="text-xl font-extrabold text-emerald-600 mt-1" id="statGrossRevenue">Rs. 0</div>
+          <span class="text-[10px] text-emerald-700">Total customer volume</span>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+        <div class="flex flex-1 items-center space-x-3 w-full sm:w-auto">
+          <div class="relative flex-1 sm:max-w-xs">
+            <input type="text" id="orderSearchInput" oninput="filterOrders()" placeholder="Search order ID, customer, phone..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-[#F97316]">
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+          <select id="orderStatusFilter" onchange="filterOrders()" class="py-2 px-3 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-[#F97316]">
+            <option value="all">All Statuses</option>
+            <option value="Placed">Placed (New)</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="In Processing">In Processing</option>
+            <option value="Dispatched">Dispatched</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <button onclick="loadOrders()" class="py-2 px-4 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
+          Refresh Orders
+        </button>
+      </div>
+
+      <!-- Orders List Container -->
+      <div id="ordersListContainer" class="space-y-3"></div>
+    </div>
+
+    <!-- =============================================================== -->
+    <!-- TAB 6: CATEGORIES TAB                                           -->
+    <!-- =============================================================== -->
+    <div id="content-categories" class="tab-content hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div class="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+        <div>
+          <h2 class="text-xl font-bold text-[#0B132B]">Store Categories</h2>
+          <p class="text-xs text-slate-500 mt-1">Organize your store collections and navigation taxonomy.</p>
+        </div>
+        <button onclick="openCategoryModal()" class="py-2.5 px-5 rounded-xl bg-[#0B132B] hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-2 shadow transition">
+          <svg class="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          <span>Add Category</span>
+        </button>
+      </div>
+      <div id="categoriesList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+    </div>
+
+    <!-- =============================================================== -->
+    <!-- TAB 7: ANNOUNCEMENTS TAB                                        -->
+    <!-- =============================================================== -->
+    <div id="content-announcements" class="tab-content hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+        <h2 class="text-xl font-bold text-[#0B132B]">Announcement Bar Messages</h2>
+        <p class="text-xs text-slate-500">Edit the scrolling ticker banner at the very top of the storefront.</p>
+        <div id="announcementsList" class="space-y-2"></div>
+        <button onclick="addAnnouncementRow()" class="py-2 px-4 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 transition">+ Add Announcement</button>
+        <div class="pt-4 border-t border-slate-100 flex justify-end">
+          <button onclick="saveAnnouncements()" class="py-2.5 px-6 rounded-xl bg-[#F97316] text-white text-xs font-bold hover:bg-[#EA580C] shadow transition">Save Announcements</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- =============================================================== -->
+    <!-- TAB 8: REVIEWS TAB                                              -->
+    <!-- =============================================================== -->
+    <div id="content-reviews" class="tab-content hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div class="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+        <div>
+          <h2 class="text-xl font-bold text-[#0B132B]">Verified Customer Reviews</h2>
+          <p class="text-xs text-slate-500 mt-1">Manage verified purchaser feedback and testimonials across Pakistan.</p>
+        </div>
+        <button onclick="openReviewModal()" class="py-2.5 px-5 rounded-xl bg-[#0B132B] hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-2 shadow transition">
+          <svg class="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          <span>Add Verified Review</span>
+        </button>
+      </div>
+      <div id="reviewsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+
+    <!-- =============================================================== -->
+    <!-- TAB 9: DEPLOY & PUBLISH TAB                                     -->
+    <!-- =============================================================== -->
+    <div id="content-publish" class="tab-content hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs space-y-6">
+        <div>
+          <h2 class="text-xl font-bold text-[#0B132B]">Deploy &amp; Git Sync Pipeline</h2>
+          <p class="text-xs text-slate-500 mt-1">Atomically commit all store configurations, products, deals, and media to Git and trigger production deployment on Vercel.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-slate-900 text-slate-200 font-mono text-xs space-y-2">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span class="text-emerald-400 font-bold">PIPELINE STATUS</span>
+            <span class="text-[10px] text-slate-400">Target: calenvee.pk</span>
+          </div>
+          <pre id="deployConsoleOutput" class="whitespace-pre-wrap text-slate-300">Ready to initiate live production deployment.</pre>
+        </div>
+
+        <button onclick="publishToLive()" id="deployRunBtn" class="py-3 px-6 rounded-xl bg-[#F97316] hover:bg-[#EA580C] text-white text-xs font-bold shadow-lg transition active:scale-95 flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+          <span>Trigger Production Deploy</span>
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- =============================================================== -->
+  <!-- MODALS                                                          -->
+  <!-- =============================================================== -->
+
+  <!-- 1. SECTION LIBRARY MODAL -->
+  <div id="sectionLibraryModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl">
+      <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-[#0B132B]">Add Section to Page</h3>
+          <p class="text-xs text-slate-500">Select a section component from the schema registry to insert into your page.</p>
+        </div>
+        <button onclick="closeSectionLibraryModal()" class="text-slate-400 hover:text-slate-700 text-xl font-bold p-2">✕</button>
+      </div>
+      <div class="p-6 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 custom-scroll" id="sectionLibraryCards">
+        <!-- Section cards rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. PUBLISH DIFF SUMMARY MODAL -->
+  <div id="publishDiffModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl">
+      <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-[#0B132B]">Review Changes Before Publishing</h3>
+          <p class="text-xs text-slate-500">Atomic snapshot will be generated before writing to storefront.</p>
+        </div>
+        <button onclick="closePublishDiffModal()" class="text-slate-400 hover:text-slate-700 text-xl font-bold p-2">✕</button>
+      </div>
+      <div class="p-6 overflow-y-auto space-y-4 custom-scroll text-xs">
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Detected Changes</span>
+          <ul id="publishDiffList" class="space-y-1.5 text-slate-700 list-disc list-inside">
+            <!-- Diff items -->
+          </ul>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Snapshot Note (Optional):</label>
+          <input type="text" id="publishSnapshotNote" placeholder="e.g. Updated hero slides and trending collection limit" class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-[#F97316]">
+        </div>
+      </div>
+      <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+        <button onclick="closePublishDiffModal()" class="py-2.5 px-4 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100 transition">Cancel</button>
+        <button onclick="executePublishStorefront()" id="confirmPublishBtn" class="py-2.5 px-6 rounded-xl bg-[#F97316] hover:bg-[#EA580C] text-white text-xs font-bold shadow transition flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          <span>Confirm &amp; Publish Live</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. VERSION HISTORY & ROLLBACK MODAL -->
+  <div id="historyModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl">
+      <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-[#0B132B]">Version History &amp; Snapshots</h3>
+          <p class="text-xs text-slate-500">One-click rollback to any of the last 20 automatically captured snapshots.</p>
+        </div>
+        <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-slate-700 text-xl font-bold p-2">✕</button>
+      </div>
+      <div class="p-6 overflow-y-auto space-y-3 custom-scroll" id="historySnapshotsList">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. MEDIA UPLOAD MODAL -->
+  <div id="mediaUploadModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl">
+      <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-[#0B132B]">Upload Image to Media Library</h3>
+          <p class="text-xs text-slate-500">Alt text is required. Automatically optimized to WebP with responsive sizes.</p>
+        </div>
+        <button onclick="closeMediaUploadModal()" class="text-slate-400 hover:text-slate-700 text-xl font-bold p-2">✕</button>
+      </div>
+      <form onsubmit="handleMediaUploadSubmit(event)" class="p-6 space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Select File (JPG, PNG, WebP):</label>
+          <input type="file" id="mediaUploadFileInput" accept="image/*" required class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Mandatory Alt Text (Accessibility &amp; SEO):</label>
+          <input type="text" id="mediaUploadAltInput" required placeholder="e.g. Royal Gold Chronograph with Emerald Dial on Marble" class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-[#F97316]">
+          <p class="text-[10px] text-slate-400 mt-1">Descriptive alt text ensures search engine indexing and screen-reader accessibility.</p>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Folder Destination:</label>
+          <select id="mediaUploadFolderInput" class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs">
+            <option value="products">public/products (Standard catalog &amp; banners)</option>
+            <option value="hero">public/hero (Hero slider backgrounds)</option>
+          </select>
+        </div>
+        <div id="mediaUploadFeedback" class="text-xs font-semibold"></div>
+        <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
+          <button type="button" onclick="closeMediaUploadModal()" class="py-2.5 px-4 rounded-xl border border-slate-300 font-bold text-slate-700 hover:bg-slate-50">Cancel</button>
+          <button type="submit" id="mediaUploadSubmitBtn" class="py-2.5 px-6 rounded-xl bg-[#F97316] text-white font-bold hover:bg-[#EA580C] shadow transition">Upload &amp; Optimize</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. PRODUCT EDIT MODAL -->
+  <div id="productModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+      <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-[#0B132B]" id="productModalTitle">Edit Product</h3>
+          <p class="text-xs text-slate-500">Configure title, description, images, variants, stock, pricing, and SEO.</p>
+        </div>
+        <button onclick="closeProductModal()" class="text-slate-400 hover:text-slate-700 text-xl font-bold p-2">✕</button>
+      </div>
+      <form onsubmit="handleProductSave(event)" class="p-6 overflow-y-auto space-y-4 text-xs custom-scroll">
+        <input type="hidden" id="p_id">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Product Title</label>
+            <input type="text" id="p_name" required class="w-full py-2 px-3 rounded-xl border border-slate-300 font-semibold focus:outline-none focus:border-[#F97316]">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">URL Slug</label>
+            <input type="text" id="p_slug" required class="w-full py-2 px-3 rounded-xl border border-slate-300 font-mono text-[11px] focus:outline-none focus:border-[#F97316]">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Category</label>
+            <select id="p_category" class="w-full py-2 px-3 rounded-xl border border-slate-300 font-semibold focus:outline-none focus:border-[#F97316]"></select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Publish Status</label>
+            <select id="p_status" class="w-full py-2 px-3 rounded-xl border border-slate-300 font-bold text-emerald-700 focus:outline-none focus:border-[#F97316]">
+              <option value="published">Published (Live in Store)</option>
+              <option value="hidden">Hidden (Unavailable / Noindex)</option>
+              <option value="draft">Draft (Work in progress)</option>
+              <option value="scheduled">Scheduled Drop</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Sale Price (PKR)</label>
+            <input type="number" id="p_price" required min="0" class="w-full py-2 px-3 rounded-xl border border-slate-300 font-bold focus:outline-none focus:border-[#F97316]">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Original / Compare-At Price (PKR)</label>
+            <input type="number" id="p_originalPrice" min="0" class="w-full py-2 px-3 rounded-xl border border-slate-300 font-bold focus:outline-none focus:border-[#F97316]">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Inventory Stock Units</label>
+            <input type="number" id="p_stockCount" min="0" class="w-full py-2 px-3 rounded-xl border border-slate-300 font-bold focus:outline-none focus:border-[#F97316]">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Tags (comma separated)</label>
+            <input type="text" id="p_tags" placeholder="e.g. Chronograph, Sapphire, Waterproof" class="w-full py-2 px-3 rounded-xl border border-slate-300 focus:outline-none focus:border-[#F97316]">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Product Images (URLs, one per line)</label>
+          <textarea id="p_images" rows="3" class="w-full py-2 px-3 rounded-xl border border-slate-300 font-mono text-[11px] focus:outline-none focus:border-[#F97316]" placeholder="/products/image-1.webp&#10;/products/image-2.webp"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Short Summary Description</label>
+          <input type="text" id="p_shortDescription" class="w-full py-2 px-3 rounded-xl border border-slate-300 focus:outline-none focus:border-[#F97316]">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Full Product Description</label>
+          <textarea id="p_description" rows="4" class="w-full py-2 px-3 rounded-xl border border-slate-300 focus:outline-none focus:border-[#F97316]"></textarea>
+        </div>
+
+        <div class="flex items-center gap-6 pt-2">
+          <label class="flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
+            <input type="checkbox" id="p_isBestSeller" class="w-4 h-4 rounded text-[#F97316]">
+            <span>Bestseller Badge</span>
+          </label>
+          <label class="flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
+            <input type="checkbox" id="p_isNewDrop" class="w-4 h-4 rounded text-[#F97316]">
+            <span>New Drop Badge</span>
+          </label>
+          <label class="flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
+            <input type="checkbox" id="p_isTrending" class="w-4 h-4 rounded text-[#F97316]">
+            <span>Trending Badge</span>
+          </label>
+        </div>
+
+        <div class="p-4 border-t border-slate-100 flex justify-end gap-3">
+          <button type="button" onclick="closeProductModal()" class="py-2.5 px-4 rounded-xl border border-slate-300 font-bold text-slate-700 hover:bg-slate-50">Cancel</button>
+          <button type="submit" class="py-2.5 px-6 rounded-xl bg-[#F97316] text-white font-bold hover:bg-[#EA580C] shadow transition">Save Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APP LOGIC -->
+  <script>
+    // Global Application State
+    let activeTab = 'customizer';
+    let siteConfig = null;
+    let draftConfig = null;
+    let isDirty = false;
+    let undoStack = [];
+    let redoStack = [];
+    let selectedPageId = 'home';
+    let selectedSectionId = null;
+    let productsList = [];
+    let categoriesList = [];
+    let dealsList = [];
+    let ordersList = [];
+    let mediaList = [];
+    let currentPreviewViewport = 'desktop';
+
+    // Headers with admin token for security
+    const API_HEADERS = {
+      'Content-Type': 'application/json',
+      'X-Admin-Token': 'calenvee_local_admin_token'
+    };
+
+    // Initialize application on load
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadInitialData();
+      initKeyboardShortcuts();
+    });
+
+    async function loadInitialData() {
+      try {
+        await Promise.all([
+          loadCmsConfig(),
+          loadProducts(),
+          loadCategories(),
+          loadDeals(),
+          loadMediaCatalog()
+        ]);
+        renderCustomizer();
+      } catch (err) {
+        console.error('Initialization error:', err);
+      }
+    }
+
+    // TAB SWITCHING
+    function switchTab(tabId) {
+      activeTab = tabId;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-[#F97316]', 'text-[#F97316]');
+        btn.classList.add('border-transparent', 'text-slate-500');
+      });
+      const activeBtn = document.getElementById('tab-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.remove('border-transparent', 'text-slate-500');
+        activeBtn.classList.add('border-[#F97316]', 'text-[#F97316]');
+      }
+
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+      });
+      const activeContent = document.getElementById('content-' + tabId);
+      if (activeContent) {
+        activeContent.classList.remove('hidden');
+      }
+
+      if (tabId === 'orders') loadOrders();
+      if (tabId === 'media') loadMediaCatalog();
+      if (tabId === 'deals') renderDeals();
+      if (tabId === 'categories') renderCategories();
+      if (tabId === 'reviews') loadReviews();
+      if (tabId === 'announcements') loadAnnouncements();
+    }
+
+    // CMS CONFIGURATION
+    async function loadCmsConfig() {
+      const res = await fetch('/api/cms/config');
+      const data = await res.json();
+      if (data && data.success) {
+        siteConfig = data.published;
+        draftConfig = JSON.parse(JSON.stringify(data.draft || data.published));
+        isDirty = data.isDirty;
+        updateDirtyIndicator();
+      }
+    }
+
+    function recordStateForUndo() {
+      if (draftConfig) {
+        undoStack.push(JSON.parse(JSON.stringify(draftConfig)));
+        if (undoStack.length > 30) undoStack.shift();
+        redoStack = [];
+        updateUndoRedoButtons();
+      }
+    }
+
+    function undoDraftChange() {
+      if (undoStack.length > 0) {
+        redoStack.push(JSON.parse(JSON.stringify(draftConfig)));
+        draftConfig = undoStack.pop();
+        isDirty = true;
+        updateDirtyIndicator();
+        updateUndoRedoButtons();
+        syncDraftToPreview();
+        renderCustomizer();
+      }
+    }
+
+    function redoDraftChange() {
+      if (redoStack.length > 0) {
+        undoStack.push(JSON.parse(JSON.stringify(draftConfig)));
+        draftConfig = redoStack.pop();
+        isDirty = true;
+        updateDirtyIndicator();
+        updateUndoRedoButtons();
+        syncDraftToPreview();
+        renderCustomizer();
+      }
+    }
+
+    function updateUndoRedoButtons() {
+      const uBtn = document.getElementById('undoBtn');
+      const rBtn = document.getElementById('redoBtn');
+      if (uBtn) uBtn.disabled = undoStack.length === 0;
+      if (rBtn) rBtn.disabled = redoStack.length === 0;
+    }
+
+    function updateDirtyIndicator() {
+      const badge = document.getElementById('draftStatusBadge');
+      const text = document.getElementById('draftStatusText');
+      if (!badge || !text) return;
+
+      if (isDirty) {
+        badge.className = 'flex items-center gap-1.5 py-1 px-2.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-300';
+        text.innerText = '● Unsaved Draft';
+      } else {
+        badge.className = 'flex items-center gap-1.5 py-1 px-2.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+        text.innerText = '● Published (Synced)';
+      }
+    }
+
+    // REAL-TIME POSTMESSAGE SYNC TO STOREFRONT IFRAME
+    function syncDraftToPreview() {
+      const iframe = document.getElementById('previewIframe');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({
+          type: 'CALENVEE_PREVIEW_UPDATE',
+          config: draftConfig
+        }, '*');
+      }
+    }
+
+    // CUSTOMIZER VIEWPORT SWITCHER
+    function setPreviewViewport(vp) {
+      currentPreviewViewport = vp;
+      const container = document.getElementById('previewContainer');
+      const label = document.getElementById('previewViewportLabel');
+      const btnD = document.getElementById('vpBtnDesktop');
+      const btnT = document.getElementById('vpBtnTablet');
+      const btnM = document.getElementById('vpBtnMobile');
+
+      [btnD, btnT, btnM].forEach(b => {
+        b.className = 'p-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition';
+      });
+
+      if (vp === 'desktop') {
+        container.style.maxWidth = '1440px';
+        label.innerText = 'Desktop 1440px';
+        btnD.className = 'p-1.5 rounded-lg text-xs font-bold bg-white text-slate-800 shadow-xs transition';
+      } else if (vp === 'tablet') {
+        container.style.maxWidth = '768px';
+        label.innerText = 'Tablet 768px';
+        btnT.className = 'p-1.5 rounded-lg text-xs font-bold bg-white text-slate-800 shadow-xs transition';
+      } else if (vp === 'mobile') {
+        container.style.maxWidth = '390px';
+        label.innerText = 'Mobile 390px';
+        btnM.className = 'p-1.5 rounded-lg text-xs font-bold bg-white text-slate-800 shadow-xs transition';
+      }
+    }
+
+    function reloadPreviewIframe() {
+      const iframe = document.getElementById('previewIframe');
+      if (!iframe) return;
+      const targetPage = selectedPageId === '__global__' ? 'home' : selectedPageId;
+      iframe.src = `http://localhost:5173/?preview=true&page=${targetPage}&t=${Date.now()}`;
+    }
+
+    // PAGE SELECTION
+    function onCustomizerPageChange() {
+      const select = document.getElementById('customizerPageSelect');
+      selectedPageId = select.value;
+      selectedSectionId = null;
+      renderCustomizer();
+      reloadPreviewIframe();
+    }
+
+    // RENDER CUSTOMIZER
+    function renderCustomizer() {
+      const secHeader = document.getElementById('sidebarSectionsHeader');
+      const secList = document.getElementById('sidebarSectionsList');
+      const settingsPanel = document.getElementById('sidebarSettingsPanel');
+      const globalPanel = document.getElementById('sidebarGlobalPanel');
+      const pageTitle = document.getElementById('sidebarPageTitle');
+
+      if (selectedPageId === '__global__') {
+        secHeader.classList.add('hidden');
+        secList.classList.add('hidden');
+        settingsPanel.classList.add('hidden');
+        globalPanel.classList.remove('hidden');
+        renderGlobalSettings();
+        return;
+      }
+
+      globalPanel.classList.add('hidden');
+
+      if (selectedSectionId) {
+        secHeader.classList.add('hidden');
+        secList.classList.add('hidden');
+        settingsPanel.classList.remove('hidden');
+        renderSectionSettings();
+        return;
+      }
+
+      secHeader.classList.remove('hidden');
+      secList.classList.remove('hidden');
+      settingsPanel.classList.add('hidden');
+
+      const page = draftConfig?.pages?.[selectedPageId];
+      if (pageTitle) pageTitle.innerText = page?.name || selectedPageId;
+
+      const sections = page?.sections || [];
+      if (sections.length === 0) {
+        secList.innerHTML = `
+          <div class="text-center py-10 px-4">
+            <p class="text-slate-400 text-xs mb-3">No sections on this page yet.</p>
+            <button onclick="openSectionLibraryModal()" class="py-2 px-4 rounded-xl bg-[#0B132B] text-white text-xs font-bold hover:bg-[#F97316] transition">+ Add Section</button>
+          </div>
+        `;
+        return;
+      }
+
+      secList.innerHTML = sections.map((sec, idx) => {
+        const isEyeOn = sec.visible !== false;
+        return `
+          <div class="group bg-white p-3 rounded-xl border border-slate-200 hover:border-[#F97316] hover:shadow-sm transition flex items-center justify-between gap-2 cursor-pointer" onclick="openSectionSettings('${sec.id}')">
+            <div class="flex items-center gap-2.5 flex-1 min-w-0">
+              <span class="text-slate-300 font-mono text-[11px] font-bold w-4">${idx + 1}</span>
+              <div class="w-7 h-7 rounded-lg bg-orange-50 text-[#F97316] flex items-center justify-center font-bold text-xs shrink-0">
+                ${getSectionIconSvg(sec.type)}
+              </div>
+              <div class="truncate">
+                <span class="font-bold text-xs text-[#0B132B] block truncate">${getSectionDisplayName(sec)}</span>
+                <span class="text-[10px] text-slate-400 uppercase font-mono tracking-wider">${sec.type}</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
+              <!-- Move Up / Down -->
+              <button onclick="moveSection(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="p-1 hover:text-[#F97316] text-slate-400 disabled:opacity-20 transition" title="Move Up">▲</button>
+              <button onclick="moveSection(${idx}, 1)" ${idx === sections.length - 1 ? 'disabled' : ''} class="p-1 hover:text-[#F97316] text-slate-400 disabled:opacity-20 transition" title="Move Down">▼</button>
+              
+              <!-- Eye Visibility Toggle -->
+              <button onclick="toggleSectionVisibility('${sec.id}')" class="p-1.5 rounded-lg hover:bg-slate-100 transition ${isEyeOn ? 'text-emerald-600' : 'text-slate-300'}" title="Toggle Section Visibility">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  ${isEyeOn 
+                    ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>'
+                    : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"></path>'
+                  }
+                </svg>
+              </button>
+
+              <!-- Duplicate Section -->
+              <button onclick="duplicateSection('${sec.id}')" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition" title="Duplicate Section">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+              </button>
+
+              <!-- Delete Section -->
+              <button onclick="deleteSection('${sec.id}')" class="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition" title="Delete Section">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getSectionDisplayName(sec) {
+      if (sec.settings?.title) return sec.settings.title;
+      if (sec.type === 'hero') return 'Hero Banner / Slides';
+      if (sec.type === 'category-grid') return 'Shop by Category';
+      if (sec.type === 'product-grid') return 'Featured Products Grid';
+      if (sec.type === 'deal-of-the-day') return 'Deal of the Day';
+      if (sec.type === 'promo-banner') return 'Promotional Banners';
+      if (sec.type === 'trust-badges') return 'Trust Badges & USPs';
+      if (sec.type === 'testimonials') return 'Customer Testimonials';
+      if (sec.type === 'brand-story') return 'Brand Story';
+      if (sec.type === 'faq') return 'FAQ Accordion';
+      if (sec.type === 'newsletter') return 'Newsletter & WhatsApp';
+      return sec.type;
+    }
+
+    function getSectionIconSvg(type) {
+      if (type === 'hero') return '🖼️';
+      if (type === 'product-grid') return '🛍️';
+      if (type === 'category-grid') return '🗂️';
+      if (type === 'deal-of-the-day') return '⚡';
+      if (type === 'promo-banner') return '🏷️';
+      if (type === 'trust-badges') return '🛡️';
+      if (type === 'testimonials') return '⭐';
+      if (type === 'brand-story') return '📖';
+      if (type === 'faq') return '❓';
+      if (type === 'newsletter') return '✉️';
+      return '📄';
+    }
+
+    // SECTION ACTIONS: VISIBILITY, REORDER, DUPLICATE, DELETE
+    function toggleSectionVisibility(secId) {
+      recordStateForUndo();
+      const page = draftConfig?.pages?.[selectedPageId];
+      if (!page) return;
+      const sec = page.sections.find(s => s.id === secId);
+      if (sec) {
+        sec.visible = sec.visible === false ? true : false;
+        markDraftDirty();
+        renderCustomizer();
+        syncDraftToPreview();
+      }
+    }
+
+    function moveSection(index, direction) {
+      recordStateForUndo();
+      const page = draftConfig?.pages?.[selectedPageId];
+      if (!page) return;
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= page.sections.length) return;
+      
+      const temp = page.sections[index];
+      page.sections[index] = page.sections[targetIndex];
+      page.sections[targetIndex] = temp;
+
+      markDraftDirty();
+      renderCustomizer();
+      syncDraftToPreview();
+    }
+
+    function duplicateSection(secId) {
+      recordStateForUndo();
+      const page = draftConfig?.pages?.[selectedPageId];
+      if (!page) return;
+      const index = page.sections.findIndex(s => s.id === secId);
+      if (index === -1) return;
+
+      const clone = JSON.parse(JSON.stringify(page.sections[index]));
+      clone.id = clone.type + '-' + Date.now();
+      if (clone.settings?.title) clone.settings.title += ' (Copy)';
+      page.sections.splice(index + 1, 0, clone);
+
+      markDraftDirty();
+      renderCustomizer();
+      syncDraftToPreview();
+    }
+
+    function deleteSection(secId) {
+      if (!confirm('Are you sure you want to delete this section?')) return;
+      recordStateForUndo();
+      const page = draftConfig?.pages?.[selectedPageId];
+      if (!page) return;
+      page.sections = page.sections.filter(s => s.id !== secId);
+      if (selectedSectionId === secId) selectedSectionId = null;
+
+      markDraftDirty();
+      renderCustomizer();
+      syncDraftToPreview();
+    }
+
+    function markDraftDirty() {
+      isDirty = true;
+      updateDirtyIndicator();
+    }
+
+    // OPEN & RENDER SECTION SETTINGS PANEL
+    function openSectionSettings(secId) {
+      selectedSectionId = secId;
+      renderCustomizer();
+    }
+
+    function closeSectionSettings() {
+      selectedSectionId = null;
+      renderCustomizer();
+    }
+
+    function renderSectionSettings() {
+      const form = document.getElementById('sidebarSettingsForm');
+      const badge = document.getElementById('settingsSectionTypeBadge');
+      const page = draftConfig?.pages?.[selectedPageId];
+      const sec = page?.sections?.find(s => s.id === selectedSectionId);
+
+      if (!sec) {
+        selectedSectionId = null;
+        renderCustomizer();
+        return;
+      }
+
+      badge.innerText = sec.type;
+      sec.settings = sec.settings || {};
+
+      let html = `
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+          <label class="flex items-center justify-between font-bold text-slate-700">
+            <span>Section Visible</span>
+            <input type="checkbox" ${sec.visible !== false ? 'checked' : ''} onchange="updateSecSetting('visible', this.checked, true)" class="w-4 h-4 rounded text-[#F97316]">
+          </label>
+        </div>
+      `;
+
+      // SPECIFIC CONTROLS BY TYPE
+      if (sec.type === 'hero') {
+        html += renderHeroSettings(sec);
+      } else if (sec.type === 'product-grid') {
+        html += renderProductGridSettings(sec);
+      } else if (sec.type === 'category-grid') {
+        html += renderCategoryGridSettings(sec);
+      } else if (sec.type === 'deal-of-the-day') {
+        html += renderDealOfTheDaySettings(sec);
+      } else if (sec.type === 'promo-banner') {
+        html += renderPromoBannerSettings(sec);
+      } else if (sec.type === 'trust-badges') {
+        html += renderTrustBadgesSettings(sec);
+      } else if (sec.type === 'testimonials') {
+        html += renderTestimonialsSettings(sec);
+      } else if (sec.type === 'faq') {
+        html += renderFaqSettings(sec);
+      } else if (sec.type === 'newsletter') {
+        html += renderNewsletterSettings(sec);
+      } else {
+        html += renderGenericSettings(sec);
+      }
+
+      form.innerHTML = html;
+    }
+
+    function updateSecSetting(field, value, isDirect = false) {
+      recordStateForUndo();
+      const page = draftConfig?.pages?.[selectedPageId];
+      const sec = page?.sections?.find(s => s.id === selectedSectionId);
+      if (!sec) return;
+
+      if (isDirect) {
+        sec[field] = value;
+      } else {
+        sec.settings[field] = value;
+      }
+      markDraftDirty();
+      syncDraftToPreview();
+    }
+
+    // SECTION SPECIFIC FIELD RENDERERS
+    function renderHeroSettings(sec) {
+      const slides = sec.settings.slides || [];
+      return `
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Rotation Interval (Seconds)</label>
+          <input type="number" min="2" max="20" value="${sec.settings.autoIntervalSeconds || 5}" oninput="updateSecSetting('autoIntervalSeconds', parseInt(this.value))" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+        </div>
+        <div class="space-y-3 pt-2">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-1">
+            <span class="font-bold text-slate-800">Slides (${slides.length})</span>
+            <button type="button" onclick="addHeroSlide()" class="text-[#F97316] font-bold text-xs hover:underline">+ Add Slide</button>
+          </div>
+          ${slides.map((s, idx) => `
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-700">Slide #${idx + 1}</span>
+                <button type="button" onclick="removeHeroSlide(${idx})" class="text-rose-500 font-bold hover:underline">Remove</button>
+              </div>
+              <input type="text" placeholder="Kicker (e.g. QUALITY. STYLE. EVERYDAY.)" value="${s.kicker || ''}" oninput="updateHeroSlideField(${idx}, 'kicker', this.value)" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300">
+              <input type="text" placeholder="Headline Prefix (e.g. Everything You Love,)" value="${s.headlinePrefix || ''}" oninput="updateHeroSlideField(${idx}, 'headlinePrefix', this.value)" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300 font-bold">
+              <input type="text" placeholder="Headline Highlight (Orange)" value="${s.headlineHighlight || ''}" oninput="updateHeroSlideField(${idx}, 'headlineHighlight', this.value)" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300 font-bold text-[#F97316]">
+              <textarea placeholder="Subtitle description" oninput="updateHeroSlideField(${idx}, 'subtitle', this.value)" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300">${s.subtitle || ''}</textarea>
+              <div class="flex gap-2">
+                <input type="text" placeholder="CTA Text" value="${s.ctaText || 'Shop Now'}" oninput="updateHeroSlideField(${idx}, 'ctaText', this.value)" class="w-1/2 py-1.5 px-2.5 rounded-lg border border-slate-300">
+                <input type="text" placeholder="CTA Link" value="${s.ctaLink || '/shop'}" oninput="updateHeroSlideField(${idx}, 'ctaLink', this.value)" class="w-1/2 py-1.5 px-2.5 rounded-lg border border-slate-300">
+              </div>
+              <div class="space-y-1">
+                <label class="block text-[11px] font-bold text-slate-500">Image URL</label>
+                <div class="flex gap-2">
+                  <input type="text" value="${s.image || ''}" oninput="updateHeroSlideField(${idx}, 'image', this.value)" class="flex-1 py-1.5 px-2.5 rounded-lg border border-slate-300 font-mono text-[11px]">
+                  <button type="button" onclick="pickImageForHeroSlide(${idx})" class="py-1.5 px-2.5 rounded-lg bg-slate-200 hover:bg-slate-300 font-bold">Pick</button>
+                </div>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500">Image Alt Text (Required)</label>
+                <input type="text" required value="${s.imageAlt || ''}" oninput="updateHeroSlideField(${idx}, 'imageAlt', this.value)" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300">
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function updateHeroSlideField(idx, field, value) {
+      recordStateForUndo();
+      const page = draftConfig?.pages?.[selectedPageId];
+      const sec = page?.sections?.find(s => s.id === selectedSectionId);
+      if (sec && sec.settings.slides && sec.settings.slides[idx]) {
+        sec.settings.slides[idx][field] = value;
+        markDraftDirty();
+        syncDraftToPreview();
+      }
+    }
+
+    function addHeroSlide() {
+      recordStateForUndo();
+      const page = draftConfig?.pages?.[selectedPageId];
+      const sec = page?.sections?.find(s => s.id === selectedSectionId);
+      if (sec) {
+        sec.settings.slides = sec.settings.slides || [];
+        sec.settings.slides.push({
+          id: 'slide-' + Date.now(),
+          kicker: 'NEW COLLECTION',
+          headlinePrefix: 'Discover Luxury,',
+          headlineHighlight: 'Crafted For You.',
+          subtitle: 'Experience authentic craftsmanship and precision across Pakistan.',
+          ctaText: 'Shop Now',
+          ctaLink: '/shop',
+          image: '/products/1792095143426-luxury_accessories_still_life_with_backpack.png',
+          imageAlt: 'Calenvee Luxury Collection'
+        });
+        markDraftDirty();
+        renderSectionSettings();
+        syncDraftToPreview();
+      }
+    }
+
+    function removeHeroSlide(idx) {
+      recordStateForUndo();
+      const page = draftConfig?.pages?.[selectedPageId];
+      const sec = page?.sections?.find(s => s.id === selectedSectionId);
+      if (sec && sec.settings.slides) {
+        sec.settings.slides.splice(idx, 1);
+        markDraftDirty();
+        renderSectionSettings();
+        syncDraftToPreview();
+      }
+    }
+
+    function renderProductGridSettings(sec) {
+      return `
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Section Title</label>
+          <input type="text" value="${sec.settings.title || ''}" oninput="updateSecSetting('title', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Subtitle</label>
+          <input type="text" value="${sec.settings.subtitle || ''}" oninput="updateSecSetting('subtitle', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Selection Rule</label>
+          <select onchange="updateSecSetting('rule', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-semibold">
+            <option value="bestsellers" ${sec.settings.rule === 'bestsellers' ? 'selected' : ''}>Bestsellers (High Demand)</option>
+            <option value="trending" ${sec.settings.rule === 'trending' ? 'selected' : ''}>Trending Now</option>
+            <option value="new-drops" ${sec.settings.rule === 'new-drops' ? 'selected' : ''}>New Arrivals / Drops</option>
+            <option value="category" ${sec.settings.rule === 'category' ? 'selected' : ''}>Specific Category</option>
+            <option value="manual" ${sec.settings.rule === 'manual' ? 'selected' : ''}>Manual Selection</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Item Limit</label>
+            <input type="number" min="2" max="24" value="${sec.settings.limit || 8}" oninput="updateSecSetting('limit', parseInt(this.value))" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Desktop Columns</label>
+            <select onchange="updateSecSetting('columnsDesktop', parseInt(this.value))" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+              <option value="2" ${sec.settings.columnsDesktop === 2 ? 'selected' : ''}>2 Columns</option>
+              <option value="3" ${sec.settings.columnsDesktop === 3 ? 'selected' : ''}>3 Columns</option>
+              <option value="4" ${sec.settings.columnsDesktop === 4 || !sec.settings.columnsDesktop ? 'selected' : ''}>4 Columns</option>
+            </select>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCategoryGridSettings(sec) {
+      return `
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Heading</label>
+          <input type="text" value="${sec.settings.title || 'SHOP BY CATEGORY'}" oninput="updateSecSetting('title', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Subtitle</label>
+          <input type="text" value="${sec.settings.subtitle || ''}" oninput="updateSecSetting('subtitle', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Grid Columns</label>
+          <select onchange="updateSecSetting('columns', parseInt(this.value))" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+            <option value="2" ${sec.settings.columns === 2 ? 'selected' : ''}>2 Columns</option>
+            <option value="3" ${sec.settings.columns === 3 || !sec.settings.columns ? 'selected' : ''}>3 Columns</option>
+            <option value="4" ${sec.settings.columns === 4 ? 'selected' : ''}>4 Columns</option>
+          </select>
+        </div>
+      `;
+    }
+
+    function renderDealOfTheDaySettings(sec) {
+      return `
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Target Deal Selection</label>
+          <select onchange="updateSecSetting('dealId', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-semibold">
+            ${dealsList.map(d => `<option value="${d.id}" ${sec.settings.dealId === d.id ? 'selected' : ''}>${d.title} (Rs. ${d.dealPrice})</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Banner Title</label>
+          <input type="text" value="${sec.settings.title || 'DEAL OF THE DAY'}" oninput="updateSecSetting('title', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">CTA Button Text</label>
+          <input type="text" value="${sec.settings.ctaText || 'CLAIM DEAL NOW'}" oninput="updateSecSetting('ctaText', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+        </div>
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+          <label class="flex items-center justify-between font-bold text-slate-700 cursor-pointer">
+            <span>Auto-Hide Section When Expired</span>
+            <input type="checkbox" ${sec.settings.autoHideWhenExpired !== false ? 'checked' : ''} onchange="updateSecSetting('autoHideWhenExpired', this.checked)" class="w-4 h-4 rounded text-[#F97316]">
+          </label>
+        </div>
+      `;
+    }
+
+    function renderPromoBannerSettings(sec) {
+      const banners = sec.settings.banners || [];
+      return `
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Layout</label>
+          <select onchange="updateSecSetting('layout', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+            <option value="single" ${sec.settings.layout === 'single' ? 'selected' : ''}>Single Full-Width Banner</option>
+            <option value="split-2" ${sec.settings.layout === 'split-2' ? 'selected' : ''}>Split 2 Columns</option>
+            <option value="trio-3" ${sec.settings.layout === 'trio-3' ? 'selected' : ''}>Trio 3 Columns</option>
+          </select>
+        </div>
+        <div class="space-y-3 pt-2">
+          <span class="font-bold text-slate-800 block">Banner Cards</span>
+          ${banners.map((b, idx) => `
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+              <input type="text" placeholder="Badge" value="${b.badge || ''}" oninput="updatePromoBannerField(${idx}, 'badge', this.value)" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300">
+              <input type="text" placeholder="Title" value="${b.title || ''}" oninput="updatePromoBannerField(${idx}, 'title', this.value)" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300 font-bold">
+              <input type="text" placeholder="CTA Link" value="${b.link || '/shop'}" oninput="updatePromoBannerField(${idx}, 'link', this.value)" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300">
+              <input type="text" placeholder="Image URL" value="${b.image || ''}" oninput="updatePromoBannerField(${idx}, 'image', this.value)" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300 font-mono text-[11px]">
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function updatePromoBannerField(idx, field, value) {
+      recordStateForUndo();
+      const page = draftConfig?.pages?.[selectedPageId];
+      const sec = page?.sections?.find(s => s.id === selectedSectionId);
+      if (sec && sec.settings.banners && sec.settings.banners[idx]) {
+        sec.settings.banners[idx][field] = value;
+        markDraftDirty();
+        syncDraftToPreview();
+      }
+    }
+
+    function renderTrustBadgesSettings(sec) {
+      return `
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Heading</label>
+          <input type="text" value="${sec.settings.title || 'OUR SERVICE PROMISE'}" oninput="updateSecSetting('title', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Subtitle</label>
+          <input type="text" value="${sec.settings.subtitle || ''}" oninput="updateSecSetting('subtitle', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+        </div>
+      `;
+    }
+
+    function renderTestimonialsSettings(sec) {
+      return `
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Heading</label>
+          <input type="text" value="${sec.settings.title || 'WHAT OUR CUSTOMERS SAY'}" oninput="updateSecSetting('title', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Layout</label>
+          <select onchange="updateSecSetting('layout', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+            <option value="marquee" ${sec.settings.layout === 'marquee' ? 'selected' : ''}>Infinite Marquee Loop</option>
+            <option value="grid" ${sec.settings.layout === 'grid' ? 'selected' : ''}>Standard Grid</option>
+          </select>
+        </div>
+      `;
+    }
+
+    function renderFaqSettings(sec) {
+      const items = sec.settings.items || [];
+      return `
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">FAQ Section Title</label>
+          <input type="text" value="${sec.settings.title || 'FREQUENTLY ASKED QUESTIONS'}" oninput="updateSecSetting('title', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+        </div>
+        <div class="space-y-3 pt-2">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-1">
+            <span class="font-bold text-slate-800">Q&amp;A Items (${items.length})</span>
+            <button type="button" onclick="addFaqItem()" class="text-[#F97316] font-bold hover:underline">+ Add Item</button>
+          </div>
+          ${items.map((item, idx) => `
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+              <input type="text" placeholder="Question" value="${item.question || ''}" oninput="updateFaqField(${idx}, 'question', this.value)" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300 font-bold">
+              <textarea placeholder="Answer" oninput="updateFaqField(${idx}, 'answer', this.value)" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300">${item.answer || ''}</textarea>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderNewsletterSettings(sec) {
+      return `
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Headline</label>
+          <input type="text" value="${sec.settings.title || 'Stay in the Loop'}" oninput="updateSecSetting('title', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Subtitle</label>
+          <input type="text" value="${sec.settings.subtitle || ''}" oninput="updateSecSetting('subtitle', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Promo Coupon Code</label>
+          <input type="text" value="${sec.settings.discountPromoCode || 'CALENVEE10'}" oninput="updateSecSetting('discountPromoCode', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-mono">
+        </div>
+      `;
+    }
+
+    function renderGenericSettings(sec) {
+      return `
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Title</label>
+          <input type="text" value="${sec.settings.title || ''}" oninput="updateSecSetting('title', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+        </div>
+      `;
+    }
+
+    // GLOBAL THEME SETTINGS RENDERER
+    function renderGlobalSettings() {
+      const panel = document.getElementById('sidebarGlobalPanel');
+      if (!draftConfig?.global) return;
+      const g = draftConfig.global;
+
+      panel.innerHTML = `
+        <div class="space-y-6">
+          <div class="border-b border-slate-200 pb-3">
+            <h3 class="text-sm font-bold text-[#0B132B]">Announcement Bar</h3>
+            <label class="flex items-center gap-2 mt-2 font-bold text-slate-700 cursor-pointer">
+              <input type="checkbox" ${g.announcementBar?.enabled !== false ? 'checked' : ''} onchange="updateGlobalSetting('announcementBar.enabled', this.checked)" class="w-4 h-4 rounded text-[#F97316]">
+              <span>Enable Announcement Bar</span>
+            </label>
+          </div>
+
+          <div class="border-b border-slate-200 pb-3 space-y-3">
+            <h3 class="text-sm font-bold text-[#0B132B]">Branding &amp; Colors</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Navy Brand Color</label>
+                <div class="flex items-center gap-2">
+                  <input type="color" value="${g.themeTokens?.brandNavy || '#0B132B'}" onchange="updateGlobalSetting('themeTokens.brandNavy', this.value)" class="w-8 h-8 rounded border border-slate-300 cursor-pointer">
+                  <span class="font-mono text-xs">${g.themeTokens?.brandNavy || '#0B132B'}</span>
+                </div>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Orange Accent Color</label>
+                <div class="flex items-center gap-2">
+                  <input type="color" value="${g.themeTokens?.brandOrange || '#F97316'}" onchange="updateGlobalSetting('themeTokens.brandOrange', this.value)" class="w-8 h-8 rounded border border-slate-300 cursor-pointer">
+                  <span class="font-mono text-xs">${g.themeTokens?.brandOrange || '#F97316'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="border-b border-slate-200 pb-3 space-y-3">
+            <h3 class="text-sm font-bold text-[#0B132B]">Shipping Rates &amp; Policy</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Standard Shipping (Rs.)</label>
+                <input type="number" value="${g.shipping?.standardShippingFee || 250}" oninput="updateGlobalSetting('shipping.standardShippingFee', parseInt(this.value))" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300 font-bold">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Free Delivery Threshold (Rs.)</label>
+                <input type="number" value="${g.shipping?.freeShippingThreshold || 3500}" oninput="updateGlobalSetting('shipping.freeShippingThreshold', parseInt(this.value))" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300 font-bold">
+              </div>
+            </div>
+          </div>
+
+          <div class="border-b border-slate-200 pb-3 space-y-3">
+            <h3 class="text-sm font-bold text-[#0B132B]">Contact &amp; WhatsApp</h3>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 mb-1">Store Slogan</label>
+              <input type="text" value="${g.contact?.storeSlogan || 'SHOP SMART, LIVE BETTER'}" oninput="updateGlobalSetting('contact.storeSlogan', this.value)" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300 font-bold">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">WhatsApp Display</label>
+                <input type="text" value="${g.contact?.whatsappNumber || '+923001234567'}" oninput="updateGlobalSetting('contact.whatsappNumber', this.value)" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Support Email</label>
+                <input type="email" value="${g.contact?.supportEmail || 'calenvee.pk@gmail.com'}" oninput="updateGlobalSetting('contact.supportEmail', this.value)" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300">
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function updateGlobalSetting(path, value) {
+      recordStateForUndo();
+      const parts = path.split('.');
+      let obj = draftConfig.global;
+      for (let i = 0; i < parts.length - 1; i++) {
+        obj[parts[i]] = obj[parts[i]] || {};
+        obj = obj[parts[i]];
+      }
+      obj[parts[parts.length - 1]] = value;
+      markDraftDirty();
+      syncDraftToPreview();
+    }
+
+    // SECTION LIBRARY MODAL
+    const SECTION_LIBRARY_ITEMS = [
+      { type: 'hero', name: 'Hero Banner Slider', desc: 'Up to 3 rotating high-res slides with custom headlines and buttons.', icon: '🖼️' },
+      { type: 'product-grid', name: 'Product Grid', desc: 'Curated products with rules: bestsellers, trending, new drops or category.', icon: '🛍️' },
+      { type: 'category-grid', name: 'Category Grid', desc: 'Visual cards linking to shop collections with photo banners.', icon: '🗂️' },
+      { type: 'deal-of-the-day', name: 'Deal of the Day', desc: 'Limited flash deal with reload-proof timer and discount pricing.', icon: '⚡' },
+      { type: 'promo-banner', name: 'Promotional Banners', desc: 'Single, split or trio marketing callout cards.', icon: '🏷️' },
+      { type: 'trust-badges', name: 'Trust Badges & USPs', desc: 'Nationwide COD, inspected quality, and exchange guarantee pills.', icon: '🛡️' },
+      { type: 'testimonials', name: 'Customer Testimonials', desc: 'Real verified reviews from Karachi, Lahore, Islamabad and nationwide.', icon: '⭐' },
+      { type: 'brand-story', name: 'Brand Story', desc: 'Editorial about-us story block with craftsmanship highlights.', icon: '📖' },
+      { type: 'faq', name: 'FAQ Accordion', desc: 'Expandable answers addressing delivery, returns, and payments.', icon: '❓' },
+      { type: 'newsletter', name: 'Newsletter & CTA', desc: 'Subscriber lead capture offering instant discount vouchers.', icon: '✉️' },
+      { type: 'rich-text', name: 'Rich Text Section', desc: 'Formatted HTML copy with headlines and policy explanations.', icon: '📝' },
+      { type: 'image-gallery', name: 'Image Gallery', desc: 'Grid of luxury unboxing and lifestyle photography with alt text.', icon: '📸' }
+    ];
+
+    function openSectionLibraryModal() {
+      const container = document.getElementById('sectionLibraryCards');
+      container.innerHTML = SECTION_LIBRARY_ITEMS.map(item => `
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 hover:border-[#F97316] hover:shadow-md transition flex flex-col justify-between space-y-3">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-orange-50 text-[#F97316] flex items-center justify-center text-xl mb-2">${item.icon}</div>
+            <h4 class="font-bold text-xs text-[#0B132B]">${item.name}</h4>
+            <p class="text-[11px] text-slate-500 mt-1 leading-snug">${item.desc}</p>
+          </div>
+          <button onclick="insertSectionFromLibrary('${item.type}')" class="w-full py-2 rounded-xl bg-slate-100 hover:bg-[#F97316] hover:text-white text-slate-800 text-xs font-bold transition">Add to Page</button>
+        </div>
+      `).join('');
+      document.getElementById('sectionLibraryModal').classList.remove('hidden');
+    }
+
+    function closeSectionLibraryModal() {
+      document.getElementById('sectionLibraryModal').classList.add('hidden');
+    }
+
+    function insertSectionFromLibrary(type) {
+      recordStateForUndo();
+      const page = draftConfig?.pages?.[selectedPageId];
+      if (!page) return;
+
+      const newSec = {
+        id: type + '-' + Date.now(),
+        type,
+        visible: true,
+        settings: {
+          title: type.toUpperCase().replace('-', ' ')
+        },
+        blocks: []
+      };
+
+      if (type === 'hero') {
+        newSec.settings = {
+          autoIntervalSeconds: 5,
+          slides: [{
+            id: 'slide-1',
+            kicker: 'QUALITY. STYLE. EVERYDAY.',
+            headlinePrefix: 'Everything You Love,',
+            headlineHighlight: 'All in One Place.',
+            subtitle: 'Shop top-quality products across watches, jewelry and accessories.',
+            ctaText: 'Shop Now',
+            ctaLink: '/shop',
+            image: '/products/1792095143426-luxury_accessories_still_life_with_backpack.png',
+            imageAlt: 'Calenvee Luxury Collection'
+          }]
+        };
+      } else if (type === 'product-grid') {
+        newSec.settings = {
+          title: 'FEATURED COLLECTION',
+          subtitle: 'Handpicked bestsellers crafted for timeless distinction.',
+          rule: 'bestsellers',
+          limit: 8,
+          columnsDesktop: 4
+        };
+      }
+
+      page.sections.push(newSec);
+      closeSectionLibraryModal();
+      markDraftDirty();
+      renderCustomizer();
+      syncDraftToPreview();
+      openSectionSettings(newSec.id);
+    }
+
+    // DRAFT PERSISTENCE & LIVE PUBLISH
+    async function saveDraftOnly() {
+      const btn = document.getElementById('saveDraftBtn');
+      btn.innerText = 'Saving...';
+      try {
+        const res = await fetch('/api/cms/draft', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({ config: draftConfig })
+        });
+        const data = await res.json();
+        if (data.success) {
+          btn.innerText = 'Saved Draft!';
+          setTimeout(() => btn.innerText = 'Save Draft', 2000);
+        } else {
+          alert('Validation error: ' + (data.errors ? data.errors.join('; ') : 'Invalid payload'));
+          btn.innerText = 'Save Draft';
+        }
+      } catch (err) {
+        alert('Error saving draft: ' + err.message);
+        btn.innerText = 'Save Draft';
+      }
+    }
+
+    async function openPublishDiffModal() {
+      try {
+        const res = await fetch('/api/cms/diff', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({ current: siteConfig, target: draftConfig })
+        });
+        const data = await res.json();
+        const list = document.getElementById('publishDiffList');
+        if (data.changes && data.changes.length > 0) {
+          list.innerHTML = data.changes.map(c => `<li>${c}</li>`).join('');
+        } else {
+          list.innerHTML = `<li>No structural differences detected from published configuration.</li>`;
+        }
+        document.getElementById('publishDiffModal').classList.remove('hidden');
+      } catch (err) {
+        alert('Failed to compute diff: ' + err.message);
+      }
+    }
+
+    function closePublishDiffModal() {
+      document.getElementById('publishDiffModal').classList.add('hidden');
+    }
+
+    async function executePublishStorefront() {
+      const btn = document.getElementById('confirmPublishBtn');
+      btn.innerText = 'Publishing...';
+      const summary = document.getElementById('publishSnapshotNote').value;
+
+      try {
+        const res = await fetch('/api/cms/publish', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({ config: draftConfig, summary })
+        });
+        const data = await res.json();
+        if (data.success) {
+          siteConfig = JSON.parse(JSON.stringify(draftConfig));
+          isDirty = false;
+          updateDirtyIndicator();
+          closePublishDiffModal();
+          alert('✓ Storefront published successfully! Snapshot ID: ' + data.snapshotId);
+        } else {
+          alert('Publish failed: ' + (data.errors ? data.errors.join('; ') : 'Validation error'));
+        }
+      } catch (err) {
+        alert('Error publishing: ' + err.message);
+      } finally {
+        btn.innerText = 'Confirm & Publish Live';
+      }
+    }
+
+    // SNAPSHOT HISTORY & ROLLBACK
+    async function openHistoryModal() {
+      try {
+        const res = await fetch('/api/cms/history');
+        const data = await res.json();
+        const list = document.getElementById('historySnapshotsList');
+
+        if (!data.snapshots || data.snapshots.length === 0) {
+          list.innerHTML = `<p class="text-slate-400 text-xs py-4 text-center">No snapshots recorded yet.</p>`;
+        } else {
+          list.innerHTML = data.snapshots.map((s, idx) => `
+            <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 flex items-center justify-between gap-3 text-xs">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-[#0B132B]">${s.summary || 'Storefront Snapshot'}</span>
+                  ${idx === 0 ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">Latest</span>' : ''}
+                </div>
+                <p class="text-[11px] text-slate-400 font-mono mt-0.5">${s.dateFormatted} (${s.sizeKb} KB)</p>
+              </div>
+              <button onclick="executeRollback('${s.id}')" class="py-1.5 px-3 rounded-xl bg-slate-900 hover:bg-[#F97316] text-white font-bold text-xs transition">Restore Version</button>
+            </div>
+          `).join('');
+        }
+        document.getElementById('historyModal').classList.remove('hidden');
+      } catch (err) {
+        alert('Failed loading history: ' + err.message);
+      }
+    }
+
+    function closeHistoryModal() {
+      document.getElementById('historyModal').classList.add('hidden');
+    }
+
+    async function executeRollback(snapshotId) {
+      if (!confirm(`Are you sure you want to rollback the storefront to ${snapshotId}?`)) return;
+      try {
+        const res = await fetch('/api/cms/rollback', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({ snapshotId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          closeHistoryModal();
+          await loadCmsConfig();
+          renderCustomizer();
+          syncDraftToPreview();
+          alert('✓ Successfully rolled back to ' + snapshotId);
+        } else {
+          alert('Rollback failed: ' + data.error);
+        }
+      } catch (err) {
+        alert('Rollback error: ' + err.message);
+      }
+    }
+
+    // KEYBOARD SHORTCUTS (CTRL+Z, CTRL+Y)
+    function initKeyboardShortcuts() {
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+          e.preventDefault();
+          undoDraftChange();
+        } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+          e.preventDefault();
+          redoDraftChange();
+        }
+      });
+    }
+
+    // ===============================================================
+    // MEDIA LIBRARY LOGIC
+    // ===============================================================
+    async function loadMediaCatalog() {
+      try {
+        const res = await fetch('/api/media');
+        const data = await res.json();
+        if (data.success) {
+          mediaList = data.items || [];
+          document.getElementById('mediaTotalCount').innerText = data.totalFiles || mediaList.length;
+          document.getElementById('mediaUsedCount').innerText = (data.totalFiles - data.unusedCount) || 0;
+          document.getElementById('mediaUnusedCount').innerText = data.unusedCount || 0;
+          document.getElementById('mediaOversizedCount').innerText = data.oversizedCount || 0;
+          renderMediaGrid();
+        }
+      } catch (err) {
+        console.warn('Failed to load media catalog:', err);
+      }
+    }
+
+    let activeMediaFilter = 'all';
+
+    function filterMediaList(f) {
+      activeMediaFilter = f;
+      ['all', 'used', 'unused', 'oversized'].forEach(id => {
+        const btn = document.getElementById('mediaFilter' + id.charAt(0).toUpperCase() + id.slice(1));
+        if (btn) {
+          btn.className = id === f
+            ? 'px-3 py-1.5 rounded-lg font-bold bg-[#F97316] text-white'
+            : 'px-3 py-1.5 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200';
+        }
+      });
+      renderMediaGrid();
+    }
+
+    function renderMediaGrid() {
+      const container = document.getElementById('mediaCatalogGrid');
+      if (!container) return;
+      const search = (document.getElementById('mediaSearchInput')?.value || '').toLowerCase();
+
+      const filtered = mediaList.filter(item => {
+        if (activeMediaFilter === 'used' && item.isUnused) return false;
+        if (activeMediaFilter === 'unused' && !item.isUnused) return false;
+        if (activeMediaFilter === 'oversized' && !item.isOversized) return false;
+        if (search) {
+          return item.filename.toLowerCase().includes(search) || item.altText.toLowerCase().includes(search);
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400 text-xs">No media files match your filter.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => `
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition flex flex-col group">
+          <div class="aspect-square bg-slate-100 relative overflow-hidden flex items-center justify-center">
+            <img src="${item.url}" alt="${item.altText}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+            ${item.isOversized ? '<span class="absolute top-2 right-2 bg-rose-500 text-white font-mono text-[9px] px-1.5 py-0.5 rounded font-bold">Oversized</span>' : ''}
+            ${item.isUnused ? '<span class="absolute top-2 left-2 bg-slate-800/80 text-white text-[9px] px-1.5 py-0.5 rounded font-bold">Unused</span>' : ''}
+          </div>
+          <div class="p-3 text-[11px] flex-1 flex flex-col justify-between">
+            <div>
+              <p class="font-bold text-slate-800 truncate" title="${item.filename}">${item.filename}</p>
+              <p class="text-slate-400 text-[10px] truncate" title="${item.altText}">Alt: "${item.altText}"</p>
+            </div>
+            <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+              <span>${item.sizeKb} KB</span>
+              <span>${item.width ? `${item.width}×${item.height}` : item.format}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openMediaUploadModal() {
+      document.getElementById('mediaUploadModal').classList.remove('hidden');
+    }
+
+    function closeMediaUploadModal() {
+      document.getElementById('mediaUploadModal').classList.add('hidden');
+    }
+
+    async function handleMediaUploadSubmit(e) {
+      e.preventDefault();
+      const fileInput = document.getElementById('mediaUploadFileInput');
+      const altInput = document.getElementById('mediaUploadAltInput');
+      const folderInput = document.getElementById('mediaUploadFolderInput');
+      const feedback = document.getElementById('mediaUploadFeedback');
+      const submitBtn = document.getElementById('mediaUploadSubmitBtn');
+
+      if (!fileInput.files || fileInput.files.length === 0) return;
+      if (!altInput.value.trim()) {
+        alert('Alt text is required for every uploaded image.');
+        return;
+      }
+
+      const file = fileInput.files[0];
+      submitBtn.innerText = 'Optimizing to WebP...';
+      submitBtn.disabled = true;
+
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const res = await fetch('/api/media/upload', {
+            method: 'POST',
+            headers: API_HEADERS,
+            body: JSON.stringify({
+              filename: file.name,
+              data: reader.result,
+              altText: altInput.value.trim(),
+              subDir: folderInput.value
+            })
+          });
+          const data = await res.json();
+          if (data.success) {
+            feedback.innerHTML = `<span class="text-emerald-600">✓ Uploaded &amp; optimized to WebP: ${data.url} (${data.sizeKb} KB)</span>`;
+            setTimeout(() => {
+              closeMediaUploadModal();
+              loadMediaCatalog();
+            }, 1000);
+          } else {
+            feedback.innerHTML = `<span class="text-rose-600">Upload failed: ${data.error}</span>`;
+          }
+        } catch (err) {
+          feedback.innerHTML = `<span class="text-rose-600">Error: ${err.message}</span>`;
+        } finally {
+          submitBtn.innerText = 'Upload & Optimize';
+          submitBtn.disabled = false;
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ===============================================================
+    // PRODUCTS MANAGEMENT LOGIC
+    // ===============================================================
+    async function loadProducts() {
+      const res = await fetch('/api/products');
+      productsList = await res.json();
+      document.getElementById('productsCount').innerText = productsList.length;
+      renderProductsGrid();
+    }
+
+    function renderProductsGrid() {
+      const grid = document.getElementById('productsGrid');
+      if (!grid) return;
+      const search = (document.getElementById('productSearch')?.value || '').toLowerCase();
+      const cat = document.getElementById('categoryFilter')?.value || 'all';
+
+      const filtered = productsList.filter(p => {
+        if (cat !== 'all' && p.category !== cat) return false;
+        if (search && !p.name.toLowerCase().includes(search) && !p.id.toLowerCase().includes(search)) return false;
+        return true;
+      });
+
+      grid.innerHTML = filtered.map(p => `
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition p-4 flex flex-col justify-between space-y-3">
+          <div class="flex gap-3">
+            <img src="${(p.images && p.images[0]) || p.image || '/logo.png'}" alt="${p.name}" class="w-16 h-16 rounded-xl object-cover bg-slate-100 shrink-0">
+            <div class="min-w-0 flex-1">
+              <span class="text-[10px] font-mono text-slate-400 font-bold uppercase">${p.category || 'general'}</span>
+              <h4 class="font-bold text-xs text-[#0B132B] truncate" title="${p.name}">${p.name}</h4>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="font-extrabold text-[#F97316] text-xs">Rs. ${p.price?.toLocaleString()}</span>
+                ${p.originalPrice ? `<span class="text-slate-400 line-through text-[11px]">Rs. ${p.originalPrice?.toLocaleString()}</span>` : ''}
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${p.status === 'hidden' ? 'bg-slate-100 text-slate-500' : 'bg-emerald-50 text-emerald-700'}">${p.status || 'published'}</span>
+            <span class="text-slate-500 font-semibold">Stock: ${p.stockCount ?? 20}</span>
+            <button onclick="editProduct('${p.id}')" class="text-[#0B132B] hover:text-[#F97316] font-bold">Edit ↗</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterProducts() {
+      renderProductsGrid();
+    }
+
+    function openProductModal() {
+      document.getElementById('productModalTitle').innerText = 'Add New Product';
+      document.getElementById('p_id').value = 'cv-' + Date.now();
+      document.getElementById('p_name').value = '';
+      document.getElementById('p_slug').value = '';
+      document.getElementById('p_price').value = '';
+      document.getElementById('p_originalPrice').value = '';
+      document.getElementById('p_stockCount').value = '25';
+      document.getElementById('p_tags').value = '';
+      document.getElementById('p_images').value = '';
+      document.getElementById('p_shortDescription').value = '';
+      document.getElementById('p_description').value = '';
+      document.getElementById('productModal').classList.remove('hidden');
+    }
+
+    function editProduct(productId) {
+      const p = productsList.find(x => x.id === productId);
+      if (!p) return;
+      document.getElementById('productModalTitle').innerText = 'Edit ' + p.name;
+      document.getElementById('p_id').value = p.id;
+      document.getElementById('p_name').value = p.name || '';
+      document.getElementById('p_slug').value = p.slug || '';
+      document.getElementById('p_price').value = p.price || '';
+      document.getElementById('p_originalPrice').value = p.originalPrice || '';
+      document.getElementById('p_stockCount').value = p.stockCount ?? 20;
+      document.getElementById('p_status').value = p.status || 'published';
+      document.getElementById('p_tags').value = Array.isArray(p.tags) ? p.tags.join(', ') : '';
+      document.getElementById('p_images').value = Array.isArray(p.images) ? p.images.join('\n') : (p.image || '');
+      document.getElementById('p_shortDescription').value = p.shortDescription || '';
+      document.getElementById('p_description').value = p.description || '';
+      document.getElementById('p_isBestSeller').checked = Boolean(p.isBestSeller);
+      document.getElementById('p_isNewDrop').checked = Boolean(p.isNewDrop);
+      document.getElementById('p_isTrending').checked = Boolean(p.isTrending);
+      document.getElementById('productModal').classList.remove('hidden');
+    }
+
+    function closeProductModal() {
+      document.getElementById('productModal').classList.add('hidden');
+    }
+
+    async function handleProductSave(e) {
+      e.preventDefault();
+      const id = document.getElementById('p_id').value;
+      const imagesRaw = document.getElementById('p_images').value.split('\n').map(s => s.trim()).filter(Boolean);
+      const tagsRaw = document.getElementById('p_tags').value.split(',').map(s => s.trim()).filter(Boolean);
+
+      const payload = {
+        id,
+        name: document.getElementById('p_name').value.trim(),
+        slug: document.getElementById('p_slug').value.trim(),
+        category: document.getElementById('p_category').value,
+        price: parseInt(document.getElementById('p_price').value),
+        originalPrice: document.getElementById('p_originalPrice').value ? parseInt(document.getElementById('p_originalPrice').value) : undefined,
+        stockCount: parseInt(document.getElementById('p_stockCount').value),
+        status: document.getElementById('p_status').value,
+        tags: tagsRaw,
+        images: imagesRaw,
+        image: imagesRaw[0] || '',
+        shortDescription: document.getElementById('p_shortDescription').value.trim(),
+        description: document.getElementById('p_description').value.trim(),
+        isBestSeller: document.getElementById('p_isBestSeller').checked,
+        isNewDrop: document.getElementById('p_isNewDrop').checked,
+        isTrending: document.getElementById('p_isTrending').checked
+      };
+
+      try {
+        const res = await fetch('/api/products/save', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          closeProductModal();
+          await loadProducts();
+        } else {
+          alert('Save failed: ' + data.error);
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    // ===============================================================
+    // CATEGORIES MANAGEMENT
+    // ===============================================================
+    async function loadCategories() {
+      const res = await fetch('/api/categories');
+      categoriesList = await res.json();
+      const countEl = document.getElementById('categoriesCount');
+      if (countEl) countEl.innerText = categoriesList.length;
+
+      const filterEl = document.getElementById('categoryFilter');
+      const productCatEl = document.getElementById('p_category');
+      if (filterEl) {
+        filterEl.innerHTML = '<option value="all">All Categories</option>' + categoriesList.map(c => `<option value="${c.id || c.slug}">${c.name || c.title}</option>`).join('');
+      }
+      if (productCatEl) {
+        productCatEl.innerHTML = categoriesList.map(c => `<option value="${c.id || c.slug}">${c.name || c.title}</option>`).join('');
+      }
+    }
+
+    function renderCategories() {
+      const list = document.getElementById('categoriesList');
+      if (!list) return;
+      list.innerHTML = categoriesList.map(c => `
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 space-y-2">
+          <img src="${c.image || '/logo.png'}" alt="${c.name}" class="w-full h-32 rounded-xl object-cover bg-slate-100">
+          <h4 class="font-bold text-xs text-[#0B132B]">${c.name || c.title}</h4>
+          <p class="text-[11px] text-slate-500 font-mono">${c.slug}</p>
+        </div>
+      `).join('');
+    }
+
+    // ===============================================================
+    // DEALS MANAGEMENT
+    // ===============================================================
+    async function loadDeals() {
+      const res = await fetch('/api/deals');
+      dealsList = await res.json();
+      renderDeals();
+    }
+
+    function renderDeals() {
+      const container = document.getElementById('dealsListContainer');
+      if (!container) return;
+      container.innerHTML = dealsList.map(d => `
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-[#F97316]">${d.badge || 'Flash Deal'}</span>
+            <h4 class="font-bold text-sm text-[#0B132B]">${d.title}</h4>
+            <p class="text-xs text-slate-500">Deal Price: <span class="font-bold text-emerald-600">Rs. ${d.dealPrice}</span> | Ends: ${d.endDateTime}</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-xs font-bold ${d.active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}">${d.active ? 'Active' : 'Inactive'}</span>
+        </div>
+      `).join('');
+    }
+
+    // ===============================================================
+    // ORDERS & DISPATCH LOGIC
+    // ===============================================================
+    async function loadOrders() {
+      const res = await fetch('/api/orders');
+      const data = await res.json();
+      if (data && Array.isArray(data.orders)) {
+        ordersList = data.orders;
+        document.getElementById('ordersCount').innerText = ordersList.length;
+        document.getElementById('statTotalOrders').innerText = ordersList.length;
+        const pending = ordersList.filter(o => ['Placed', 'Confirmed', 'In Processing'].includes(o.status)).length;
+        const dispatched = ordersList.filter(o => o.status === 'Dispatched').length;
+        document.getElementById('statPendingOrders').innerText = pending;
+        document.getElementById('statDispatchedOrders').innerText = dispatched;
+        
+        const rev = ordersList.reduce((acc, o) => acc + (parseFloat(o.total) || 0), 0);
+        document.getElementById('statGrossRevenue').innerText = 'Rs. ' + rev.toLocaleString();
+        renderOrders();
+      }
+    }
+
+    function renderOrders() {
+      const container = document.getElementById('ordersListContainer');
+      if (!container) return;
+      const search = (document.getElementById('orderSearchInput')?.value || '').toLowerCase();
+      const statusFilter = document.getElementById('orderStatusFilter')?.value || 'all';
+
+      const filtered = ordersList.filter(o => {
+        if (statusFilter !== 'all' && o.status !== statusFilter) return false;
+        if (search) {
+          const matchId = String(o.orderId || '').toLowerCase().includes(search);
+          const matchCust = String(o.customerName || '').toLowerCase().includes(search);
+          const matchPhone = String(o.phone || '').toLowerCase().includes(search);
+          return matchId || matchCust || matchPhone;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-slate-400 text-xs">No orders match filter.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(o => `
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono font-bold text-xs text-[#0B132B]">#${o.orderId}</span>
+              <span class="text-xs font-semibold text-slate-700">${o.customerName}</span>
+              <span class="text-[11px] text-slate-400 font-mono">${o.phone}</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1">${o.shippingAddress || o.city || 'Pakistan'}</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="font-extrabold text-xs text-[#0B132B]">Rs. ${(parseFloat(o.total) || 0).toLocaleString()}</span>
+            <select onchange="updateOrderStatus('${o.orderId}', this.value)" class="py-1 px-2.5 rounded-lg border border-slate-300 font-bold text-xs">
+              <option value="Placed" ${o.status === 'Placed' ? 'selected' : ''}>Placed</option>
+              <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+              <option value="In Processing" ${o.status === 'In Processing' ? 'selected' : ''}>In Processing</option>
+              <option value="Dispatched" ${o.status === 'Dispatched' ? 'selected' : ''}>Dispatched</option>
+              <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+              <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+            </select>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterOrders() {
+      renderOrders();
+    }
+
+    async function updateOrderStatus(orderId, status) {
+      try {
+        await fetch('/api/orders/update-status', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({ orderId, status })
+        });
+        await loadOrders();
+      } catch (err) {
+        alert('Failed to update status: ' + err.message);
+      }
+    }
+
+    // CLOUD SYNC & DEPLOY
+    async function triggerCloudSyncAll() {
+      const btn = document.getElementById('syncCloudBtnText');
+      btn.innerText = 'Syncing...';
+      try {
+        const res = await fetch('/api/cloud/sync-all', { method: 'POST', headers: API_HEADERS });
+        const data = await res.json();
+        btn.innerText = data.success ? '✓ Synced!' : 'Sync Note';
+        setTimeout(() => btn.innerText = '⚡ Sync Cloud', 2000);
+      } catch (err) {
+        btn.innerText = 'Sync Error';
+      }
+    }
+
+    async function publishToLive() {
+      const output = document.getElementById('deployConsoleOutput');
+      const btn = document.getElementById('deployRunBtn');
+      btn.disabled = true;
+      btn.innerText = 'Deploying...';
+      output.innerText = 'Initiating Git commit and pushing to origin feat/functional-cms...';
+
+      try {
+        const res = await fetch('/api/publish', { method: 'POST', headers: API_HEADERS });
+        const data = await res.json();
+        output.innerText = data.output || JSON.stringify(data, null, 2);
+        btn.innerText = data.success ? '✓ Deployed!' : 'Deploy Failed';
+      } catch (err) {
+        output.innerText = 'Error: ' + err.message;
+        btn.innerText = 'Deploy Error';
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getSiteConfig } from '../../utils/configLoader';
+import { useSiteConfig } from '../../utils/configLoader';
 import { SectionRenderer } from './SectionRenderer';
 import { SEO } from '../common/SEO';
 import { QuickViewModal } from '../common/QuickViewModal';
@@ -12,7 +12,7 @@ interface PageRendererProps {
 
 export const PageRenderer: React.FC<PageRendererProps> = ({ pageId, fallbackChildren }) => {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
-  const config = getSiteConfig();
+  const config = useSiteConfig();
   const page = config.pages[pageId];
 
   // Hidden means gone: if page is hidden, show unavailable notice with noindex

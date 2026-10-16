@@ -1,3 +1,4 @@
+import React from 'react';
 import DOMPurify from 'dompurify';
 import { SiteConfig, SiteConfigSchema } from '../schema';
 import rawSiteConfig from '../data/siteConfig.json';
@@ -28,6 +29,82 @@ export function getSiteConfig(): SiteConfig {
     console.error('Failed to parse site configuration:', err);
     cachedConfig = rawSiteConfig as unknown as SiteConfig;
     return cachedConfig;
+  }
+}
+
+type ConfigListener = (config: SiteConfig) => void;
+const listeners = new Set<ConfigListener>();
+
+let currentLiveConfig: SiteConfig = getSiteConfig();
+
+/**
+ * Notifies all subscribers of an in-memory configuration update (e.g. from live preview iframe).
+ */
+export function setPreviewConfig(newConfig: SiteConfig) {
+  currentLiveConfig = newConfig;
+  cachedConfig = newConfig;
+  listeners.forEach((listener) => {
+    try {
+      listener(newConfig);
+    } catch (e) {
+      console.error('Error notifying config listener:', e);
+    }
+  });
+}
+
+/**
+ * Subscribes a callback to live configuration updates.
+ */
+export function subscribeSiteConfig(listener: ConfigListener): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+/**
+ * React hook that returns the active site configuration and re-renders whenever
+ * the admin theme editor broadcasts a live draft preview update.
+ */
+export function useSiteConfig(): SiteConfig {
+  const [config, setConfig] = React.useState<SiteConfig>(currentLiveConfig);
+
+  React.useEffect(() => {
+    return subscribeSiteConfig((updated) => {
+      setConfig({ ...updated });
+    });
+  }, []);
+
+  return config;
+}
+
+// Window postMessage listener for live iframe synchronization from Admin Theme Editor
+if (typeof window !== 'undefined') {
+  window.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'CALENVEE_PREVIEW_UPDATE' && event.data.config) {
+      const parseResult = SiteConfigSchema.safeParse(event.data.config);
+      if (parseResult.success) {
+        setPreviewConfig(parseResult.data);
+      } else {
+        // Tolerant partial fallback for drafting
+        setPreviewConfig(event.data.config as SiteConfig);
+      }
+    }
+  });
+
+  // If page loaded with ?preview=true, attempt fetching active draft from admin server
+  if (window.location.search.includes('preview=true')) {
+    fetch('/api/cms/config')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && data.draft) {
+          const parseResult = SiteConfigSchema.safeParse(data.draft);
+          if (parseResult.success) {
+            setPreviewConfig(parseResult.data);
+          }
+        }
+      })
+      .catch(() => {});
   }
 }
 
@@ -64,4 +141,5 @@ export function isSectionActive(section: { visible?: boolean; showFrom?: string;
 
   return true;
 }
+
 

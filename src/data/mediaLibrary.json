@@ -1,0 +1,20 @@
+{
+  "/products/1792126054208_test_dot.webp": {
+    "altText": "Test Dot Image",
+    "uploadedAt": "2026-10-16T04:47:34.226Z",
+    "originalName": "test_dot.png",
+    "width": 1,
+    "height": 1,
+    "sizeKb": 0,
+    "thumbUrl": "/products/1792126054208_test_dot_thumb.webp"
+  },
+  "/products/1792126069286_test_dot.webp": {
+    "altText": "Test Dot Image",
+    "uploadedAt": "2026-10-16T04:47:49.337Z",
+    "originalName": "test_dot.png",
+    "width": 1,
+    "height": 1,
+    "sizeKb": 0,
+    "thumbUrl": "/products/1792126069286_test_dot_thumb.webp"
+  }
+}

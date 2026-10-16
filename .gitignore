@@ -38,4 +38,7 @@ lerna-debug.log*
 
 .DS_Store
 Thumbs.db
+*.bak
+src/data/.history/
+src/data/*.bak
 

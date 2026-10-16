@@ -1,10 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Truck, Tag, Sparkles, ShieldCheck, Zap } from 'lucide-react';
-
+import { useSiteConfig } from '../../utils/configLoader';
 import announcementsData from '../../data/announcements.json';
 
 export const MarqueeBanner: React.FC = () => {
+  const config = useSiteConfig();
+  const barConfig = config?.global?.announcementBar;
+
+  if (barConfig && barConfig.enabled === false) {
+    return null;
+  }
+
   const iconList = [
     <Truck className="w-3.5 h-3.5 text-[#F97316]" />,
     <Tag className="w-3.5 h-3.5 text-[#F97316]" />,
@@ -13,14 +20,16 @@ export const MarqueeBanner: React.FC = () => {
     <Sparkles className="w-3.5 h-3.5 text-[#F97316]" />,
   ];
 
-  const rawList: string[] = Array.isArray(announcementsData) && announcementsData.length > 0
-    ? announcementsData
-    : [
-        'FREE SHIPPING: Nationwide on orders over Rs. 3,999',
-        'CASH ON DELIVERY: Available across all cities in Pakistan',
-        'SHOP SMART, LIVE BETTER: 7-Day Easy Exchange & Warranty',
-        'EXTRA 10% OFF: On prepaid orders (JazzCash / EasyPaisa / Bank)',
-      ];
+  const rawList: string[] = barConfig?.messages && barConfig.messages.length > 0
+    ? barConfig.messages
+    : Array.isArray(announcementsData) && announcementsData.length > 0
+      ? announcementsData
+      : [
+          'FREE SHIPPING: Nationwide on orders over Rs. 3,500',
+          'CASH ON DELIVERY: Available across all cities in Pakistan',
+          'SHOP SMART, LIVE BETTER: 7-Day Easy Exchange & Warranty',
+          'EXTRA 10% OFF: On prepaid orders (JazzCash / EasyPaisa / Bank)',
+        ];
 
   const items = rawList.map((str, i) => {
     let prefix = 'CALENVEE';
