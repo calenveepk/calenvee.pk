@@ -48,11 +48,19 @@ describe('Admin Server & CMS Core Modules', () => {
     expect(result.thumbUrl).toContain('_thumb.webp');
     expect(result.altText).toBe('Test Dot Image');
 
-    // Clean up created test files
+    // Clean up created test files and registry entry
     const fullWebp = path.join(cmsStorage.PUBLIC_DIR, 'products', result.filename);
     const fullThumb = path.join(cmsStorage.PUBLIC_DIR, 'products', path.basename(result.thumbUrl));
     if (fs.existsSync(fullWebp)) fs.unlinkSync(fullWebp);
     if (fs.existsSync(fullThumb)) fs.unlinkSync(fullThumb);
+
+    const registryFile = path.join(cmsStorage.DATA_DIR, 'mediaLibrary.json');
+    if (fs.existsSync(registryFile)) {
+      const reg = cmsStorage.readJsonFile(registryFile, {});
+      delete reg[result.url];
+      cmsStorage.writeJsonFileAtomic(registryFile, reg);
+    }
   });
 });
+
 

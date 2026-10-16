@@ -178,3 +178,4 @@ Clicking **Publish Live** in the Deploy tab executes:
 1. `git add -A && git commit -m "Store content & catalog update..."`
 2. `git push origin feat/functional-cms`
 3. Vercel automatically detects the push and deploys the new build to the global edge network across Pakistan in ~45 seconds.
+

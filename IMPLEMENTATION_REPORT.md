@@ -183,3 +183,4 @@ dist/assets/index-D_CTPgVi.js   646.87 kB │ gzip: 180.15 kB
 | `3f64379` | `feat(schema): implement Zod content model, section registry, and PageRenderer` | Milestone 3: Zod schema package, dynamic section registry, `siteConfig.json`, "hidden means gone". |
 | `9c57b19` | `feat(editor): implement Shopify-style theme customizer, live preview, atomic persistence, and media manager` | Milestone 4: Admin server on port 4200, Shopify customizer UI, live preview iframe sync, Sharp WebP. |
 | *(Current)* | `test(verify): complete Playwright crawler, visual diffs, roundtrip tests, and documentation` | Milestone 5: Round-trip test suite, visual crawler, `diff-report.html`, `CMS_ARCHITECTURE.md`, `IMPLEMENTATION_REPORT.md`. |
+
