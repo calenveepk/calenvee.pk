@@ -81,7 +81,29 @@ function writeJsonFileAtomic(filePath, data) {
   try {
     const jsonString = JSON.stringify(data, null, 2);
     fs.writeFileSync(tmpFile, jsonString, 'utf8');
-    fs.renameSync(tmpFile, filePath);
+
+    // Windows rename retry loop to handle momentary file watcher / antivirus locks
+    let renamed = false;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      try {
+        fs.renameSync(tmpFile, filePath);
+        renamed = true;
+        break;
+      } catch (e) {
+        if (e.code === 'EPERM' || e.code === 'EBUSY') {
+          const start = Date.now();
+          while (Date.now() - start < 20) {}
+          continue;
+        }
+        break;
+      }
+    }
+
+    if (!renamed) {
+      // Fallback: direct atomic write if Windows rename is held by file watcher
+      fs.writeFileSync(filePath, jsonString, 'utf8');
+      try { fs.unlinkSync(tmpFile); } catch (_) {}
+    }
     return true;
   } catch (err) {
     if (fs.existsSync(tmpFile)) {

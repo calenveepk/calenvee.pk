@@ -2,7 +2,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 
 // Import modular CMS storage safety & media management engines
 const {
@@ -26,6 +26,67 @@ const {
   getMediaCatalog,
   processMediaUpload
 } = require('./media-manager.cjs');
+
+let viteProcess = null;
+
+function checkVitePort(timeout = 1000) {
+  return new Promise((resolve) => {
+    const req = http.get('http://127.0.0.1:5173', { timeout }, () => {
+      resolve(true);
+    });
+    req.on('error', () => resolve(false));
+    req.on('timeout', () => { req.destroy(); resolve(false); });
+  });
+}
+
+async function ensureViteRunning() {
+  const isRunning = await checkVitePort(800);
+  if (isRunning) {
+    console.log('[Storefront Preview] ✓ Vite dev server is active on http://localhost:5173');
+    return true;
+  }
+
+  console.log('[Storefront Preview] 🚀 Auto-starting Vite storefront preview server on http://localhost:5173 ...');
+  const isWindows = process.platform === 'win32';
+  const npmCmd = isWindows ? 'npm.cmd' : 'npm';
+
+  try {
+    viteProcess = spawn(npmCmd, ['run', 'dev'], {
+      cwd: ROOT_DIR,
+      stdio: 'ignore',
+      detached: false
+    });
+
+    viteProcess.on('error', (err) => {
+      console.warn('[Storefront Preview] Note on Vite process:', err.message);
+    });
+
+    viteProcess.on('exit', () => {
+      viteProcess = null;
+    });
+
+    return true;
+  } catch (err) {
+    console.warn('[Storefront Preview] Error spawning Vite dev server:', err.message);
+    return false;
+  }
+}
+
+function cleanupProcesses() {
+  if (viteProcess) {
+    try {
+      if (process.platform === 'win32') {
+        exec(`taskkill /pid ${viteProcess.pid} /T /F`, () => {});
+      } else {
+        viteProcess.kill('SIGTERM');
+      }
+    } catch (_) {}
+  }
+}
+
+process.on('SIGINT', () => { cleanupProcesses(); process.exit(0); });
+process.on('SIGTERM', () => { cleanupProcesses(); process.exit(0); });
+process.on('exit', () => cleanupProcesses());
 
 const PORT = 4200;
 const PRODUCTS_FILE = path.join(DATA_DIR, 'products.json');
@@ -658,6 +719,30 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    // 17. PREVIEW STATUS & LAUNCHER
+    if (pathname === '/api/preview-status' && req.method === 'GET') {
+      const active = await checkVitePort(1000);
+      sendJson(res, 200, { active, port: 5173 });
+      return;
+    }
+
+    if (pathname === '/api/start-vite' && req.method === 'POST') {
+      const active = await checkVitePort(800);
+      if (active) {
+        sendJson(res, 200, { success: true, message: 'Already running', port: 5173 });
+        return;
+      }
+      await ensureViteRunning();
+      let ready = false;
+      for (let i = 0; i < 20; i++) {
+        await new Promise(r => setTimeout(r, 250));
+        ready = await checkVitePort(600);
+        if (ready) break;
+      }
+      sendJson(res, 200, { success: ready, port: 5173 });
+      return;
+    }
+
     sendJson(res, 404, { error: 'Not found' });
 
   } catch (err) {
@@ -671,7 +756,12 @@ server.listen(PORT, '127.0.0.1', () => {
   console.log(`=======================================================`);
   console.log(` CALENVEE SHOPIFY-STYLE STORE MANAGER RUNNING!`);
   console.log(`=======================================================`);
-  console.log(` URL: http://localhost:${PORT}`);
+  console.log(` Admin URL:      http://localhost:${PORT}`);
+  console.log(` Storefront URL: http://localhost:5173`);
   console.log(` Bound strictly to 127.0.0.1 (Localhost Only)`);
   console.log(`=======================================================`);
+
+  // Ensure storefront preview dev server is running
+  ensureViteRunning();
 });
+
