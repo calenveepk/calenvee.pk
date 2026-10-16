@@ -108,6 +108,19 @@ try {
   reportFail('Failed to parse src/data/homeContent.json: ' + err.message);
 }
 
+let siteConfig;
+try {
+  siteConfig = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/data/siteConfig.json'), 'utf8'));
+  if (!siteConfig.global || !siteConfig.pages) {
+    reportFail('siteConfig.json missing global or pages root object');
+  } else {
+    const pageKeys = Object.keys(siteConfig.pages);
+    reportPass(`siteConfig.json valid (${pageKeys.length} configured pages: ${pageKeys.join(', ')})`);
+  }
+} catch (err) {
+  reportFail('Failed to parse src/data/siteConfig.json: ' + err.message);
+}
+
 // ==============================================================================
 // 2. PRODUCTS REFERENCING VALID CATEGORIES
 // ==============================================================================
@@ -167,6 +180,7 @@ extractLocalImages(products);
 extractLocalImages(categories);
 extractLocalImages(deals);
 extractLocalImages(homeContent);
+extractLocalImages(siteConfig);
 
 const missingImages = [];
 const checkedImages = new Set();

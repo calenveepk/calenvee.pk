@@ -26,11 +26,16 @@ export const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const product = PRODUCTS.find((p) => p.slug === slug);
 
-  if (!product) {
+  if (!product || (product as any).status === 'hidden' || (product as any).isArchived) {
     return (
       <div className="min-h-screen py-24 text-center px-4 bg-white text-gray-900">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Piece Not Found</h1>
-        <p className="text-gray-500 text-xs mb-6">The requested piece is no longer available.</p>
+        <SEO
+          title="Product Unavailable | Calenvee.pk"
+          description="The requested piece is no longer available or is currently offline."
+        />
+        <meta name="robots" content="noindex, nofollow" />
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Piece Unavailable</h1>
+        <p className="text-gray-500 text-xs mb-6">The requested piece is no longer available or has been unlisted.</p>
         <Link
           to="/shop"
           className="inline-flex items-center space-x-2 px-6 py-2.5 bg-[#F97316] hover:bg-[#EA580C] text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-md transition-colors"

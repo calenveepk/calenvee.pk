@@ -9,7 +9,17 @@ import homeContentData from '../../data/homeContent.json';
 import dealsData from '../../data/deals.json';
 import { Deal } from '../../types';
 
-export const DiscountOfferBanner: React.FC = () => {
+export interface DiscountOfferBannerProps {
+  settings?: {
+    dealId?: string;
+    title?: string;
+    subtitle?: string;
+    ctaText?: string;
+    autoHideWhenExpired?: boolean;
+  };
+}
+
+export const DiscountOfferBanner: React.FC<DiscountOfferBannerProps> = ({ settings }) => {
   const { addItem, deals } = useCart();
   const [isAdded, setIsAdded] = useState(false);
   const [clockOffset, setClockOffset] = useState(0);

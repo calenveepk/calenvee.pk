@@ -6,6 +6,7 @@ import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { formatPKR } from '../../utils/formatters';
 import { getEffectivePrice } from '../../utils/pricing';
+import { getSiteConfig } from '../../utils/configLoader';
 
 interface ProductCardProps {
   product: Product;
@@ -22,6 +23,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const [isAdded, setIsAdded] = useState(false);
   const { addItem, deals } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+
+  const config = getSiteConfig();
+  const cardSettings = config.global.cardSettings || {
+    showBadge: true,
+    showRating: true,
+    showCompareAtPrice: true,
+    showQuickAdd: true,
+    showWishlist: true,
+  };
 
   const pricing = getEffectivePrice(product, Date.now(), deals);
 
@@ -69,7 +79,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       <div className="relative aspect-square w-full overflow-hidden bg-gray-50/80 flex items-center justify-center p-1.5 sm:p-3.5">
         
         {/* Top-Left Badge */}
-        {showBadge && (product.isBestSeller || product.discountPercentage > 0 || product.isNewDrop) && (
+        {cardSettings.showBadge && showBadge && (product.isBestSeller || product.discountPercentage > 0 || product.isNewDrop) && (
           <div className="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">
             {product.isBestSeller ? (
               <span className="px-1.5 py-0.5 text-[8px] sm:text-[10px] font-black uppercase tracking-wider bg-[#F97316] text-white rounded shadow-2xs">
@@ -88,17 +98,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         )}
 
         {/* Top-Right Wishlist Heart Button */}
-        <button
-          onClick={handleWishlistToggle}
-          className="absolute top-2 right-2 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 hover:bg-white text-gray-400 hover:text-red-500 shadow-2xs border border-gray-100 flex items-center justify-center transition-all duration-200 active:scale-90"
-          aria-label={isFavorited ? 'Remove from wishlist' : 'Add to wishlist'}
-        >
-          <Heart
-            className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors ${
-              isFavorited ? 'text-red-500 fill-red-500' : 'text-gray-400'
-            }`}
-          />
-        </button>
+        {cardSettings.showWishlist && (
+          <button
+            onClick={handleWishlistToggle}
+            className="absolute top-2 right-2 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 hover:bg-white text-gray-400 hover:text-red-500 shadow-2xs border border-gray-100 flex items-center justify-center transition-all duration-200 active:scale-90"
+            aria-label={isFavorited ? 'Remove from wishlist' : 'Add to wishlist'}
+          >
+            <Heart
+              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors ${
+                isFavorited ? 'text-red-500 fill-red-500' : 'text-gray-400'
+              }`}
+            />
+          </button>
+        )}
 
         {/* Quick View Button on Hover */}
         {onQuickView && (
@@ -138,12 +150,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </span>
 
             {/* Compact Star Rating */}
-            <div className="flex items-center space-x-0.5 shrink-0">
-              <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-amber-400 text-amber-400" />
-              <span className="text-[9px] sm:text-[10px] font-bold text-gray-600">
-                {product.rating || 5}
-              </span>
-            </div>
+            {cardSettings.showRating && (
+              <div className="flex items-center space-x-0.5 shrink-0">
+                <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-amber-400 text-amber-400" />
+                <span className="text-[9px] sm:text-[10px] font-bold text-gray-600">
+                  {product.rating || 5}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -154,7 +168,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             <span className="text-xs sm:text-sm font-black text-[#0B132B] whitespace-nowrap">
               {formatPKR(pricing.effectivePrice)}
             </span>
-            {pricing.originalPrice > pricing.effectivePrice && (
+            {cardSettings.showCompareAtPrice && pricing.originalPrice > pricing.effectivePrice && (
               <span className="text-[9px] sm:text-xs text-gray-400 line-through whitespace-nowrap">
                 {formatPKR(pricing.originalPrice)}
               </span>
@@ -162,22 +176,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
 
           {/* Touch-Friendly Add to Bag Button */}
-          <button
-            onClick={handleQuickAdd}
-            className={`h-7 w-7 sm:h-8 sm:w-8 shrink-0 rounded-lg border transition-all duration-200 active:scale-90 shadow-2xs flex items-center justify-center cursor-pointer ${
-              isAdded
-                ? 'bg-emerald-600 border-emerald-600 text-white'
-                : 'border-gray-200 bg-gray-50 hover:border-[#F97316] hover:bg-[#F97316] text-gray-800 hover:text-white'
-            }`}
-            title={isAdded ? 'Added to bag' : 'Add to cart'}
-            aria-label={isAdded ? 'Added to bag' : 'Add to cart'}
-          >
-            {isAdded ? (
-              <Check className="w-3.5 h-3.5 text-white" />
-            ) : (
-              <ShoppingBag className="w-3.5 h-3.5" />
-            )}
-          </button>
+          {cardSettings.showQuickAdd && (
+            <button
+              onClick={handleQuickAdd}
+              className={`h-7 w-7 sm:h-8 sm:w-8 shrink-0 rounded-lg border transition-all duration-200 active:scale-90 shadow-2xs flex items-center justify-center cursor-pointer ${
+                isAdded
+                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                  : 'border-gray-200 bg-gray-50 hover:border-[#F97316] hover:bg-[#F97316] text-gray-800 hover:text-white'
+              }`}
+              title={isAdded ? 'Added to bag' : 'Add to cart'}
+              aria-label={isAdded ? 'Added to bag' : 'Add to cart'}
+            >
+              {isAdded ? (
+                <Check className="w-3.5 h-3.5 text-white" />
+              ) : (
+                <ShoppingBag className="w-3.5 h-3.5" />
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>

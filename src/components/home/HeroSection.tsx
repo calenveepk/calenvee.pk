@@ -14,8 +14,18 @@ interface HeroSlide {
   image: string;
 }
 
-export const HeroSection: React.FC = () => {
-  const rawHero = homeContentData.hero || {};
+export interface HeroSectionProps {
+  settings?: {
+    autoIntervalSeconds?: number;
+    slides?: HeroSlide[];
+    trustPoints?: Array<{ text: string; icon?: string }>;
+  };
+}
+
+export const HeroSection: React.FC<HeroSectionProps> = ({ settings }) => {
+  const rawHero: any = (settings && settings.slides && settings.slides.length > 0)
+    ? settings
+    : (homeContentData.hero || {});
 
   const defaultSlide: HeroSlide = {
     id: 'slide-1',

@@ -1,0 +1,432 @@
+{
+  "version": 1,
+  "lastModified": "2026-10-16T00:00:00+05:00",
+  "global": {
+    "announcementBar": {
+      "enabled": true,
+      "messages": [
+        "Nationwide Cash on Delivery (7-10 Working Days)",
+        "Free Nationwide Delivery On Orders Over Rs. 3,500",
+        "SHOP SMART, LIVE BETTER -- Premium Timepieces & Accessories",
+        "7-Day Replacement & Exchange Guarantee",
+        "Inspected Quality Presentation Packaging"
+      ],
+      "speed": 4000
+    },
+    "themeTokens": {
+      "brandNavy": "#0B132B",
+      "brandOrange": "#F97316",
+      "brandNavyHover": "#1C2541",
+      "brandOrangeHover": "#EA580C",
+      "fontFamily": "Inter, system-ui, sans-serif"
+    },
+    "socialLinks": {
+      "instagram": "https://instagram.com/calenvee.pk",
+      "facebook": "https://facebook.com/calenvee.pk",
+      "tiktok": "",
+      "whatsapp": "https://wa.me/923001234567"
+    },
+    "contact": {
+      "storeName": "Calenvee.pk",
+      "storeSlogan": "SHOP SMART, LIVE BETTER",
+      "whatsappNumber": "+923001234567",
+      "whatsappRaw": "923001234567",
+      "supportEmail": "calenvee.pk@gmail.com",
+      "deliveryWindow": "Nationwide Delivery (7-10 Working Days)",
+      "address": "Online E-Commerce Store -- Serving All Pakistan Cities",
+      "city": "Pakistan",
+      "country": "Pakistan"
+    },
+    "shipping": {
+      "freeShippingThreshold": 3500,
+      "standardShippingFee": 250,
+      "defaultDeliveryWindow": "7-10 Working Days",
+      "shippingPolicySummary": "Nationwide Cash on Delivery across all cities and towns in Pakistan in 7-10 working days."
+    },
+    "payments": {
+      "cod": {
+        "enabled": true,
+        "title": "Cash on Delivery (COD)",
+        "providerName": "TCS / Trax Express Logistics",
+        "accountTitle": "Calenvee COD",
+        "accountNumber": "-",
+        "instructions": "Pay cash to the delivery courier rider at your doorstep upon receiving the parcel."
+      },
+      "jazzcash": {
+        "enabled": true,
+        "title": "JazzCash Mobile Account",
+        "providerName": "JazzCash",
+        "accountTitle": "Calenvee Official",
+        "accountNumber": "03001234567",
+        "instructions": "Send payment via JazzCash App or *786# and share the transaction screenshot on WhatsApp."
+      },
+      "easypaisa": {
+        "enabled": true,
+        "title": "EasyPaisa Mobile Account",
+        "providerName": "EasyPaisa",
+        "accountTitle": "Calenvee Official",
+        "accountNumber": "03001234567",
+        "instructions": "Send payment via EasyPaisa App or *786# and share the transaction screenshot on WhatsApp."
+      },
+      "bankTransfer": {
+        "enabled": true,
+        "title": "Online Bank Transfer / Raast Instant",
+        "providerName": "Meezan Bank Limited",
+        "accountTitle": "Calenvee Official",
+        "accountNumber": "01020304050607",
+        "iban": "PK00MEZN0001020304050607",
+        "raastId": "03001234567",
+        "instructions": "Transfer funds via Bank App or Raast Instant, then send the slip on WhatsApp."
+      }
+    },
+    "cardSettings": {
+      "showBadge": true,
+      "showRating": true,
+      "showCompareAtPrice": true,
+      "showQuickAdd": true,
+      "showWishlist": true
+    },
+    "header": {
+      "logoText": "CALENVEE",
+      "logoUrl": "/logo.png",
+      "faviconUrl": "/favicon.png",
+      "menuItems": [
+        { "label": "Shop All", "url": "/shop" },
+        { "label": "Watches", "url": "/category/watches" },
+        { "label": "Jewelry", "url": "/category/jewelry" },
+        { "label": "Handbags", "url": "/category/women" },
+        { "label": "Sunglasses", "url": "/category/sunglasses" },
+        { "label": "Fragrances", "url": "/category/beauty" },
+        { "label": "Tech Essentials", "url": "/category/electronics" }
+      ]
+    },
+    "footer": {
+      "columns": [
+        {
+          "title": "SHOPPING & COLLECTIONS",
+          "links": [
+            { "label": "Watches & Timepieces", "url": "/category/watches" },
+            { "label": "Waterproof Jewelry", "url": "/category/jewelry" },
+            { "label": "Handbags & Totes", "url": "/category/women" },
+            { "label": "Designer Sunglasses", "url": "/category/sunglasses" },
+            { "label": "French Fragrances", "url": "/category/beauty" },
+            { "label": "Tech Everyday Carry", "url": "/category/electronics" },
+            { "label": "Browse All Products", "url": "/shop" }
+          ]
+        },
+        {
+          "title": "CUSTOMER SERVICES",
+          "links": [
+            { "label": "Track Your Parcel", "url": "/track-order" },
+            { "label": "Shipping & Delivery Policy", "url": "/shipping-policy" },
+            { "label": "7-Day Replacement Policy", "url": "/returns" },
+            { "label": "Terms of Service", "url": "/terms" },
+            { "label": "Verified Client Reviews", "url": "/reviews" },
+            { "label": "Privacy Policy", "url": "/privacy" },
+            { "label": "Contact & WhatsApp", "url": "/contact" }
+          ]
+        }
+      ],
+      "copyright": "© 2026 Calenvee.pk. All rights reserved. Registered E-Commerce Store Pakistan.",
+      "paymentIcons": ["Cash on Delivery", "JazzCash", "EasyPaisa", "Bank Transfer"]
+    },
+    "seo": {
+      "siteTitle": "Calenvee.pk — Quality, Style, Everyday.",
+      "metaDescription": "Calenvee.pk — Online store for premium watches, waterproof jewelry, sunglasses and accessories in Pakistan. Cash on Delivery nationwide (7-10 Working Days).",
+      "canonicalUrl": "https://calenvee.pk",
+      "ogImage": "/logo.png"
+    }
+  },
+  "pages": {
+    "home": {
+      "id": "home",
+      "name": "Home Page",
+      "path": "/",
+      "visible": true,
+      "seo": {
+        "title": "Calenvee.pk — Quality, Style, Everyday.",
+        "description": "Calenvee.pk — Online store for premium watches, waterproof jewelry, sunglasses and accessories in Pakistan. Cash on Delivery nationwide (7-10 Working Days).",
+        "noindex": false
+      },
+      "sections": [
+        {
+          "id": "home-hero",
+          "type": "hero",
+          "visible": true,
+          "settings": {
+            "autoIntervalSeconds": 5,
+            "slides": [
+              {
+                "id": "slide-1",
+                "kicker": "QUALITY. STYLE. EVERYDAY.",
+                "headlinePrefix": "Everything You Love,",
+                "headlineHighlight": "All in One Place.",
+                "subtitle": "Shop top-quality products across watches, jewelry, handbags, sunglasses, and fragrances with unbeatable prices and a seamless Cash on Delivery experience nationwide.",
+                "ctaText": "Shop Now",
+                "ctaLink": "/shop",
+                "image": "/products/1792095143426-luxury_accessories_still_life_with_backpack.png",
+                "imageAlt": "Calenvee Lifestyle Essentials and Accessories",
+                "secondaryCtaText": "View Collections",
+                "secondaryCtaLink": "/shop"
+              },
+              {
+                "id": "slide-2",
+                "kicker": "TIMEPIECES & CHRONOGRAPHS",
+                "headlinePrefix": "Signature Watches,",
+                "headlineHighlight": "Engineered For Prestige.",
+                "subtitle": "Explore timeless automatic movements, royal gold accents, and sapphire-crystal durability crafted to make every second memorable.",
+                "ctaText": "Explore Watches",
+                "ctaLink": "/category/watches",
+                "image": "/products/1792095128145-premium_orange-accent_watch_advertisement.png",
+                "imageAlt": "Calenvee Signature Watch Collection"
+              },
+              {
+                "id": "slide-3",
+                "kicker": "CURATED LUXURY DROP",
+                "headlinePrefix": "Contemporary Accents,",
+                "headlineHighlight": "Defined by Elegance.",
+                "subtitle": "Elevate your daily presence with anti-tarnish waterproof jewelry, designer accessories, and artisan everyday essentials.",
+                "ctaText": "View Collection",
+                "ctaLink": "/category/jewelry",
+                "image": "/hero/hero_podium_collection.jpg",
+                "imageAlt": "Calenvee Curated Jewelry and Accessories Collection"
+              }
+            ],
+            "trustPoints": [
+              { "text": "Cash on Delivery", "icon": "ShieldCheck" },
+              { "text": "Premium Quality", "icon": "Award" },
+              { "text": "Nationwide Shipping", "icon": "Truck" }
+            ]
+          },
+          "blocks": []
+        },
+        {
+          "id": "home-categories",
+          "type": "category-grid",
+          "visible": true,
+          "settings": {
+            "title": "SHOP BY CATEGORY",
+            "subtitle": "Explore our curated lifestyle collections designed for everyday distinction.",
+            "columns": 3,
+            "limit": 6,
+            "viewAllLink": "/shop",
+            "viewAllText": "View All Categories"
+          },
+          "blocks": []
+        },
+        {
+          "id": "home-fresh-finds",
+          "type": "promo-banner",
+          "visible": true,
+          "settings": {
+            "layout": "single",
+            "banners": [
+              {
+                "id": "fresh-finds-banner",
+                "badge": "Fresh Finds",
+                "title": "New Season Curations",
+                "subtitle": "Discover newly introduced timepieces and jewelry pieces crafted with meticulous detail.",
+                "ctaText": "Explore New Drops",
+                "link": "/shop?filter=new-drop",
+                "image": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1200&q=80",
+                "imageAlt": "Fresh Finds New Arrivals"
+              }
+            ]
+          },
+          "blocks": []
+        },
+        {
+          "id": "home-trending-now",
+          "type": "product-grid",
+          "visible": true,
+          "settings": {
+            "title": "TRENDING NOW",
+            "subtitle": "Top demanded pieces ordered by clients across Pakistan this week.",
+            "rule": "trending",
+            "limit": 8,
+            "columnsDesktop": 4,
+            "columnsMobile": 2,
+            "viewAllLink": "/shop?filter=trending",
+            "viewAllText": "Explore All Trending"
+          },
+          "blocks": []
+        },
+        {
+          "id": "home-member-exclusive",
+          "type": "promo-banner",
+          "visible": true,
+          "settings": {
+            "layout": "single",
+            "banners": [
+              {
+                "id": "vip-exclusive-banner",
+                "badge": "VIP Exclusive",
+                "title": "Direct From Workshop Pricing",
+                "subtitle": "Join thousands of satisfied shoppers nationwide enjoying luxury without markups.",
+                "ctaText": "Shop Best Deals",
+                "link": "/shop?filter=top-deals",
+                "image": "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=1200&q=80",
+                "imageAlt": "VIP Exclusive Promotions"
+              }
+            ]
+          },
+          "blocks": []
+        },
+        {
+          "id": "home-value-props",
+          "type": "trust-badges",
+          "visible": true,
+          "settings": {
+            "title": "OUR SERVICE PROMISE",
+            "subtitle": "Honest service, reliable delivery, and customer care you can depend on.",
+            "badges": [
+              { "id": "b1", "title": "Cash on Delivery", "subtitle": "Pay at your doorstep anywhere in Pakistan", "icon": "Truck" },
+              { "id": "b2", "title": "Quality Inspected", "subtitle": "Every parcel is hand-checked before packing", "icon": "ShieldCheck" },
+              { "id": "b3", "title": "7-Day Exchange", "subtitle": "Hassle-free replacement policy for adjustments", "icon": "RotateCcw" },
+              { "id": "b4", "title": "Direct WhatsApp Support", "subtitle": "Prompt assistance for order placement and questions", "icon": "MessageSquare" }
+            ]
+          },
+          "blocks": []
+        },
+        {
+          "id": "home-recommended",
+          "type": "product-grid",
+          "visible": true,
+          "settings": {
+            "title": "RECOMMENDED FOR YOU",
+            "subtitle": "Carefully selected timepieces and accessories tailored for your lifestyle.",
+            "rule": "bestsellers",
+            "limit": 8,
+            "columnsDesktop": 4,
+            "columnsMobile": 2,
+            "viewAllLink": "/shop",
+            "viewAllText": "Browse Catalog"
+          },
+          "blocks": []
+        },
+        {
+          "id": "home-deal-of-the-day",
+          "type": "deal-of-the-day",
+          "visible": true,
+          "settings": {
+            "dealId": "deal-obsidian-chrono",
+            "title": "DEAL OF THE DAY",
+            "subtitle": "Limited flash reduction on our flagship timepiece.",
+            "ctaText": "CLAIM DEAL NOW",
+            "autoHideWhenExpired": true
+          },
+          "blocks": []
+        },
+        {
+          "id": "home-testimonials",
+          "type": "testimonials",
+          "visible": true,
+          "settings": {
+            "title": "WHAT OUR CUSTOMERS SAY",
+            "subtitle": "Real feedback from shoppers across Pakistan who wear and trust Calenvee everyday.",
+            "layout": "marquee",
+            "limit": 10
+          },
+          "blocks": []
+        },
+        {
+          "id": "home-newsletter",
+          "type": "newsletter",
+          "visible": true,
+          "settings": {
+            "title": "Stay in the Loop",
+            "subtitle": "Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.",
+            "buttonText": "Subscribe",
+            "discountPromoCode": "CALENVEE10"
+          },
+          "blocks": []
+        }
+      ]
+    },
+    "shop": {
+      "id": "shop",
+      "name": "Shop Catalog",
+      "path": "/shop",
+      "visible": true,
+      "seo": {
+        "title": "Shop All Luxury Products | Calenvee.pk",
+        "description": "Explore all Calenvee luxury timepieces, waterproof chains, sunglasses, handbags, and fragrances. Cash on Delivery across Pakistan.",
+        "noindex": false
+      },
+      "sections": []
+    },
+    "contact": {
+      "id": "contact",
+      "name": "Contact & Support",
+      "path": "/contact",
+      "visible": true,
+      "seo": {
+        "title": "Contact & Customer Care | Calenvee.pk",
+        "description": "Official contact hub for Calenvee Pakistan. Inquire about deliveries, order status, or sizing advice.",
+        "noindex": false
+      },
+      "sections": []
+    },
+    "returns": {
+      "id": "returns",
+      "name": "Returns & Exchanges",
+      "path": "/returns",
+      "visible": true,
+      "seo": {
+        "title": "Returns & Refunds Policy | Calenvee.pk",
+        "description": "Official 7-Day Exchange & Return Guarantee for Calenvee Pakistan.",
+        "noindex": false
+      },
+      "sections": []
+    },
+    "shipping": {
+      "id": "shipping",
+      "name": "Shipping Policy",
+      "path": "/shipping-policy",
+      "visible": true,
+      "seo": {
+        "title": "Shipping Policy (Nationwide COD) | Calenvee.pk",
+        "description": "Nationwide Cash on Delivery shipping policy across Pakistan with 7-10 working days delivery.",
+        "noindex": false
+      },
+      "sections": []
+    },
+    "terms": {
+      "id": "terms",
+      "name": "Terms of Service",
+      "path": "/terms",
+      "visible": true,
+      "seo": {
+        "title": "Terms of Service & FAQs | Calenvee.pk",
+        "description": "Official terms, payment guidelines, and FAQs for Calenvee Pakistan.",
+        "noindex": false
+      },
+      "sections": []
+    },
+    "privacy": {
+      "id": "privacy",
+      "name": "Privacy Policy",
+      "path": "/privacy",
+      "visible": true,
+      "seo": {
+        "title": "Privacy Policy | Calenvee.pk",
+        "description": "Official customer privacy and data protection policy for Calenvee Pakistan.",
+        "noindex": false
+      },
+      "sections": []
+    },
+    "reviews": {
+      "id": "reviews",
+      "name": "Customer Reviews",
+      "path": "/reviews",
+      "visible": true,
+      "seo": {
+        "title": "Client Reviews | Calenvee.pk",
+        "description": "Read genuine verified reviews from clients across Pakistan.",
+        "noindex": false
+      },
+      "sections": []
+    }
+  }
+}
+

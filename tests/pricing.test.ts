@@ -297,3 +297,4 @@ describe('Single Source of Truth Pricing Module & Parity Test', () => {
     expect(clientTotals.isFreeShipping).toBe(serverTotals.isFreeShipping);
   });
 });
+

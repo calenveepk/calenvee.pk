@@ -221,3 +221,4 @@ graph TD
 - [x] Contradiction hunt performed across prices, discounts, shipping thresholds, delivery fees, return policies, contact numbers, and delivery timelines.
 - [x] Mermaid data-flow diagram constructed.
 - [x] Zero-regression baseline screenshots captured (15 desktop, 15 mobile = 30 total).
+
