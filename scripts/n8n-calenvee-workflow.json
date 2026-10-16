@@ -1,0 +1,227 @@
+{
+  "name": "Calenvee Store AI Manager & Graphic Designer Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "id": "node-schedule-digest",
+      "name": "Daily 9 AM Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:4200/api/n8n/store-summary",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "node-fetch-summary",
+      "name": "Fetch Calenvee Store Summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [420, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "calenvee_auth",
+          "name": "Calenvee Admin Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.catalog.lowStockCount }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "node-check-low-stock",
+      "name": "Check Low Stock Alert",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "calenvee-design-image",
+        "options": {}
+      },
+      "id": "node-webhook-ai-design",
+      "name": "Webhook: AI Graphic Designer",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 520],
+      "webhookId": "calenvee-ai-designer"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:4200/api/n8n/ai/design-image",
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "image",
+              "value": "={{ $json.body.image }}"
+            },
+            {
+              "name": "targetSection",
+              "value": "={{ $json.body.targetSection || 'hero' }}"
+            },
+            {
+              "name": "styleTheme",
+              "value": "={{ $json.body.styleTheme || 'luxury-studio' }}"
+            },
+            {
+              "name": "filename",
+              "value": "={{ $json.body.filename || 'n8n-designer-visual' }}"
+            },
+            {
+              "name": "applyTo",
+              "value": "={{ $json.body.applyTo || 'hero' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-run-ai-designer",
+      "name": "Execute Graphic Designer Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 520]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "calenvee-rotate-deal",
+        "options": {}
+      },
+      "id": "node-webhook-deal-rotation",
+      "name": "Webhook: Rotate Flash Deal",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 720],
+      "webhookId": "calenvee-deal-rotator"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:4200/api/n8n/deals",
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "id",
+              "value": "={{ 'deal-' + $json.body.productId }}"
+            },
+            {
+              "name": "productId",
+              "value": "={{ $json.body.productId }}"
+            },
+            {
+              "name": "title",
+              "value": "={{ $json.body.title || 'Flash Drop Special' }}"
+            },
+            {
+              "name": "dealPrice",
+              "value": "={{ $json.body.dealPrice }}"
+            },
+            {
+              "name": "discountPercentage",
+              "value": "={{ $json.body.discountPercentage || 30 }}"
+            },
+            {
+              "name": "startDateTime",
+              "value": "={{ new Date().toISOString() }}"
+            },
+            {
+              "name": "endDateTime",
+              "value": "={{ new Date(Date.now() + 86400000).toISOString() }}"
+            },
+            {
+              "name": "badge",
+              "value": "Deal of the Day"
+            },
+            {
+              "name": "active",
+              "value": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-save-deal",
+      "name": "Update Store Deal of the Day",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 720]
+    }
+  ],
+  "connections": {
+    "Daily 9 AM Schedule": {
+      "main": [
+        [
+          {
+            "node": "Fetch Calenvee Store Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Calenvee Store Summary": {
+      "main": [
+        [
+          {
+            "node": "Check Low Stock Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook: AI Graphic Designer": {
+      "main": [
+        [
+          {
+            "node": "Execute Graphic Designer Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook: Rotate Flash Deal": {
+      "main": [
+        [
+          {
+            "node": "Update Store Deal of the Day",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
+

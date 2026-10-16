@@ -101,8 +101,6 @@ export const DiscountOfferBanner: React.FC<DiscountOfferBannerProps> = ({ settin
     setTimeout(() => setIsAdded(false), 2000);
   };
 
-  const stockRemaining = activeDeal.stockLimit || dealProduct.stockCount || 14;
-
   return (
     <section className="bg-white py-5 sm:py-8">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
@@ -110,8 +108,8 @@ export const DiscountOfferBanner: React.FC<DiscountOfferBannerProps> = ({ settin
           
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
             
-            {/* Left Column: Heading, Badge, & Urgency Timer (5 cols) */}
-            <div className="md:col-span-5 space-y-3 sm:space-y-4 text-left">
+            {/* Left Column: Heading, Badge, Pricing, Timer & CTA (7 cols) */}
+            <div className="md:col-span-7 space-y-3 sm:space-y-4 text-left">
               <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-orange-100/90 text-[11px] font-extrabold text-[#EA580C] uppercase tracking-wider">
                 <Flame className="w-3.5 h-3.5 text-[#EA580C] animate-pulse" />
                 <span>{activeDeal.badge || 'Deal of the Day'}</span>
@@ -124,6 +122,19 @@ export const DiscountOfferBanner: React.FC<DiscountOfferBannerProps> = ({ settin
                 <p className="text-xs sm:text-sm text-gray-600">
                   Special verified promotional price on our flagship timepiece. Evaluated in Pakistan Time (PKT).
                 </p>
+              </div>
+
+              {/* Deal Pricing */}
+              <div className="flex flex-wrap items-baseline gap-3 pt-1">
+                <span className="text-2xl sm:text-3xl font-black text-[#EA580C]">
+                  {formatPKR(effectivePrice)}
+                </span>
+                <span className="text-sm sm:text-base text-gray-400 line-through">
+                  {formatPKR(originalPrice)}
+                </span>
+                <span className="inline-block text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                  Save {discountPercent}% OFF
+                </span>
               </div>
 
               {/* Countdown Urgency Block */}
@@ -189,58 +200,19 @@ export const DiscountOfferBanner: React.FC<DiscountOfferBannerProps> = ({ settin
               </div>
             </div>
 
-            {/* Middle Column: Cutout Product Photo (4 cols) */}
-            <div className="md:col-span-4 flex items-center justify-center py-2">
+            {/* Right Column: Featured Product Photo (5 cols) without blur-2xl artifact */}
+            <div className="md:col-span-5 flex items-center justify-center py-2">
               <Link
                 to={dealConfig.link || `/product/${dealProduct.slug}`}
-                className="group relative max-w-[220px] sm:max-w-[260px] flex items-center justify-center"
+                className="group relative max-w-[240px] sm:max-w-[280px] w-full flex items-center justify-center"
               >
-                <div className="absolute inset-0 bg-orange-400/15 rounded-full blur-2xl transform scale-90 group-hover:scale-105 transition-transform duration-500" />
+                <div className="absolute inset-0 rounded-2xl bg-orange-200/30 transform scale-95 pointer-events-none transition-transform duration-500 group-hover:scale-100" />
                 <img
                   src={dealProduct.images[0] || '/hero/hero-watch.png'}
                   alt={dealProduct.name}
-                  className="relative z-10 w-full h-auto max-h-52 sm:max-h-64 object-contain filter drop-shadow-xl transform transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
+                  className="relative z-10 w-full h-52 sm:h-64 object-cover rounded-2xl border border-orange-200/80 shadow-md transform transition-transform duration-500 group-hover:scale-105"
                 />
               </Link>
-            </div>
-
-            {/* Right Column: Real Pricing, Real Stock (3 cols) */}
-            <div className="md:col-span-3 bg-white/90 backdrop-blur-xs p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-orange-200/70 shadow-2xs space-y-3 text-left">
-              <div>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
-                  Promotional Deal
-                </span>
-                <h4 className="text-sm sm:text-base font-bold text-gray-900 leading-snug line-clamp-2">
-                  {dealProduct.name}
-                </h4>
-              </div>
-
-              <div className="space-y-0.5">
-                <div className="flex items-baseline space-x-2">
-                  <span className="text-xl sm:text-2xl font-black text-[#EA580C]">
-                    {formatPKR(effectivePrice)}
-                  </span>
-                  <span className="text-xs text-gray-400 line-through">
-                    {formatPKR(originalPrice)}
-                  </span>
-                </div>
-                <span className="inline-block text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                  Save {discountPercent}% Deal Price
-                </span>
-              </div>
-
-              {/* Real Inventory Status */}
-              <div className="space-y-1 pt-1">
-                <div className="flex justify-between items-center text-[11px]">
-                  <span className="font-semibold text-gray-600">Inventory:</span>
-                  <span className="font-bold text-emerald-700">In Stock ({stockRemaining} available)</span>
-                </div>
-              </div>
-
-              <div className="pt-1 text-[10px] text-gray-500">
-                ✓ Cash on Delivery Available
-              </div>
             </div>
 
           </div>

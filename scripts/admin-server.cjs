@@ -27,6 +27,12 @@ const {
   processMediaUpload
 } = require('./media-manager.cjs');
 
+const {
+  SECTION_SPECS,
+  STYLE_THEMES,
+  designSectionGraphic
+} = require('./graphic-designer.cjs');
+
 let viteProcess = null;
 
 function checkVitePort(timeout = 1000) {
@@ -108,6 +114,15 @@ const HOME_CONTENT_FILE = path.join(DATA_DIR, 'homeContent.json');
 const UPLOADS_DIR = path.join(PUBLIC_DIR, 'products');
 
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'calenvee_local_admin_token';
+const N8N_TOKEN = process.env.N8N_TOKEN || 'calenvee_n8n_secret_2026';
+
+function isN8nAuthorized(req, url) {
+  const token = req.headers['x-n8n-token'] || 
+                req.headers['x-admin-token'] || 
+                url.searchParams.get('token') || 
+                (req.headers.authorization ? req.headers.authorization.replace('Bearer ', '') : null);
+  return token === N8N_TOKEN || token === ADMIN_TOKEN;
+}
 
 // Google Apps Script Live Automation Webhook URL
 const APPS_SCRIPT_URL = process.env.GOOGLE_APPS_SCRIPT_URL || 
@@ -234,7 +249,7 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(204, {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, X-Admin-Token, Authorization',
+      'Access-Control-Allow-Headers': 'Content-Type, X-Admin-Token, X-N8N-Token, Authorization',
     });
     res.end();
     return;
@@ -242,8 +257,8 @@ const server = http.createServer(async (req, res) => {
 
   // Mutating token check (POST, PUT, DELETE)
   if (['POST', 'PUT', 'DELETE'].includes(req.method)) {
-    const tokenHeader = req.headers['x-admin-token'] || url.searchParams.get('token');
-    if (tokenHeader !== ADMIN_TOKEN && !req.headers.authorization) {
+    const tokenHeader = req.headers['x-admin-token'] || req.headers['x-n8n-token'] || url.searchParams.get('token');
+    if (tokenHeader !== ADMIN_TOKEN && tokenHeader !== N8N_TOKEN && !req.headers.authorization) {
       // Allow internal local requests if token matches default
     }
   }
@@ -450,14 +465,55 @@ const server = http.createServer(async (req, res) => {
         sendJson(res, 400, { success: false, error: 'Deal id and productId are required' });
         return;
       }
+
+      // Automatically lookup product info to ensure price consistency
+      const products = readJsonFile(PRODUCTS_FILE, []);
+      const product = products.find(p => p.id === deal.productId);
+      
+      const origPrice = Number(deal.originalPrice || (product && (product.originalPrice || Math.round(product.price * 1.5))) || deal.dealPrice);
+      const dealPrice = Number(deal.dealPrice);
+      let discountPct = Number(deal.discountPercentage);
+      if (!discountPct && origPrice > dealPrice) {
+        discountPct = Math.round(((origPrice - dealPrice) / origPrice) * 100);
+      }
+      
+      deal.dealPrice = dealPrice;
+      deal.originalPrice = origPrice;
+      deal.discountPercentage = discountPct;
+      if (!deal.title && product) {
+        deal.title = `${product.name} Flash Drop`;
+      }
+      if (!deal.badge) deal.badge = 'Deal of the Day';
+      if (deal.active === undefined) deal.active = true;
+
       const deals = readJsonFile(DEALS_FILE, []);
       const index = deals.findIndex(d => d.id === deal.id);
       if (index >= 0) {
         deals[index] = { ...deals[index], ...deal };
       } else {
-        deals.push(deal);
+        deals.unshift(deal);
       }
       writeJsonFileAtomic(DEALS_FILE, deals);
+
+      // Keep homeContent.json dealOfTheDay in perfect sync
+      if (deal.active && (deal.badge === 'Deal of the Day' || deal.isDealOfTheDay || deal.id === 'deal-obsidian-chrono')) {
+        const homeContent = readJsonFile(HOME_CONTENT_FILE, {});
+        if (!homeContent.trioBanners) homeContent.trioBanners = {};
+        homeContent.trioBanners.dealOfTheDay = {
+          badge: deal.badge || 'Deal of the Day',
+          title: deal.title,
+          dealId: deal.id,
+          productId: deal.productId,
+          dealPrice: dealPrice,
+          startDateTime: deal.startDateTime || new Date().toISOString(),
+          endDateTime: deal.endDateTime || new Date(Date.now() + 7 * 86400000).toISOString(),
+          link: deal.link || (product ? `/product/${product.slug || product.id}` : '/shop'),
+          ctaText: deal.ctaText || 'Claim Deal Now',
+          active: true
+        };
+        writeJsonFileAtomic(HOME_CONTENT_FILE, homeContent);
+      }
+
       sendJson(res, 200, { success: true, deal });
       return;
     }
@@ -469,6 +525,203 @@ const server = http.createServer(async (req, res) => {
       writeJsonFileAtomic(DEALS_FILE, deals);
       sendJson(res, 200, { success: true });
       return;
+    }
+
+    // 5B. AI GRAPHIC DESIGNER AGENT
+    if (pathname === '/api/ai/specs' && req.method === 'GET') {
+      sendJson(res, 200, {
+        success: true,
+        specs: SECTION_SPECS,
+        themes: STYLE_THEMES
+      });
+      return;
+    }
+
+    if (pathname === '/api/ai/design-image' && req.method === 'POST') {
+      const payload = await parseBody(req);
+      const { image, targetSection, styleTheme, filename, altText, applyTo, productId } = payload;
+      if (!image) {
+        sendJson(res, 400, { success: false, error: 'Raw image data required (base64 data URL)' });
+        return;
+      }
+
+      try {
+        const result = await designSectionGraphic({
+          image,
+          targetSection: targetSection || 'hero',
+          styleTheme: styleTheme || 'luxury-studio',
+          filename: filename || 'calenvee-visual',
+          altText: altText || 'Calenvee Luxury Collection'
+        });
+
+        // Optional 1-click auto apply to storefront section
+        if (applyTo === 'dealOfTheDay') {
+          const homeContent = readJsonFile(HOME_CONTENT_FILE, {});
+          if (homeContent.trioBanners?.dealOfTheDay) {
+            homeContent.trioBanners.dealOfTheDay.image = result.url;
+            writeJsonFileAtomic(HOME_CONTENT_FILE, homeContent);
+          }
+        } else if (applyTo === 'hero') {
+          const homeContent = readJsonFile(HOME_CONTENT_FILE, {});
+          if (homeContent.hero) {
+            homeContent.hero.image = result.url;
+            if (Array.isArray(homeContent.hero.slides) && homeContent.hero.slides.length > 0) {
+              homeContent.hero.slides[0].image = result.url;
+            }
+            writeJsonFileAtomic(HOME_CONTENT_FILE, homeContent);
+          }
+        } else if (applyTo === 'product' && productId) {
+          const products = readJsonFile(PRODUCTS_FILE, []);
+          const p = products.find(prod => prod.id === productId);
+          if (p) {
+            if (!Array.isArray(p.images)) p.images = [];
+            p.images.unshift(result.url);
+            writeJsonFileAtomic(PRODUCTS_FILE, products);
+          }
+        }
+
+        sendJson(res, 200, { success: true, ...result, appliedTo: applyTo || null });
+      } catch (err) {
+        sendJson(res, 500, { success: false, error: err.message });
+      }
+      return;
+    }
+
+    // 5C. N8N STORE MANAGEMENT API (Webhooks & Workflow Automations)
+    if (pathname.startsWith('/api/n8n/')) {
+      if (!isN8nAuthorized(req, url)) {
+        sendJson(res, 401, {
+          success: false,
+          error: 'Unauthorized: Invalid or missing N8N token. Pass x-n8n-token header or ?token= query parameter.'
+        });
+        return;
+      }
+
+      // N8N Store Health & Digest Summary
+      if (pathname === '/api/n8n/store-summary' && req.method === 'GET') {
+        const products = readJsonFile(PRODUCTS_FILE, []);
+        const deals = readJsonFile(DEALS_FILE, []);
+        const cachedOrders = readJsonFile(ORDERS_CACHE_FILE, []);
+        const settings = readJsonFile(SETTINGS_FILE, {});
+
+        const lowStock = products.filter(p => (p.stockCount ?? 20) <= 5);
+        const outOfStock = products.filter(p => (p.stockCount ?? 20) === 0);
+        const pendingOrders = cachedOrders.filter(o => ['Placed', 'Confirmed', 'In Processing'].includes(o.status));
+        const dispatchedOrders = cachedOrders.filter(o => o.status === 'Dispatched');
+        const deliveredOrders = cachedOrders.filter(o => o.status === 'Delivered');
+        const grossRevenue = cachedOrders.reduce((acc, o) => acc + (parseFloat(o.total) || 0), 0);
+
+        sendJson(res, 200, {
+          success: true,
+          storeName: settings.storeName || 'Calenvee.pk',
+          timestamp: new Date().toISOString(),
+          catalog: {
+            totalProducts: products.length,
+            lowStockCount: lowStock.length,
+            lowStockItems: lowStock.map(p => ({ id: p.id, name: p.name, stock: p.stockCount })),
+            outOfStockCount: outOfStock.length
+          },
+          deals: {
+            activeDealsCount: deals.filter(d => d.active).length,
+            dealsList: deals
+          },
+          orders: {
+            totalOrders: cachedOrders.length,
+            pendingCount: pendingOrders.length,
+            dispatchedCount: dispatchedOrders.length,
+            deliveredCount: deliveredOrders.length,
+            grossRevenuePKR: grossRevenue,
+            recentOrders: cachedOrders.slice(0, 5)
+          }
+        });
+        return;
+      }
+
+      // N8N Products
+      if (pathname === '/api/n8n/products' && req.method === 'GET') {
+        sendJson(res, 200, { success: true, products: readJsonFile(PRODUCTS_FILE, []) });
+        return;
+      }
+      if (pathname === '/api/n8n/products' && req.method === 'POST') {
+        const product = await parseBody(req);
+        if (!product.id || !product.name) {
+          sendJson(res, 400, { success: false, error: 'Product id and name required' });
+          return;
+        }
+        const products = readJsonFile(PRODUCTS_FILE, []);
+        const idx = products.findIndex(p => p.id === product.id);
+        if (idx >= 0) products[idx] = { ...products[idx], ...product };
+        else products.unshift(product);
+        writeJsonFileAtomic(PRODUCTS_FILE, products);
+        syncToCloud('sync_catalog', { products }).catch(() => {});
+        sendJson(res, 200, { success: true, product });
+        return;
+      }
+
+      // N8N Deals
+      if (pathname === '/api/n8n/deals' && req.method === 'GET') {
+        sendJson(res, 200, { success: true, deals: readJsonFile(DEALS_FILE, []) });
+        return;
+      }
+      if (pathname === '/api/n8n/deals' && req.method === 'POST') {
+        const deal = await parseBody(req);
+        if (!deal.id || !deal.productId) {
+          sendJson(res, 400, { success: false, error: 'Deal id and productId required' });
+          return;
+        }
+        const deals = readJsonFile(DEALS_FILE, []);
+        const idx = deals.findIndex(d => d.id === deal.id);
+        if (idx >= 0) deals[idx] = { ...deals[idx], ...deal };
+        else deals.unshift(deal);
+        writeJsonFileAtomic(DEALS_FILE, deals);
+        sendJson(res, 200, { success: true, deal });
+        return;
+      }
+
+      // N8N Orders
+      if (pathname === '/api/n8n/orders' && req.method === 'GET') {
+        const status = url.searchParams.get('status');
+        let orders = readJsonFile(ORDERS_CACHE_FILE, []);
+        if (status) orders = orders.filter(o => o.status === status);
+        sendJson(res, 200, { success: true, count: orders.length, orders });
+        return;
+      }
+      if (pathname === '/api/n8n/orders/status' && req.method === 'POST') {
+        const { orderId, status, courier, trackingNumber } = await parseBody(req);
+        const cachedOrders = readJsonFile(ORDERS_CACHE_FILE, []);
+        const idx = cachedOrders.findIndex(o => String(o.orderId).toUpperCase() === String(orderId).toUpperCase());
+        if (idx >= 0) {
+          cachedOrders[idx].status = status;
+          if (courier) cachedOrders[idx].courier = courier;
+          if (trackingNumber) cachedOrders[idx].trackingNumber = trackingNumber;
+          writeJsonFileAtomic(ORDERS_CACHE_FILE, cachedOrders);
+        }
+        await syncToCloud('update_order_status', { orderId, status, courier, trackingNumber });
+        sendJson(res, 200, { success: true, orderId, status });
+        return;
+      }
+
+      // N8N AI Graphic Designer Endpoint
+      if (pathname === '/api/n8n/ai/design-image' && req.method === 'POST') {
+        const payload = await parseBody(req);
+        try {
+          const result = await designSectionGraphic(payload);
+          sendJson(res, 200, { success: true, ...result });
+        } catch (err) {
+          sendJson(res, 500, { success: false, error: err.message });
+        }
+        return;
+      }
+
+      // N8N Publish Live
+      if (pathname === '/api/n8n/publish' && req.method === 'POST') {
+        const timestamp = new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' });
+        const commitMsg = `Store automated update via N8N Workflow [${timestamp}]`;
+        exec(`git add -A && git commit -m "${commitMsg}" && git push origin feat/functional-cms`, { cwd: ROOT_DIR }, (err, stdout, stderr) => {
+          sendJson(res, 200, { success: !err, commitMessage: commitMsg, output: stdout || stderr });
+        });
+        return;
+      }
     }
 
     // 6. CATEGORIES

@@ -101,6 +101,11 @@
         <span>Deals &amp; Flash Sales</span>
       </button>
 
+      <button onclick="switchTab('ai-designer')" id="tab-ai-designer" class="tab-btn py-3.5 px-1 border-b-2 font-semibold text-xs tracking-wide border-transparent text-slate-500 hover:text-slate-900 flex items-center gap-1.5">
+        <span class="text-xs">🎨</span>
+        <span>AI Designer &amp; N8N</span>
+      </button>
+
       <button onclick="switchTab('orders')" id="tab-orders" class="tab-btn py-3.5 px-1 border-b-2 font-semibold text-xs tracking-wide border-transparent text-slate-500 hover:text-slate-900 flex items-center gap-1.5">
         <svg class="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
         <span>Orders &amp; Dispatch (<span id="ordersCount">0</span>)</span>
@@ -372,6 +377,164 @@
       <div id="dealsListContainer" class="space-y-4">
         <!-- Rendered dynamically -->
       </div>
+    </div>
+
+    <!-- =============================================================== -->
+    <!-- TAB 4B: AI GRAPHIC DESIGNER & N8N AUTOMATION                    -->
+    <!-- =============================================================== -->
+    <div id="content-ai-designer" class="tab-content hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      
+      <!-- Studio Header -->
+      <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 text-[#EA580C] font-extrabold text-[11px] uppercase tracking-wider mb-2">
+            <span>✨ AI Graphic Designer &amp; N8N Automation</span>
+          </div>
+          <h2 class="text-2xl font-black text-[#0B132B]">Calenvee Studio Visual Agent</h2>
+          <p class="text-xs text-slate-500 mt-1 max-w-xl">
+            Upload raw product photos and the AI agent automatically composites them onto luxury travertine studio podiums with the exact aspect ratios for Hero Banners, Deals of the Day, Product Catalog Cards, and Categories.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono text-xs font-bold">
+            ● N8N Webhooks Active
+          </span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Upload & Config (5 cols) -->
+        <div class="lg:col-span-5 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4 text-xs">
+          <h3 class="font-extrabold text-sm text-[#0B132B]">1. Select Raw Image &amp; Target Section</h3>
+          
+          <!-- Dropzone -->
+          <div onclick="document.getElementById('aiFileInput').click()" class="border-2 border-dashed border-orange-300 hover:border-orange-500 bg-orange-50/40 hover:bg-orange-50 rounded-2xl p-6 text-center cursor-pointer transition">
+            <input type="file" id="aiFileInput" accept="image/*" class="hidden" onchange="handleAiFileSelect(event)">
+            <svg class="w-10 h-10 mx-auto text-orange-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <span class="font-bold text-[#0B132B] block">Click to upload raw image</span>
+            <span class="text-[10px] text-slate-400">JPG, PNG, WebP (camera or product photos)</span>
+          </div>
+
+          <div id="aiRawPreviewContainer" class="hidden flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
+            <img id="aiRawPreviewImg" class="w-16 h-16 rounded-xl object-contain bg-white border border-slate-200">
+            <div class="min-w-0 flex-1">
+              <span class="font-bold text-[#0B132B] block truncate" id="aiRawFilename">photo.png</span>
+              <span class="text-[10px] text-slate-400" id="aiRawSize">0 KB</span>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Target Section &amp; Aspect Ratio</label>
+            <select id="aiTargetSection" class="w-full py-2.5 px-3 rounded-xl border border-slate-300 font-bold focus:outline-none focus:border-[#F97316]">
+              <option value="hero">🖼️ Hero Banner (1920x800, 2.4:1 ratio — Right Staged)</option>
+              <option value="deal-of-the-day">⚡ Deal of the Day (800x800, 1:1 ratio — Spotlight)</option>
+              <option value="product">🛍️ Product Catalog Card (800x1000, 4:5 ratio — Centered)</option>
+              <option value="category">🗂️ Category Grid Thumbnail (600x600, 1:1 ratio)</option>
+              <option value="promo-banner">🏷️ Promotional Banner (1200x500, 2.4:1 ratio)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Luxury Studio Backdrop Theme</label>
+            <select id="aiStyleTheme" class="w-full py-2.5 px-3 rounded-xl border border-slate-300 font-bold focus:outline-none focus:border-[#F97316]">
+              <option value="luxury-studio">🏛️ Luxury Travertine Studio (Warm Architectural Beige)</option>
+              <option value="dark-obsidian">🌑 Dark Obsidian Onyx (Dramatic Black / Navy)</option>
+              <option value="warm-terracotta">🌅 Calenvee Warm Terracotta (Signature Orange Glow)</option>
+              <option value="minimalist-white">⚪ Minimalist Clean White (Contemporary Studio)</option>
+            </select>
+          </div>
+
+          <button type="button" onclick="executeAiDesign()" id="aiGenerateBtn" class="w-full py-3 rounded-xl bg-[#F97316] hover:bg-[#EA580C] text-white font-extrabold text-xs shadow-md transition flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <span>Generate Dynamic Studio Visual</span>
+          </button>
+        </div>
+
+        <!-- Right: Preview & 1-Click Apply (7 cols) -->
+        <div class="lg:col-span-7 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex flex-col justify-between space-y-4 text-xs">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-extrabold text-sm text-[#0B132B]">2. Generated Studio Visual Preview</h3>
+              <span id="aiResultBadge" class="hidden px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Ready</span>
+            </div>
+
+            <div id="aiResultEmpty" class="border border-slate-200 rounded-2xl h-80 flex flex-col items-center justify-center text-center p-6 bg-slate-50 text-slate-400">
+              <svg class="w-12 h-12 text-slate-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              <p class="font-bold text-slate-600">No Image Generated Yet</p>
+              <p class="text-[11px] text-slate-400 max-w-xs mt-1">Upload an image on the left and click Generate to see the dynamic visual composed to exact section specifications.</p>
+            </div>
+
+            <div id="aiResultActive" class="hidden space-y-4">
+              <div class="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center p-2">
+                <img id="aiResultImg" class="max-h-72 w-full object-contain rounded-xl shadow-xs">
+              </div>
+              <div class="grid grid-cols-3 gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+                <div>
+                  <span class="text-[10px] text-slate-400 block font-bold uppercase">Dimensions</span>
+                  <span class="font-mono font-bold text-slate-800" id="aiResultDims">1920 x 800</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400 block font-bold uppercase">Format</span>
+                  <span class="font-mono font-bold text-emerald-600">WebP 86%</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400 block font-bold uppercase">Optimized Size</span>
+                  <span class="font-mono font-bold text-slate-800" id="aiResultSize">24 KB</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1-Click Apply Buttons -->
+          <div id="aiApplyActions" class="hidden pt-4 border-t border-slate-100 flex flex-wrap items-center gap-3">
+            <button type="button" onclick="applyAiGraphic('hero')" class="flex-1 py-2.5 px-4 rounded-xl bg-[#0B132B] hover:bg-slate-800 text-white font-bold text-xs shadow transition flex items-center justify-center gap-1.5">
+              <span>🚀 Apply to Hero Banner</span>
+            </button>
+            <button type="button" onclick="applyAiGraphic('dealOfTheDay')" class="flex-1 py-2.5 px-4 rounded-xl bg-[#F97316] hover:bg-[#EA580C] text-white font-bold text-xs shadow transition flex items-center justify-center gap-1.5">
+              <span>⚡ Apply to Deal of the Day</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- N8N Integration Panel -->
+      <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4 text-xs">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🤖</span>
+            <div>
+              <h3 class="font-extrabold text-sm text-[#0B132B]">N8N Workflow Automation &amp; Webhook Endpoints</h3>
+              <p class="text-[11px] text-slate-500">Connect N8N to manage inventory, auto-rotate flash deals, and process orders on your behalf.</p>
+            </div>
+          </div>
+          <a href="/scripts/n8n-calenvee-workflow.json" download class="py-2 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+            📥 Download N8N Workflow JSON
+          </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">N8N API Token &amp; Auth</span>
+            <div class="flex items-center gap-2">
+              <input type="text" readonly value="calenvee_n8n_secret_2026" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300 font-mono text-xs bg-white text-slate-700 select-all">
+            </div>
+            <p class="text-[10px] text-slate-400">Pass in header: <code class="font-mono bg-slate-200 px-1 py-0.5 rounded">x-n8n-token: calenvee_n8n_secret_2026</code></p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Live Endpoints for N8N</span>
+            <ul class="space-y-1 font-mono text-[11px] text-slate-700">
+              <li>• <span class="text-blue-600 font-bold">GET</span> http://localhost:4200/api/n8n/store-summary</li>
+              <li>• <span class="text-emerald-600 font-bold">POST</span> http://localhost:4200/api/n8n/deals</li>
+              <li>• <span class="text-purple-600 font-bold">POST</span> http://localhost:4200/api/n8n/ai/design-image</li>
+              <li>• <span class="text-amber-600 font-bold">POST</span> http://localhost:4200/api/n8n/orders/status</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- =============================================================== -->
@@ -661,8 +824,15 @@
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 mb-1">Product Images (URLs, one per line)</label>
-          <textarea id="p_images" rows="3" class="w-full py-2 px-3 rounded-xl border border-slate-300 font-mono text-[11px] focus:outline-none focus:border-[#F97316]" placeholder="/products/image-1.webp&#10;/products/image-2.webp"></textarea>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block font-bold text-slate-700">Product Images (URLs or Upload Local Image)</label>
+            <button type="button" onclick="triggerProductImageUpload()" class="py-1 px-3 bg-orange-50 hover:bg-orange-100 text-[#F97316] font-bold rounded-lg border border-orange-200 transition flex items-center gap-1.5 shadow-2xs">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+              <span>📁 Upload Local Image to Project Folder</span>
+            </button>
+          </div>
+          <textarea id="p_images" rows="3" oninput="renderProductThumbnailsPreview()" class="w-full py-2 px-3 rounded-xl border border-slate-300 font-mono text-[11px] focus:outline-none focus:border-[#F97316]" placeholder="/products/image-1.webp&#10;/products/image-2.webp"></textarea>
+          <div id="p_images_thumbnails" class="flex flex-wrap gap-2 mt-2"></div>
         </div>
 
         <div>
@@ -693,6 +863,85 @@
         <div class="p-4 border-t border-slate-100 flex justify-end gap-3">
           <button type="button" onclick="closeProductModal()" class="py-2.5 px-4 rounded-xl border border-slate-300 font-bold text-slate-700 hover:bg-slate-50">Cancel</button>
           <button type="submit" class="py-2.5 px-6 rounded-xl bg-[#F97316] text-white font-bold hover:bg-[#EA580C] shadow transition">Save Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. DEAL OF THE DAY & FLASH SALE MODAL -->
+  <div id="dealModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+      <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-[#0B132B]" id="dealModalTitle">Configure Deal of the Day</h3>
+          <p class="text-xs text-slate-500">Choose featured product, set discount percentage or deal price, and schedule countdown timer.</p>
+        </div>
+        <button onclick="closeDealModal()" class="text-slate-400 hover:text-slate-700 text-xl font-bold p-2">✕</button>
+      </div>
+      <form onsubmit="handleDealSave(event)" class="p-6 overflow-y-auto space-y-4 text-xs custom-scroll">
+        <input type="hidden" id="deal_id">
+        
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Select Featured Product</label>
+          <select id="deal_productId" onchange="onDealProductSelected()" required class="w-full py-2.5 px-3 rounded-xl border border-slate-300 font-bold focus:outline-none focus:border-[#F97316]">
+            <!-- Products populated dynamically -->
+          </select>
+          <div id="deal_product_info" class="mt-2 p-3 rounded-xl bg-orange-50 border border-orange-200 flex items-center gap-3">
+            <!-- Product thumb and base price preview -->
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Deal Title / Promotion Name</label>
+            <input type="text" id="deal_title" required placeholder="e.g. Obsidian Chronograph Flash Drop" class="w-full py-2 px-3 rounded-xl border border-slate-300 font-semibold focus:outline-none focus:border-[#F97316]">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Badge Tag</label>
+            <input type="text" id="deal_badge" value="Deal of the Day" class="w-full py-2 px-3 rounded-xl border border-slate-300 font-bold focus:outline-none focus:border-[#F97316]">
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Discount &amp; Pricing Calculator</span>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block font-bold text-slate-500 mb-1">Original Price (Rs.)</label>
+              <input type="number" id="deal_originalPrice" readonly class="w-full py-2 px-3 rounded-xl border border-slate-200 bg-slate-100 font-bold text-slate-500">
+            </div>
+            <div>
+              <label class="block font-bold text-[#EA580C] mb-1">Discount % Off</label>
+              <input type="number" id="deal_discountPct" min="1" max="95" oninput="onDealDiscountPctInput()" placeholder="e.g. 35" class="w-full py-2 px-3 rounded-xl border border-orange-300 font-black text-[#EA580C] focus:outline-none focus:border-[#F97316]">
+            </div>
+            <div>
+              <label class="block font-bold text-emerald-700 mb-1">Final Deal Price (Rs.)</label>
+              <input type="number" id="deal_price" required min="1" oninput="onDealPriceInput()" placeholder="e.g. 3899" class="w-full py-2 px-3 rounded-xl border border-emerald-300 font-black text-emerald-700 focus:outline-none focus:border-[#F97316]">
+            </div>
+          </div>
+          <p class="text-[10px] text-slate-400">💡 Editing Discount % instantly updates Deal Price, and editing Deal Price calculates exact % off.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Deal Start (Pakistan Time PKT)</label>
+            <input type="datetime-local" id="deal_startDateTime" required class="w-full py-2 px-3 rounded-xl border border-slate-300 font-mono text-[11px] focus:outline-none focus:border-[#F97316]">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Deal End (Countdown Expiry)</label>
+            <input type="datetime-local" id="deal_endDateTime" required class="w-full py-2 px-3 rounded-xl border border-slate-300 font-mono text-[11px] focus:outline-none focus:border-[#F97316]">
+          </div>
+        </div>
+
+        <div>
+          <label class="flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
+            <input type="checkbox" id="deal_active" checked class="w-4 h-4 rounded text-[#F97316]">
+            <span>Active Promotion (Displays on storefront countdown banner)</span>
+          </label>
+        </div>
+
+        <div class="p-4 border-t border-slate-100 flex justify-end gap-3">
+          <button type="button" onclick="closeDealModal()" class="py-2.5 px-4 rounded-xl border border-slate-300 font-bold text-slate-700 hover:bg-slate-50">Cancel</button>
+          <button type="submit" class="py-2.5 px-6 rounded-xl bg-[#F97316] text-white font-bold hover:bg-[#EA580C] shadow transition">Save Deal &amp; Sync Storefront</button>
         </div>
       </form>
     </div>
@@ -767,7 +1016,7 @@
 
       if (tabId === 'orders') loadOrders();
       if (tabId === 'media') loadMediaCatalog();
-      if (tabId === 'deals') renderDeals();
+      if (tabId === 'deals') loadDeals();
       if (tabId === 'categories') renderCategories();
       if (tabId === 'reviews') loadReviews();
       if (tabId === 'announcements') loadAnnouncements();
@@ -1229,10 +1478,16 @@
                 <input type="text" placeholder="CTA Link" value="${s.ctaLink || '/shop'}" oninput="updateHeroSlideField(${idx}, 'ctaLink', this.value)" class="w-1/2 py-1.5 px-2.5 rounded-lg border border-slate-300">
               </div>
               <div class="space-y-1">
-                <label class="block text-[11px] font-bold text-slate-500">Image URL</label>
+                <div class="flex items-center justify-between">
+                  <label class="block text-[11px] font-bold text-slate-500">Slide Image (Project Folder)</label>
+                  <button type="button" onclick="uploadImageForHeroSlide(${idx})" class="text-[#F97316] font-bold hover:underline flex items-center gap-1">
+                    <span>📁 Upload Local File</span>
+                  </button>
+                </div>
                 <div class="flex gap-2">
                   <input type="text" value="${s.image || ''}" oninput="updateHeroSlideField(${idx}, 'image', this.value)" class="flex-1 py-1.5 px-2.5 rounded-lg border border-slate-300 font-mono text-[11px]">
                   <button type="button" onclick="pickImageForHeroSlide(${idx})" class="py-1.5 px-2.5 rounded-lg bg-slate-200 hover:bg-slate-300 font-bold">Pick</button>
+                  <button type="button" onclick="uploadImageForHeroSlide(${idx})" class="py-1.5 px-2.5 rounded-lg bg-orange-100 text-[#F97316] hover:bg-orange-200 font-bold">📁 Upload</button>
                 </div>
               </div>
               <div>
@@ -2097,7 +2352,7 @@
     }
 
     // ===============================================================
-    // DEALS MANAGEMENT
+    // DEALS MANAGEMENT & DEAL OF THE DAY CUSTOMIZER
     // ===============================================================
     async function loadDeals() {
       const res = await fetch('/api/deals');
@@ -2108,16 +2363,428 @@
     function renderDeals() {
       const container = document.getElementById('dealsListContainer');
       if (!container) return;
-      container.innerHTML = dealsList.map(d => `
-        <div class="bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
-          <div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-[#F97316]">${d.badge || 'Flash Deal'}</span>
-            <h4 class="font-bold text-sm text-[#0B132B]">${d.title}</h4>
-            <p class="text-xs text-slate-500">Deal Price: <span class="font-bold text-emerald-600">Rs. ${d.dealPrice}</span> | Ends: ${d.endDateTime}</p>
+
+      if (!dealsList || dealsList.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white p-8 rounded-3xl border border-slate-200 text-center space-y-3">
+            <span class="text-3xl">⚡</span>
+            <h4 class="font-bold text-slate-800 text-sm">No Deals Configured</h4>
+            <p class="text-xs text-slate-400 max-w-sm mx-auto">Create a flash deal or Deal of the Day to offer special discounted pricing on any catalog product.</p>
+            <button onclick="openDealModal()" class="py-2 px-5 bg-[#F97316] hover:bg-[#EA580C] text-white text-xs font-bold rounded-xl transition shadow">Create First Deal</button>
           </div>
-          <span class="px-2.5 py-1 rounded-full text-xs font-bold ${d.active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}">${d.active ? 'Active' : 'Inactive'}</span>
+        `;
+        return;
+      }
+
+      container.innerHTML = dealsList.map(d => {
+        const prod = productsList.find(p => p.id === d.productId);
+        const thumb = (prod?.images && prod.images[0]) || prod?.image || '/logo.png';
+        const origPrice = Number(d.originalPrice || prod?.originalPrice || (prod ? Math.round(prod.price * 1.5) : d.dealPrice));
+        const dealPrice = Number(d.dealPrice);
+        const discountPct = d.discountPercentage || (origPrice > dealPrice ? Math.round(((origPrice - dealPrice) / origPrice) * 100) : 0);
+
+        return `
+          <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-orange-300 transition">
+            <div class="flex items-center gap-4">
+              <img src="${thumb}" alt="${d.title}" class="w-16 h-16 rounded-2xl object-cover bg-slate-100 border border-slate-200 shrink-0">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${d.badge === 'Deal of the Day' ? 'bg-orange-100 text-[#EA580C]' : 'bg-slate-100 text-slate-600'}">
+                    ${d.badge || 'Flash Deal'}
+                  </span>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${d.active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500'}">
+                    ${d.active ? '● Active' : 'Inactive'}
+                  </span>
+                </div>
+                <h4 class="font-extrabold text-sm text-[#0B132B]">${d.title}</h4>
+                <p class="text-xs text-slate-500">
+                  Featured Product: <strong class="text-slate-800">${prod ? prod.name : d.productId}</strong>
+                </p>
+                <div class="flex items-baseline gap-2 pt-0.5">
+                  <span class="font-black text-[#EA580C] text-sm">Rs. ${dealPrice.toLocaleString()}</span>
+                  <span class="text-slate-400 line-through text-xs">Rs. ${origPrice.toLocaleString()}</span>
+                  <span class="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Save ${discountPct}% OFF</span>
+                </div>
+                <div class="text-[10px] font-mono text-slate-400 pt-0.5">
+                  Expiry: ${d.endDateTime || 'Scheduled'}
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 w-full md:w-auto justify-end border-t md:border-t-0 pt-3 md:pt-0">
+              <button onclick="editDeal('${d.id}')" class="py-2 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition flex items-center gap-1.5">
+                <span>✏️ Edit Deal</span>
+              </button>
+              <button onclick="deleteDeal('${d.id}')" class="py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold transition" title="Delete Deal">
+                <span>🗑️</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openDealModal(dealId = null) {
+      const selectEl = document.getElementById('deal_productId');
+      if (selectEl) {
+        selectEl.innerHTML = productsList.map(p => `
+          <option value="${p.id}">${p.name} (Rs. ${p.price.toLocaleString()})</option>
+        `).join('');
+      }
+
+      if (dealId) {
+        const d = dealsList.find(x => x.id === dealId);
+        if (d) {
+          document.getElementById('dealModalTitle').innerText = 'Edit Deal of the Day';
+          document.getElementById('deal_id').value = d.id;
+          document.getElementById('deal_productId').value = d.productId;
+          document.getElementById('deal_title').value = d.title;
+          document.getElementById('deal_badge').value = d.badge || 'Deal of the Day';
+          document.getElementById('deal_price').value = d.dealPrice;
+          document.getElementById('deal_originalPrice').value = d.originalPrice || '';
+          document.getElementById('deal_discountPct').value = d.discountPercentage || '';
+          
+          if (d.startDateTime) {
+            document.getElementById('deal_startDateTime').value = d.startDateTime.slice(0, 16);
+          }
+          if (d.endDateTime) {
+            document.getElementById('deal_endDateTime').value = d.endDateTime.slice(0, 16);
+          }
+          document.getElementById('deal_active').checked = d.active !== false;
+          onDealProductSelected(false);
+          document.getElementById('dealModal').classList.remove('hidden');
+          return;
+        }
+      }
+
+      // New deal default
+      document.getElementById('dealModalTitle').innerText = 'Create New Deal';
+      document.getElementById('deal_id').value = 'deal-' + Date.now();
+      document.getElementById('deal_title').value = '';
+      document.getElementById('deal_badge').value = 'Deal of the Day';
+      document.getElementById('deal_discountPct').value = '35';
+      
+      const now = new Date();
+      const inSevenDays = new Date(Date.now() + 7 * 86400000);
+      document.getElementById('deal_startDateTime').value = now.toISOString().slice(0, 16);
+      document.getElementById('deal_endDateTime').value = inSevenDays.toISOString().slice(0, 16);
+      document.getElementById('deal_active').checked = true;
+
+      onDealProductSelected(true);
+      document.getElementById('dealModal').classList.remove('hidden');
+    }
+
+    function closeDealModal() {
+      document.getElementById('dealModal').classList.add('hidden');
+    }
+
+    function editDeal(dealId) {
+      openDealModal(dealId);
+    }
+
+    async function deleteDeal(dealId) {
+      if (!confirm('Are you sure you want to delete this deal?')) return;
+      try {
+        const res = await fetch(`/api/deals/${dealId}`, { method: 'DELETE', headers: API_HEADERS });
+        const data = await res.json();
+        if (data.success) {
+          await loadDeals();
+        } else {
+          alert('Delete failed: ' + (data.error || 'Server error'));
+        }
+      } catch (err) {
+        alert('Delete error: ' + err.message);
+      }
+    }
+
+    function onDealProductSelected(autoCalcPrice = true) {
+      const prodId = document.getElementById('deal_productId').value;
+      const product = productsList.find(p => p.id === prodId);
+      if (!product) return;
+
+      const origPrice = product.originalPrice || Math.round(product.price * 1.5);
+      document.getElementById('deal_originalPrice').value = origPrice;
+
+      const titleInput = document.getElementById('deal_title');
+      if (!titleInput.value || titleInput.value.includes('Flash Drop')) {
+        titleInput.value = `${product.name} Flash Drop`;
+      }
+
+      if (autoCalcPrice) {
+        const pct = parseFloat(document.getElementById('deal_discountPct').value) || 35;
+        document.getElementById('deal_price').value = Math.max(1, Math.round(origPrice * (1 - pct / 100)));
+      }
+
+      const infoContainer = document.getElementById('deal_product_info');
+      if (infoContainer) {
+        const thumb = (product.images && product.images[0]) || product.image || '/logo.png';
+        infoContainer.innerHTML = `
+          <img src="${thumb}" class="w-12 h-12 rounded-xl object-cover bg-white border border-slate-200 shrink-0">
+          <div class="min-w-0 flex-1">
+            <span class="font-bold text-[#0B132B] block truncate">${product.name}</span>
+            <span class="text-[11px] text-slate-500">Regular: <strong>Rs. ${product.price.toLocaleString()}</strong> | Compare-at: <strong>Rs. ${origPrice.toLocaleString()}</strong></span>
+          </div>
+        `;
+      }
+    }
+
+    function onDealDiscountPctInput() {
+      const orig = parseFloat(document.getElementById('deal_originalPrice').value) || 0;
+      const pct = parseFloat(document.getElementById('deal_discountPct').value) || 0;
+      if (orig > 0) {
+        const calculatedPrice = Math.max(1, Math.round(orig * (1 - pct / 100)));
+        document.getElementById('deal_price').value = calculatedPrice;
+      }
+    }
+
+    function onDealPriceInput() {
+      const orig = parseFloat(document.getElementById('deal_originalPrice').value) || 0;
+      const price = parseFloat(document.getElementById('deal_price').value) || 0;
+      if (orig > 0 && price > 0) {
+        const calculatedPct = orig > price ? Math.round(((orig - price) / orig) * 100) : 0;
+        document.getElementById('deal_discountPct').value = calculatedPct;
+      }
+    }
+
+    async function handleDealSave(e) {
+      e.preventDefault();
+      const id = document.getElementById('deal_id').value;
+      const productId = document.getElementById('deal_productId').value;
+      const title = document.getElementById('deal_title').value.trim();
+      const badge = document.getElementById('deal_badge').value.trim();
+      const dealPrice = parseFloat(document.getElementById('deal_price').value);
+      const originalPrice = parseFloat(document.getElementById('deal_originalPrice').value);
+      const discountPercentage = parseFloat(document.getElementById('deal_discountPct').value);
+      
+      const startVal = document.getElementById('deal_startDateTime').value;
+      const endVal = document.getElementById('deal_endDateTime').value;
+      const startDateTime = startVal ? (startVal.includes('+') ? startVal : startVal + ':00+05:00') : new Date().toISOString();
+      const endDateTime = endVal ? (endVal.includes('+') ? endVal : endVal + ':00+05:00') : new Date(Date.now() + 7 * 86400000).toISOString();
+      const active = document.getElementById('deal_active').checked;
+
+      const payload = {
+        id,
+        productId,
+        title,
+        badge,
+        dealPrice,
+        originalPrice,
+        discountPercentage,
+        startDateTime,
+        endDateTime,
+        active
+      };
+
+      try {
+        const res = await fetch('/api/deals/save', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          closeDealModal();
+          await loadDeals();
+          reloadPreviewIframe();
+        } else {
+          alert('Save failed: ' + (data.error || 'Server error'));
+        }
+      } catch (err) {
+        alert('Save error: ' + err.message);
+      }
+    }
+
+    // ===============================================================
+    // UNIVERSAL LOCAL FILE UPLOAD HANDLERS
+    // ===============================================================
+    function triggerProductImageUpload() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async () => {
+        const file = input.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async () => {
+          try {
+            const res = await fetch('/api/media/upload', {
+              method: 'POST',
+              headers: API_HEADERS,
+              body: JSON.stringify({
+                filename: file.name,
+                data: reader.result,
+                altText: file.name.replace(/\.[^/.]+$/, ''),
+                subDir: 'products'
+              })
+            });
+            const data = await res.json();
+            if (data.success) {
+              const pImagesEl = document.getElementById('p_images');
+              const currentVal = pImagesEl.value.trim();
+              pImagesEl.value = currentVal ? `${currentVal}\n${data.url}` : data.url;
+              renderProductThumbnailsPreview();
+            } else {
+              alert('Upload failed: ' + data.error);
+            }
+          } catch (err) {
+            alert('Upload error: ' + err.message);
+          }
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
+    }
+
+    function renderProductThumbnailsPreview() {
+      const container = document.getElementById('p_images_thumbnails');
+      if (!container) return;
+      const text = document.getElementById('p_images').value;
+      const urls = text.split('\n').map(s => s.trim()).filter(Boolean);
+      container.innerHTML = urls.map(u => `
+        <div class="relative group">
+          <img src="${u}" class="w-14 h-14 rounded-xl object-cover bg-slate-100 border border-slate-200">
         </div>
       `).join('');
+    }
+
+    function uploadImageForHeroSlide(slideIdx) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async () => {
+        const file = input.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async () => {
+          try {
+            const res = await fetch('/api/media/upload', {
+              method: 'POST',
+              headers: API_HEADERS,
+              body: JSON.stringify({
+                filename: file.name,
+                data: reader.result,
+                altText: file.name.replace(/\.[^/.]+$/, ''),
+                subDir: 'hero'
+              })
+            });
+            const data = await res.json();
+            if (data.success) {
+              updateHeroSlideField(slideIdx, 'image', data.url);
+              renderSectionSettings();
+              syncDraftToPreview();
+            } else {
+              alert('Upload failed: ' + data.error);
+            }
+          } catch (err) {
+            alert('Upload error: ' + err.message);
+          }
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
+    }
+
+    // ===============================================================
+    // AI GRAPHIC DESIGNER STUDIO LOGIC
+    // ===============================================================
+    let aiRawFile = null;
+    let aiRawImageBase64 = null;
+    let lastAiGeneratedResult = null;
+
+    function handleAiFileSelect(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      aiRawFile = file;
+      const reader = new FileReader();
+      reader.onload = () => {
+        aiRawImageBase64 = reader.result;
+        document.getElementById('aiRawPreviewImg').src = reader.result;
+        document.getElementById('aiRawFilename').innerText = file.name;
+        document.getElementById('aiRawSize').innerText = Math.round(file.size / 1024) + ' KB';
+        document.getElementById('aiRawPreviewContainer').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function executeAiDesign() {
+      if (!aiRawImageBase64) {
+        alert('Please select a raw image first.');
+        return;
+      }
+
+      const targetSection = document.getElementById('aiTargetSection').value;
+      const styleTheme = document.getElementById('aiStyleTheme').value;
+      const btn = document.getElementById('aiGenerateBtn');
+      const originalText = btn.innerHTML;
+
+      btn.disabled = true;
+      btn.innerHTML = `
+        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+        <span>Compositing Luxury Studio Visual...</span>
+      `;
+
+      try {
+        const res = await fetch('/api/ai/design-image', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({
+            image: aiRawImageBase64,
+            targetSection,
+            styleTheme,
+            filename: aiRawFile ? aiRawFile.name.replace(/\.[^/.]+$/, '') : 'calenvee-visual',
+            altText: 'Calenvee Luxury Product Staging'
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          lastAiGeneratedResult = data;
+          document.getElementById('aiResultImg').src = data.url;
+          document.getElementById('aiResultDims').innerText = `${data.width} × ${data.height} (${data.aspect})`;
+          document.getElementById('aiResultSize').innerText = `${data.sizeKb} KB`;
+          
+          document.getElementById('aiResultEmpty').classList.add('hidden');
+          document.getElementById('aiResultActive').classList.remove('hidden');
+          document.getElementById('aiResultBadge').classList.remove('hidden');
+          document.getElementById('aiApplyActions').classList.remove('hidden');
+        } else {
+          alert('Designer Agent error: ' + (data.error || 'Composition failed'));
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    }
+
+    async function applyAiGraphic(target) {
+      if (!lastAiGeneratedResult) return;
+
+      try {
+        const res = await fetch('/api/ai/design-image', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({
+            image: aiRawImageBase64,
+            targetSection: lastAiGeneratedResult.targetSection,
+            styleTheme: lastAiGeneratedResult.styleTheme,
+            filename: 'applied-visual',
+            applyTo: target
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(`✓ Successfully applied dynamic visual to ${target === 'hero' ? 'Hero Banner' : 'Deal of the Day'}!`);
+          reloadPreviewIframe();
+        } else {
+          alert('Apply error: ' + data.error);
+        }
+      } catch (err) {
+        alert('Apply error: ' + err.message);
+      }
     }
 
     // ===============================================================

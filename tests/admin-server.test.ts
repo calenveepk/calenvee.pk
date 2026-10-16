@@ -61,6 +61,47 @@ describe('Admin Server & CMS Core Modules', () => {
       cmsStorage.writeJsonFileAtomic(registryFile, reg);
     }
   });
+
+  it('graphic designer AI agent composites raw images to exact section specifications', async () => {
+    const graphicDesigner = require('../scripts/graphic-designer.cjs');
+    expect(graphicDesigner.SECTION_SPECS.hero).toBeDefined();
+    expect(graphicDesigner.SECTION_SPECS['deal-of-the-day']).toBeDefined();
+
+    // 1x1 transparent PNG
+    const pngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+    
+    // Generate Hero Visual (1920x800)
+    const heroResult = await graphicDesigner.designSectionGraphic({
+      image: pngBase64,
+      targetSection: 'hero',
+      styleTheme: 'luxury-studio',
+      filename: 'test-unit-hero'
+    });
+
+    expect(heroResult.success).toBe(true);
+    expect(heroResult.width).toBe(1920);
+    expect(heroResult.height).toBe(800);
+    expect(heroResult.aspect).toBe('2.4:1');
+    expect(heroResult.url).toContain('/hero/');
+    expect(fs.existsSync(heroResult.path)).toBe(true);
+    fs.unlinkSync(heroResult.path);
+
+    // Generate Deal of the Day Visual (800x800)
+    const dealResult = await graphicDesigner.designSectionGraphic({
+      image: pngBase64,
+      targetSection: 'deal-of-the-day',
+      styleTheme: 'warm-terracotta',
+      filename: 'test-unit-deal'
+    });
+
+    expect(dealResult.success).toBe(true);
+    expect(dealResult.width).toBe(800);
+    expect(dealResult.height).toBe(800);
+    expect(dealResult.aspect).toBe('1:1');
+    expect(dealResult.url).toContain('/products/');
+    expect(fs.existsSync(dealResult.path)).toBe(true);
+    fs.unlinkSync(dealResult.path);
+  });
 });
 
 
