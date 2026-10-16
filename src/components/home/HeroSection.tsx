@@ -74,14 +74,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ settings }) => {
       onTouchEnd={() => setIsPaused(false)}
     >
       
-      {/* 1. Full-Bleed Integrated Product Visuals (Narrow 8% edge feathering - NO cloudy white shading or haze) */}
-      <div
-        className="absolute top-0 right-0 bottom-0 w-[52%] sm:w-[52%] lg:w-[55%] h-full overflow-hidden pointer-events-none z-0"
-        style={{
-          WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.2) 2%, rgba(0,0,0,0.8) 5%, black 8%)',
-          maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.2) 2%, rgba(0,0,0,0.8) 5%, black 8%)'
-        }}
-      >
+      {/* 1. Full-Bleed Integrated Product Visuals (Pure background visual, no gradient mask or shading) */}
+      <div className="absolute top-0 right-0 bottom-0 w-[50%] sm:w-[52%] lg:w-[55%] h-full overflow-hidden pointer-events-none z-0">
         {slides.map((slide, idx) => (
           <img
             key={slide.id || idx}
@@ -108,18 +102,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ settings }) => {
               <span>{activeSlide.kicker}</span>
             </div>
 
-            {/* Main Headline & Description with Subtle Text Shading */}
-            <h1
-              className="text-base sm:text-3xl lg:text-4xl font-black text-[#0B132B] tracking-tight leading-[1.15]"
-              style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.05)' }}
-            >
+            {/* Main Headline & Description */}
+            <h1 className="text-base sm:text-3xl lg:text-4xl font-black text-[#0B132B] tracking-tight leading-[1.15]">
               {activeSlide.headlinePrefix}<br />
               <span className="text-[#F97316]">{activeSlide.headlineHighlight}</span>
             </h1>
-            <p
-              className="text-[10px] sm:text-xs lg:text-sm text-gray-600 font-normal leading-relaxed line-clamp-3 sm:line-clamp-none"
-              style={{ textShadow: '0 1px 1px rgba(0, 0, 0, 0.03)' }}
-            >
+            <p className="text-[10px] sm:text-xs lg:text-sm text-gray-600 font-normal leading-relaxed line-clamp-3 sm:line-clamp-none">
               {activeSlide.subtitle}
             </p>
           </div>
