@@ -47,15 +47,21 @@ async function ensureViteRunning() {
   }
 
   console.log('[Storefront Preview] 🚀 Auto-starting Vite storefront preview server on http://localhost:5173 ...');
-  const isWindows = process.platform === 'win32';
-  const npmCmd = isWindows ? 'npm.cmd' : 'npm';
+  const viteBin = path.join(ROOT_DIR, 'node_modules', 'vite', 'bin', 'vite.js');
 
   try {
-    viteProcess = spawn(npmCmd, ['run', 'dev'], {
-      cwd: ROOT_DIR,
-      stdio: 'ignore',
-      detached: false
-    });
+    if (fs.existsSync(viteBin)) {
+      viteProcess = spawn(process.execPath, [viteBin], {
+        cwd: ROOT_DIR,
+        stdio: 'ignore',
+        detached: false
+      });
+    } else {
+      const isWindows = process.platform === 'win32';
+      viteProcess = isWindows
+        ? spawn('cmd.exe', ['/c', 'npm', 'run', 'dev'], { cwd: ROOT_DIR, stdio: 'ignore' })
+        : spawn('npm', ['run', 'dev'], { cwd: ROOT_DIR, stdio: 'ignore' });
+    }
 
     viteProcess.on('error', (err) => {
       console.warn('[Storefront Preview] Note on Vite process:', err.message);
