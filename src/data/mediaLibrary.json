@@ -16,5 +16,23 @@
     "height": 1,
     "sizeKb": 0,
     "thumbUrl": "/products/1792126069286_test_dot_thumb.webp"
+  },
+  "/products/1792126417771_test_dot.webp": {
+    "altText": "Test Dot Image",
+    "uploadedAt": "2026-10-16T04:53:37.784Z",
+    "originalName": "test_dot.png",
+    "width": 1,
+    "height": 1,
+    "sizeKb": 0,
+    "thumbUrl": "/products/1792126417771_test_dot_thumb.webp"
+  },
+  "/products/1792126800174_test_dot.webp": {
+    "altText": "Test Dot Image",
+    "uploadedAt": "2026-10-16T05:00:00.202Z",
+    "originalName": "test_dot.png",
+    "width": 1,
+    "height": 1,
+    "sizeKb": 0,
+    "thumbUrl": "/products/1792126800174_test_dot_thumb.webp"
   }
 }

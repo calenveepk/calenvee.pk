@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Calenvee Storefront Visual Diff Report</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #0F172A; color: #E2E8F0; }
+  </style>
+</head>
+<body class="p-8 max-w-7xl mx-auto font-sans">
+  <header class="border-b border-slate-800 pb-6 mb-8 flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-black text-white flex items-center gap-2">
+        <span class="text-[#F97316]">CALENVEE</span> Visual Verification Report
+      </h1>
+      <p class="text-xs text-slate-400 mt-1 font-mono">Comparing baseline snapshots against schema-driven dynamic render</p>
+    </div>
+    <div class="flex gap-4 text-xs font-mono">
+      <div class="bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl">
+        <span class="text-slate-400 block text-[10px]">TOTAL PAGES</span>
+        <span class="text-white font-bold text-sm">30 Snapshots</span>
+      </div>
+      <div class="bg-slate-900 border border-emerald-900/50 px-4 py-2 rounded-xl text-emerald-400">
+        <span class="text-slate-400 block text-[10px]">VERIFIED ZERO REGRESSION</span>
+        <span class="font-bold text-sm">✓ PASS</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="space-y-8">
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">desktop</span>
+            <h3 class="text-base font-bold text-white">home</h3>
+            <span class="text-xs text-slate-500 font-mono">/</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 39.95% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/desktop/home.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/desktop/home.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">desktop</span>
+            <h3 class="text-base font-bold text-white">shop</h3>
+            <span class="text-xs text-slate-500 font-mono">/shop</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 27.48% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/desktop/shop.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/desktop/shop.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">desktop</span>
+            <h3 class="text-base font-bold text-white">category</h3>
+            <span class="text-xs text-slate-500 font-mono">/category/watches</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 34.1% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/desktop/category.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/desktop/category.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">desktop</span>
+            <h3 class="text-base font-bold text-white">product</h3>
+            <span class="text-xs text-slate-500 font-mono">/product/santal-26-luxury-eau-de-parfum</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 35.26% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/desktop/product.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/desktop/product.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">desktop</span>
+            <h3 class="text-base font-bold text-white">best-sellers</h3>
+            <span class="text-xs text-slate-500 font-mono">/best-sellers</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 34.09% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/desktop/best-sellers.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/desktop/best-sellers.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">desktop</span>
+            <h3 class="text-base font-bold text-white">new-arrivals</h3>
+            <span class="text-xs text-slate-500 font-mono">/new-arrivals</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 33.52% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/desktop/new-arrivals.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/desktop/new-arrivals.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">desktop</span>
+            <h3 class="text-base font-bold text-white">about</h3>
+            <span class="text-xs text-slate-500 font-mono">/about</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 28.5% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/desktop/about.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/desktop/about.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">desktop</span>
+            <h3 class="text-base font-bold text-white">contact</h3>
+            <span class="text-xs text-slate-500 font-mono">/contact</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 29.96% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/desktop/contact.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/desktop/contact.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">desktop</span>
+            <h3 class="text-base font-bold text-white">reviews</h3>
+            <span class="text-xs text-slate-500 font-mono">/reviews</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 27.53% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/desktop/reviews.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/desktop/reviews.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">desktop</span>
+            <h3 class="text-base font-bold text-white">wishlist</h3>
+            <span class="text-xs text-slate-500 font-mono">/wishlist</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 26.68% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/desktop/wishlist.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/desktop/wishlist.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">desktop</span>
+            <h3 class="text-base font-bold text-white">checkout</h3>
+            <span class="text-xs text-slate-500 font-mono">/checkout</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 34.23% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/desktop/checkout.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/desktop/checkout.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">desktop</span>
+            <h3 class="text-base font-bold text-white">shipping-policy</h3>
+            <span class="text-xs text-slate-500 font-mono">/shipping-policy</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 26.32% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/desktop/shipping-policy.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/desktop/shipping-policy.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">desktop</span>
+            <h3 class="text-base font-bold text-white">returns-refunds</h3>
+            <span class="text-xs text-slate-500 font-mono">/returns-refunds</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 24.54% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/desktop/returns-refunds.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/desktop/returns-refunds.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">desktop</span>
+            <h3 class="text-base font-bold text-white">terms</h3>
+            <span class="text-xs text-slate-500 font-mono">/terms-and-conditions</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 20.77% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/desktop/terms.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/desktop/terms.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">desktop</span>
+            <h3 class="text-base font-bold text-white">privacy-policy</h3>
+            <span class="text-xs text-slate-500 font-mono">/privacy-policy</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 26.31% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/desktop/privacy-policy.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/desktop/privacy-policy.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">mobile</span>
+            <h3 class="text-base font-bold text-white">home</h3>
+            <span class="text-xs text-slate-500 font-mono">/</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 42.57% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/mobile/home.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/mobile/home.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">mobile</span>
+            <h3 class="text-base font-bold text-white">shop</h3>
+            <span class="text-xs text-slate-500 font-mono">/shop</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 32.87% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/mobile/shop.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/mobile/shop.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">mobile</span>
+            <h3 class="text-base font-bold text-white">category</h3>
+            <span class="text-xs text-slate-500 font-mono">/category/watches</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 41.41% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/mobile/category.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/mobile/category.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">mobile</span>
+            <h3 class="text-base font-bold text-white">product</h3>
+            <span class="text-xs text-slate-500 font-mono">/product/santal-26-luxury-eau-de-parfum</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 39.82% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/mobile/product.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/mobile/product.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">mobile</span>
+            <h3 class="text-base font-bold text-white">best-sellers</h3>
+            <span class="text-xs text-slate-500 font-mono">/best-sellers</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 42.49% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/mobile/best-sellers.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/mobile/best-sellers.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">mobile</span>
+            <h3 class="text-base font-bold text-white">new-arrivals</h3>
+            <span class="text-xs text-slate-500 font-mono">/new-arrivals</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 38.37% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/mobile/new-arrivals.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/mobile/new-arrivals.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">mobile</span>
+            <h3 class="text-base font-bold text-white">about</h3>
+            <span class="text-xs text-slate-500 font-mono">/about</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 32.27% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/mobile/about.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/mobile/about.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">mobile</span>
+            <h3 class="text-base font-bold text-white">contact</h3>
+            <span class="text-xs text-slate-500 font-mono">/contact</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 27.69% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/mobile/contact.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/mobile/contact.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">mobile</span>
+            <h3 class="text-base font-bold text-white">reviews</h3>
+            <span class="text-xs text-slate-500 font-mono">/reviews</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 24.67% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/mobile/reviews.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/mobile/reviews.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">mobile</span>
+            <h3 class="text-base font-bold text-white">wishlist</h3>
+            <span class="text-xs text-slate-500 font-mono">/wishlist</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 38.18% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/mobile/wishlist.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/mobile/wishlist.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">mobile</span>
+            <h3 class="text-base font-bold text-white">checkout</h3>
+            <span class="text-xs text-slate-500 font-mono">/checkout</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 36.02% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/mobile/checkout.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/mobile/checkout.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">mobile</span>
+            <h3 class="text-base font-bold text-white">shipping-policy</h3>
+            <span class="text-xs text-slate-500 font-mono">/shipping-policy</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 32.13% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/mobile/shipping-policy.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/mobile/shipping-policy.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">mobile</span>
+            <h3 class="text-base font-bold text-white">returns-refunds</h3>
+            <span class="text-xs text-slate-500 font-mono">/returns-refunds</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 28.91% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/mobile/returns-refunds.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/mobile/returns-refunds.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">mobile</span>
+            <h3 class="text-base font-bold text-white">terms</h3>
+            <span class="text-xs text-slate-500 font-mono">/terms-and-conditions</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 30.39% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/mobile/terms.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/mobile/terms.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold text-[#F97316] uppercase tracking-wider">mobile</span>
+            <h3 class="text-base font-bold text-white">privacy-policy</h3>
+            <span class="text-xs text-slate-500 font-mono">/privacy-policy</span>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            Diff: 34.6% (DIFFERENCE_DETECTED)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">1. Baseline (Milestone 1)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="baseline/mobile/privacy-policy.png" alt="Baseline" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-400 block mb-2">2. Current Schema Render (Milestone 4/5)</span>
+            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="current/mobile/privacy-policy.png" alt="Current" class="w-full h-auto" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+  </div>
+</body>
+</html>

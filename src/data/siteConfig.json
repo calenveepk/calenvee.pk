@@ -91,13 +91,34 @@
       "logoUrl": "/logo.png",
       "faviconUrl": "/favicon.png",
       "menuItems": [
-        { "label": "Shop All", "url": "/shop" },
-        { "label": "Watches", "url": "/category/watches" },
-        { "label": "Jewelry", "url": "/category/jewelry" },
-        { "label": "Handbags", "url": "/category/women" },
-        { "label": "Sunglasses", "url": "/category/sunglasses" },
-        { "label": "Fragrances", "url": "/category/beauty" },
-        { "label": "Tech Essentials", "url": "/category/electronics" }
+        {
+          "label": "Shop All",
+          "url": "/shop"
+        },
+        {
+          "label": "Watches",
+          "url": "/category/watches"
+        },
+        {
+          "label": "Jewelry",
+          "url": "/category/jewelry"
+        },
+        {
+          "label": "Handbags",
+          "url": "/category/women"
+        },
+        {
+          "label": "Sunglasses",
+          "url": "/category/sunglasses"
+        },
+        {
+          "label": "Fragrances",
+          "url": "/category/beauty"
+        },
+        {
+          "label": "Tech Essentials",
+          "url": "/category/electronics"
+        }
       ]
     },
     "footer": {
@@ -105,30 +126,77 @@
         {
           "title": "SHOPPING & COLLECTIONS",
           "links": [
-            { "label": "Watches & Timepieces", "url": "/category/watches" },
-            { "label": "Waterproof Jewelry", "url": "/category/jewelry" },
-            { "label": "Handbags & Totes", "url": "/category/women" },
-            { "label": "Designer Sunglasses", "url": "/category/sunglasses" },
-            { "label": "French Fragrances", "url": "/category/beauty" },
-            { "label": "Tech Everyday Carry", "url": "/category/electronics" },
-            { "label": "Browse All Products", "url": "/shop" }
+            {
+              "label": "Watches & Timepieces",
+              "url": "/category/watches"
+            },
+            {
+              "label": "Waterproof Jewelry",
+              "url": "/category/jewelry"
+            },
+            {
+              "label": "Handbags & Totes",
+              "url": "/category/women"
+            },
+            {
+              "label": "Designer Sunglasses",
+              "url": "/category/sunglasses"
+            },
+            {
+              "label": "French Fragrances",
+              "url": "/category/beauty"
+            },
+            {
+              "label": "Tech Everyday Carry",
+              "url": "/category/electronics"
+            },
+            {
+              "label": "Browse All Products",
+              "url": "/shop"
+            }
           ]
         },
         {
           "title": "CUSTOMER SERVICES",
           "links": [
-            { "label": "Track Your Parcel", "url": "/track-order" },
-            { "label": "Shipping & Delivery Policy", "url": "/shipping-policy" },
-            { "label": "7-Day Replacement Policy", "url": "/returns" },
-            { "label": "Terms of Service", "url": "/terms" },
-            { "label": "Verified Client Reviews", "url": "/reviews" },
-            { "label": "Privacy Policy", "url": "/privacy" },
-            { "label": "Contact & WhatsApp", "url": "/contact" }
+            {
+              "label": "Track Your Parcel",
+              "url": "/track-order"
+            },
+            {
+              "label": "Shipping & Delivery Policy",
+              "url": "/shipping-policy"
+            },
+            {
+              "label": "7-Day Replacement Policy",
+              "url": "/returns"
+            },
+            {
+              "label": "Terms of Service",
+              "url": "/terms"
+            },
+            {
+              "label": "Verified Client Reviews",
+              "url": "/reviews"
+            },
+            {
+              "label": "Privacy Policy",
+              "url": "/privacy"
+            },
+            {
+              "label": "Contact & WhatsApp",
+              "url": "/contact"
+            }
           ]
         }
       ],
       "copyright": "© 2026 Calenvee.pk. All rights reserved. Registered E-Commerce Store Pakistan.",
-      "paymentIcons": ["Cash on Delivery", "JazzCash", "EasyPaisa", "Bank Transfer"]
+      "paymentIcons": [
+        "Cash on Delivery",
+        "JazzCash",
+        "EasyPaisa",
+        "Bank Transfer"
+      ]
     },
     "seo": {
       "siteTitle": "Calenvee.pk — Quality, Style, Everyday.",
@@ -193,9 +261,18 @@
               }
             ],
             "trustPoints": [
-              { "text": "Cash on Delivery", "icon": "ShieldCheck" },
-              { "text": "Premium Quality", "icon": "Award" },
-              { "text": "Nationwide Shipping", "icon": "Truck" }
+              {
+                "text": "Cash on Delivery",
+                "icon": "ShieldCheck"
+              },
+              {
+                "text": "Premium Quality",
+                "icon": "Award"
+              },
+              {
+                "text": "Nationwide Shipping",
+                "icon": "Truck"
+              }
             ]
           },
           "blocks": []
@@ -280,10 +357,30 @@
             "title": "OUR SERVICE PROMISE",
             "subtitle": "Honest service, reliable delivery, and customer care you can depend on.",
             "badges": [
-              { "id": "b1", "title": "Cash on Delivery", "subtitle": "Pay at your doorstep anywhere in Pakistan", "icon": "Truck" },
-              { "id": "b2", "title": "Quality Inspected", "subtitle": "Every parcel is hand-checked before packing", "icon": "ShieldCheck" },
-              { "id": "b3", "title": "7-Day Exchange", "subtitle": "Hassle-free replacement policy for adjustments", "icon": "RotateCcw" },
-              { "id": "b4", "title": "Direct WhatsApp Support", "subtitle": "Prompt assistance for order placement and questions", "icon": "MessageSquare" }
+              {
+                "id": "b1",
+                "title": "Cash on Delivery",
+                "subtitle": "Pay at your doorstep anywhere in Pakistan",
+                "icon": "Truck"
+              },
+              {
+                "id": "b2",
+                "title": "Quality Inspected",
+                "subtitle": "Every parcel is hand-checked before packing",
+                "icon": "ShieldCheck"
+              },
+              {
+                "id": "b3",
+                "title": "7-Day Exchange",
+                "subtitle": "Hassle-free replacement policy for adjustments",
+                "icon": "RotateCcw"
+              },
+              {
+                "id": "b4",
+                "title": "Direct WhatsApp Support",
+                "subtitle": "Prompt assistance for order placement and questions",
+                "icon": "MessageSquare"
+              }
             ]
           },
           "blocks": []
@@ -429,4 +526,3 @@
     }
   }
 }
-

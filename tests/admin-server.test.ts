@@ -55,3 +55,4 @@ describe('Admin Server & CMS Core Modules', () => {
     if (fs.existsSync(fullThumb)) fs.unlinkSync(fullThumb);
   });
 });
+

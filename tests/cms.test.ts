@@ -110,3 +110,4 @@ describe('CMS Storage & Safety Engine', () => {
     expect(diff.changes.some(c => c.includes('sec-2'))).toBe(true);
   });
 });
+
