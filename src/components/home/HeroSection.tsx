@@ -74,14 +74,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ settings }) => {
       onTouchEnd={() => setIsPaused(false)}
     >
       
-      {/* 1. Full-Bleed Integrated Product Visuals (Right-Anchored in Dedicated Container with Soft Edge Shading, NO Gradients) */}
-      <div className="absolute top-0 right-0 bottom-0 w-[45%] sm:w-[48%] lg:w-[50%] h-full overflow-hidden pointer-events-none z-0 shadow-[-12px_0_24px_-8px_rgba(0,0,0,0.06)]">
+      {/* 1. Full-Bleed Integrated Product Visuals (Seamless edge feathering into background canvas - NO harsh box line or dividing shadow) */}
+      <div
+        className="absolute top-0 right-0 bottom-0 w-[50%] sm:w-[50%] lg:w-[52%] h-full overflow-hidden pointer-events-none z-0"
+        style={{
+          WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.15) 6%, rgba(0,0,0,0.7) 18%, black 30%)',
+          maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.15) 6%, rgba(0,0,0,0.7) 18%, black 30%)'
+        }}
+      >
         {slides.map((slide, idx) => (
           <img
             key={slide.id || idx}
             src={slide.image}
             alt={slide.headlineHighlight || `Calenvee Slide ${idx + 1}`}
-            className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-700 ease-in-out ${
+            className={`absolute inset-0 w-full h-full object-cover object-right sm:object-center transition-all duration-700 ease-in-out ${
               idx === currentIndex
                 ? 'opacity-100 scale-100'
                 : 'opacity-0 scale-105 pointer-events-none'
