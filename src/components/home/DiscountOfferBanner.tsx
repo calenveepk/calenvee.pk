@@ -229,7 +229,7 @@ export const DiscountOfferBanner: React.FC<DiscountOfferBannerProps> = ({ settin
               >
                 <div className="absolute inset-0 rounded-2xl bg-orange-200/30 transform scale-95 pointer-events-none transition-transform duration-500 group-hover:scale-100" />
                 <img
-                  src={dealProduct.images[0] || '/hero/hero-watch.png'}
+                  src={activeDeal.image || dealProduct.images[0] || '/hero/hero-watch.png'}
                   alt={dealProduct.name}
                   className="relative z-10 w-full h-52 sm:h-64 object-cover rounded-2xl border border-orange-200/80 shadow-md transform transition-transform duration-500 group-hover:scale-105"
                 />
