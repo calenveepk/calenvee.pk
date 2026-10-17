@@ -126,5 +126,7 @@ export interface Deal {
   endDateTime: string;   // ISO 8601 with +05:00, e.g. 2026-10-31T23:59:59+05:00
   active: boolean;
   stockLimit?: number;
+  image?: string;
+  originalPrice?: number;
 }
 
