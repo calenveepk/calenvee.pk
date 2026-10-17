@@ -225,19 +225,6 @@
             "autoIntervalSeconds": 5,
             "slides": [
               {
-                "id": "slide-1",
-                "kicker": "QUALITY. STYLE. EVERYDAY.",
-                "headlinePrefix": "Everything You Love,",
-                "headlineHighlight": "All in One Place.",
-                "subtitle": "Shop top-quality products across watches, jewelry, handbags, sunglasses, and fragrances with unbeatable prices and a seamless Cash on Delivery experience nationwide.",
-                "ctaText": "Shop Now",
-                "ctaLink": "/shop",
-                "image": "/products/1792095143426-luxury_accessories_still_life_with_backpack.png",
-                "imageAlt": "Calenvee Lifestyle Essentials and Accessories",
-                "secondaryCtaText": "View Collections",
-                "secondaryCtaLink": "/shop"
-              },
-              {
                 "id": "slide-2",
                 "kicker": "TIMEPIECES & CHRONOGRAPHS",
                 "headlinePrefix": "Signature Watches,",
@@ -247,17 +234,6 @@
                 "ctaLink": "/category/watches",
                 "image": "/products/1792095128145-premium_orange-accent_watch_advertisement.png",
                 "imageAlt": "Calenvee Signature Watch Collection"
-              },
-              {
-                "id": "slide-3",
-                "kicker": "CURATED LUXURY DROP",
-                "headlinePrefix": "Contemporary Accents,",
-                "headlineHighlight": "Defined by Elegance.",
-                "subtitle": "Elevate your daily presence with anti-tarnish waterproof jewelry, designer accessories, and artisan everyday essentials.",
-                "ctaText": "View Collection",
-                "ctaLink": "/category/jewelry",
-                "image": "/hero/hero_podium_collection.jpg",
-                "imageAlt": "Calenvee Curated Jewelry and Accessories Collection"
               }
             ],
             "trustPoints": [

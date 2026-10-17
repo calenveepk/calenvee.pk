@@ -1604,27 +1604,228 @@
       `;
     }
 
+    function formatIsoToDatetimeLocal(isoStr) {
+      if (!isoStr) return '';
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return '';
+      const pad = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function formatDealRemainingTime(isoStr) {
+      if (!isoStr) return 'No timer set';
+      const endMs = Date.parse(isoStr);
+      if (isNaN(endMs)) return 'Invalid date';
+      const diffMs = endMs - Date.now();
+      if (diffMs <= 0) return 'Expired (Section hidden)';
+      const days = Math.floor(diffMs / 86400000);
+      const hours = Math.floor((diffMs % 86400000) / 3600000);
+      const minutes = Math.floor((diffMs % 3600000) / 60000);
+      return `${days > 0 ? days + 'd ' : ''}${hours}h ${minutes}m remaining`;
+    }
+
+    function onDealSelectionChanged(dealId) {
+      updateSecSetting('dealId', dealId);
+      const targetDeal = dealsList.find(d => d.id === dealId);
+      if (targetDeal) {
+        if (targetDeal.discountPercentage) {
+          updateSecSetting('discountPercentage', targetDeal.discountPercentage);
+        }
+        if (targetDeal.endDateTime) {
+          updateSecSetting('endDateTime', targetDeal.endDateTime);
+        }
+        if (targetDeal.dealPrice) {
+          updateSecSetting('dealPrice', targetDeal.dealPrice);
+        }
+      }
+      const page = draftConfig?.pages?.[selectedPageId];
+      const sec = page?.sections?.find(s => s.id === selectedSectionId);
+      if (sec) {
+        const form = document.getElementById('section-settings-form');
+        if (form) form.innerHTML = renderDealOfTheDaySettings(sec);
+      }
+    }
+
+    async function onDealDiscountChanged(pct) {
+      pct = Math.max(1, Math.min(95, parseInt(pct) || 35));
+      const rangeEl = document.getElementById('dealDiscountRange');
+      const inputEl = document.getElementById('dealDiscountInput');
+      const badgeEl = document.getElementById('dealPctBadge');
+      if (rangeEl) rangeEl.value = pct;
+      if (inputEl) inputEl.value = pct;
+      if (badgeEl) badgeEl.innerText = pct;
+
+      updateSecSetting('discountPercentage', pct);
+
+      const page = draftConfig?.pages?.[selectedPageId];
+      const sec = page?.sections?.find(s => s.id === selectedSectionId);
+      const targetDeal = dealsList.find(d => d.id === (sec?.settings?.dealId || 'deal-obsidian-chrono')) || dealsList[0];
+      const prod = productsList.find(p => p.id === (targetDeal?.productId || 'cv-watch-01'));
+      const origPrice = prod?.originalPrice || Math.round((prod?.price || 5999) * 1.5);
+      const newDealPrice = Math.round(origPrice * (1 - pct / 100));
+
+      updateSecSetting('dealPrice', newDealPrice);
+
+      const priceEl = document.getElementById('dealCalculatedPrice');
+      if (priceEl) priceEl.innerText = 'Rs. ' + newDealPrice.toLocaleString();
+
+      if (targetDeal) {
+        targetDeal.discountPercentage = pct;
+        targetDeal.dealPrice = newDealPrice;
+        targetDeal.originalPrice = origPrice;
+        try {
+          await fetch('/api/deals/save', {
+            method: 'POST',
+            headers: API_HEADERS,
+            body: JSON.stringify(targetDeal)
+          });
+        } catch (_) {}
+      }
+    }
+
+    async function onDealEndDatetimeChanged(dtLocal) {
+      if (!dtLocal) return;
+      const isoStr = dtLocal.length === 16 ? `${dtLocal}:00+05:00` : dtLocal;
+      updateSecSetting('endDateTime', isoStr);
+
+      const remainingEl = document.getElementById('dealRemainingTime');
+      if (remainingEl) remainingEl.innerText = formatDealRemainingTime(isoStr);
+
+      const page = draftConfig?.pages?.[selectedPageId];
+      const sec = page?.sections?.find(s => s.id === selectedSectionId);
+      const targetDeal = dealsList.find(d => d.id === (sec?.settings?.dealId || 'deal-obsidian-chrono')) || dealsList[0];
+      if (targetDeal) {
+        targetDeal.endDateTime = isoStr;
+        try {
+          await fetch('/api/deals/save', {
+            method: 'POST',
+            headers: API_HEADERS,
+            body: JSON.stringify(targetDeal)
+          });
+        } catch (_) {}
+      }
+    }
+
+    function setDealTimerPreset(hoursToAdd) {
+      const target = new Date(Date.now() + hoursToAdd * 3600000);
+      const pad = n => String(n).padStart(2, '0');
+      const dtLocal = `${target.getFullYear()}-${pad(target.getMonth() + 1)}-${pad(target.getDate())}T${pad(target.getHours())}:${pad(target.getMinutes())}`;
+      const inputEl = document.getElementById('dealEndDatetimeInput');
+      if (inputEl) inputEl.value = dtLocal;
+      onDealEndDatetimeChanged(dtLocal);
+    }
+
+    function setDealTimerEndOfMonth() {
+      const now = new Date();
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+      const pad = n => String(n).padStart(2, '0');
+      const dtLocal = `${end.getFullYear()}-${pad(end.getMonth() + 1)}-${pad(end.getDate())}T23:59`;
+      const inputEl = document.getElementById('dealEndDatetimeInput');
+      if (inputEl) inputEl.value = dtLocal;
+      onDealEndDatetimeChanged(dtLocal);
+    }
+
     function renderDealOfTheDaySettings(sec) {
+      const targetDeal = dealsList.find(d => d.id === (sec.settings.dealId || 'deal-obsidian-chrono')) || dealsList[0] || {};
+      const prod = productsList.find(p => p.id === (targetDeal.productId || 'cv-watch-01')) || {};
+      const origPrice = prod.originalPrice || Math.round((prod.price || 5999) * 1.5);
+      const currentDiscount = sec.settings.discountPercentage !== undefined ? sec.settings.discountPercentage : (targetDeal.discountPercentage || 35);
+      const currentEnd = sec.settings.endDateTime || targetDeal.endDateTime || '2026-10-31T23:59:59+05:00';
+      const calculatedPrice = sec.settings.dealPrice || Math.round(origPrice * (1 - currentDiscount / 100));
+
       return `
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">Target Deal Selection</label>
-          <select onchange="updateSecSetting('dealId', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-semibold">
-            ${dealsList.map(d => `<option value="${d.id}" ${sec.settings.dealId === d.id ? 'selected' : ''}>${d.title} (Rs. ${d.dealPrice})</option>`).join('')}
-          </select>
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">Banner Title</label>
-          <input type="text" value="${sec.settings.title || 'DEAL OF THE DAY'}" oninput="updateSecSetting('title', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">CTA Button Text</label>
-          <input type="text" value="${sec.settings.ctaText || 'CLAIM DEAL NOW'}" oninput="updateSecSetting('ctaText', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
-        </div>
-        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-          <label class="flex items-center justify-between font-bold text-slate-700 cursor-pointer">
-            <span>Auto-Hide Section When Expired</span>
-            <input type="checkbox" ${sec.settings.autoHideWhenExpired !== false ? 'checked' : ''} onchange="updateSecSetting('autoHideWhenExpired', this.checked)" class="w-4 h-4 rounded text-[#F97316]">
-          </label>
+        <div class="space-y-4">
+          <!-- 1. Target Deal Selection -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Target Deal Selection</label>
+            <select onchange="onDealSelectionChanged(this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300 font-semibold">
+              ${dealsList.map(d => `<option value="${d.id}" ${(sec.settings.dealId || 'deal-obsidian-chrono') === d.id ? 'selected' : ''}>${d.title} (Rs. ${d.dealPrice})</option>`).join('')}
+            </select>
+          </div>
+
+          <!-- 2. Interactive % OFF Editor -->
+          <div class="bg-orange-50/70 p-3.5 rounded-xl border border-orange-200 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <label class="block font-bold text-slate-800 text-sm">🔥 Discount (% OFF)</label>
+              <span class="text-xs font-black text-[#EA580C] bg-white px-2 py-0.5 rounded-md border border-orange-300 shadow-xs">
+                <span id="dealPctBadge">${currentDiscount}</span>% OFF
+              </span>
+            </div>
+            <div class="flex items-center gap-3">
+              <input 
+                type="range" 
+                min="5" 
+                max="90" 
+                step="1" 
+                value="${currentDiscount}" 
+                id="dealDiscountRange"
+                oninput="onDealDiscountChanged(parseInt(this.value))" 
+                class="flex-1 accent-[#F97316] cursor-pointer"
+              >
+              <div class="flex items-center gap-1 w-24">
+                <input 
+                  type="number" 
+                  min="1" 
+                  max="95" 
+                  value="${currentDiscount}" 
+                  id="dealDiscountInput"
+                  oninput="onDealDiscountChanged(parseInt(this.value))" 
+                  class="w-full py-1 px-2 rounded-lg border border-orange-300 font-black text-center text-sm"
+                >
+                <span class="font-bold text-slate-600 text-xs">%</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-600 bg-white/80 p-2 rounded-lg border border-orange-100">
+              <span>Original: <strong class="text-slate-800 line-through">Rs. ${origPrice.toLocaleString()}</strong></span>
+              <span>Deal Price: <strong class="text-[#EA580C] font-black text-sm" id="dealCalculatedPrice">Rs. ${calculatedPrice.toLocaleString()}</strong></span>
+            </div>
+          </div>
+
+          <!-- 3. Timer Expire (End Date & Time in Asia/Karachi PKT) -->
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <label class="block font-bold text-slate-800 text-sm">⏳ Deal Expiration (Timer)</label>
+              <span class="text-[10px] font-bold text-slate-500 bg-slate-200/80 px-2 py-0.5 rounded">Asia/Karachi (PKT)</span>
+            </div>
+            <input 
+              type="datetime-local" 
+              value="${formatIsoToDatetimeLocal(currentEnd)}" 
+              id="dealEndDatetimeInput"
+              onchange="onDealEndDatetimeChanged(this.value)" 
+              class="w-full py-2 px-3 rounded-lg border border-slate-300 font-mono text-xs font-semibold"
+            >
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Quick:</span>
+              <button type="button" onclick="setDealTimerPreset(24)" class="text-[10px] font-bold bg-white hover:bg-orange-50 hover:text-[#F97316] border border-slate-200 hover:border-orange-300 px-2 py-0.5 rounded transition">+24h</button>
+              <button type="button" onclick="setDealTimerPreset(72)" class="text-[10px] font-bold bg-white hover:bg-orange-50 hover:text-[#F97316] border border-slate-200 hover:border-orange-300 px-2 py-0.5 rounded transition">+3 Days</button>
+              <button type="button" onclick="setDealTimerPreset(168)" class="text-[10px] font-bold bg-white hover:bg-orange-50 hover:text-[#F97316] border border-slate-200 hover:border-orange-300 px-2 py-0.5 rounded transition">+7 Days</button>
+              <button type="button" onclick="setDealTimerEndOfMonth()" class="text-[10px] font-bold bg-white hover:bg-orange-50 hover:text-[#F97316] border border-slate-200 hover:border-orange-300 px-2 py-0.5 rounded transition">End of Month</button>
+            </div>
+            <div id="dealRemainingBadge" class="text-xs font-semibold text-slate-700 bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1.5 rounded-lg flex items-center justify-between">
+              <span>Status:</span>
+              <strong id="dealRemainingTime">${formatDealRemainingTime(currentEnd)}</strong>
+            </div>
+          </div>
+
+          <!-- 4. Banner Title -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Banner Title</label>
+            <input type="text" value="${sec.settings.title || 'DEAL OF THE DAY'}" oninput="updateSecSetting('title', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+          </div>
+
+          <!-- 5. CTA Button Text -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">CTA Button Text</label>
+            <input type="text" value="${sec.settings.ctaText || 'CLAIM DEAL NOW'}" oninput="updateSecSetting('ctaText', this.value)" class="w-full py-2 px-3 rounded-lg border border-slate-300">
+          </div>
+
+          <!-- 6. Auto-Hide When Expired -->
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <label class="flex items-center justify-between font-bold text-slate-700 cursor-pointer">
+              <span>Auto-Hide Section When Expired</span>
+              <input type="checkbox" ${sec.settings.autoHideWhenExpired !== false ? 'checked' : ''} onchange="updateSecSetting('autoHideWhenExpired', this.checked)" class="w-4 h-4 rounded text-[#F97316]">
+            </label>
+          </div>
         </div>
       `;
     }

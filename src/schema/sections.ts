@@ -98,6 +98,9 @@ export const DealOfTheDaySettingsSchema = z.object({
   subtitle: z.string().default('Limited-time special release with exclusive pricing nationwide.'),
   ctaText: z.string().default('CLAIM DEAL NOW'),
   autoHideWhenExpired: z.boolean().default(true),
+  discountPercentage: z.number().min(1).max(99).optional(),
+  endDateTime: z.string().optional(),
+  dealPrice: z.number().optional(),
 });
 
 // 5. Promotional Banners / Trio

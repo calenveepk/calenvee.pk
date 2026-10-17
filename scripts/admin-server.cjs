@@ -717,7 +717,7 @@ const server = http.createServer(async (req, res) => {
       if (pathname === '/api/n8n/publish' && req.method === 'POST') {
         const timestamp = new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' });
         const commitMsg = `Store automated update via N8N Workflow [${timestamp}]`;
-        exec(`git add -A && git commit -m "${commitMsg}" && git push origin feat/functional-cms`, { cwd: ROOT_DIR }, (err, stdout, stderr) => {
+        exec(`git add -A && git commit -m "${commitMsg}" && git push origin feat/functional-cms && git push origin feat/functional-cms:main`, { cwd: ROOT_DIR }, (err, stdout, stderr) => {
           sendJson(res, 200, { success: !err, commitMessage: commitMsg, output: stdout || stderr });
         });
         return;
@@ -938,14 +938,14 @@ const server = http.createServer(async (req, res) => {
           : `git status`;
 
         exec(commitCmd, { cwd: ROOT_DIR }, (commitErr, commitOut, commitStderr) => {
-          exec('git push origin feat/functional-cms', { cwd: ROOT_DIR }, (pushErr, pushOut, pushStderr) => {
+          exec('git push origin feat/functional-cms && git push origin feat/functional-cms:main', { cwd: ROOT_DIR }, (pushErr, pushOut, pushStderr) => {
             exec('git rev-parse --short HEAD', { cwd: ROOT_DIR }, (revErr, revOut) => {
               const commitHash = (revOut || '').trim() || 'HEAD';
               const fullLog = [
                 `=== LAYER 1: DATA VERIFICATION ===\nFiles modified: ${filesChanged}\n${changes || 'All store data files staged and validated.'}`,
                 `=== LAYER 2: LOCAL GIT COMMIT ===\n${commitOut || ''}\n${commitStderr || ''}`,
-                `=== LAYER 3: GITHUB CLOUD PUSH ===\n${pushOut || pushStderr || 'Pushed cleanly to branch feat/functional-cms'}`,
-                `=== LAYER 4: VERCEL DEPLOYMENT ===\nLive commit ${commitHash} triggered Vercel deployment pipeline for calenvee.pk`
+                `=== LAYER 3: GITHUB CLOUD PUSH ===\n${pushOut || pushStderr || 'Pushed cleanly to branch feat/functional-cms and main'}`,
+                `=== LAYER 4: VERCEL DEPLOYMENT ===\nLive commit ${commitHash} triggered Vercel production deployment on main for calenvee.pk`
               ].join('\n\n');
 
               sendJson(res, 200, {

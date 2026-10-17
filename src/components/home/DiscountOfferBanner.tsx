@@ -16,6 +16,9 @@ export interface DiscountOfferBannerProps {
     subtitle?: string;
     ctaText?: string;
     autoHideWhenExpired?: boolean;
+    discountPercentage?: number;
+    endDateTime?: string;
+    dealPrice?: number;
   };
 }
 
@@ -47,7 +50,8 @@ export const DiscountOfferBanner: React.FC<DiscountOfferBannerProps> = ({ settin
     title: 'Obsidian Chronograph Flash Drop',
     dealId: 'deal-obsidian-chrono',
     productId: 'cv-watch-01',
-    dealPrice: 5999,
+    dealPrice: 3899,
+    discountPercentage: 35,
     startDateTime: '2026-10-15T00:00:00+05:00',
     endDateTime: '2026-10-31T23:59:59+05:00',
     link: '/product/calenvee-obsidian-chrono-edition',
@@ -56,23 +60,34 @@ export const DiscountOfferBanner: React.FC<DiscountOfferBannerProps> = ({ settin
   };
 
   const allDeals = (deals && deals.length > 0 ? deals : (dealsData as Deal[])) || [];
-  const activeDeal = allDeals.find(
-    (d) => (d.id === (dealConfig as any).dealId || d.productId === dealConfig.productId) && isDealActive(d, currentNowMs + clockOffset)
-  ) || (isDealActive(dealConfig as any, currentNowMs + clockOffset) ? (dealConfig as any as Deal) : null);
+  const targetDealId = settings?.dealId || (dealConfig as any).dealId || 'deal-obsidian-chrono';
+  const matchedDeal = allDeals.find(
+    (d) => d.id === targetDealId || d.productId === dealConfig.productId
+  ) || (dealConfig as any as Deal);
+
+  const activeDeal: Deal = {
+    ...matchedDeal,
+    endDateTime: settings?.endDateTime || matchedDeal.endDateTime,
+    discountPercentage: settings?.discountPercentage !== undefined ? settings.discountPercentage : matchedDeal.discountPercentage,
+    dealPrice: settings?.dealPrice !== undefined ? settings.dealPrice : matchedDeal.dealPrice,
+  };
+
+  // Real countdown timer that survives browser reloads & skewed device clocks
+  const endMs = normalizeNowMs(activeDeal.endDateTime);
+  const diffMs = Math.max(0, endMs - (currentNowMs + clockOffset));
 
   // Expired state: Auto-hide section when deal is expired or unconfigured
-  if (!activeDeal) {
-    return null;
+  const isDealExpired = diffMs <= 0;
+  if (!isDealActive(activeDeal, currentNowMs + clockOffset) || isDealExpired) {
+    if (settings?.autoHideWhenExpired !== false) {
+      return null;
+    }
   }
 
   const dealProduct = PRODUCTS.find((p) => p.id === activeDeal.productId) || PRODUCTS[0];
   if (!dealProduct) {
     return null;
   }
-
-  // Real countdown timer that survives browser reloads & skewed device clocks
-  const endMs = normalizeNowMs(activeDeal.endDateTime);
-  const diffMs = Math.max(0, endMs - (currentNowMs + clockOffset));
 
   const hours = Math.floor(diffMs / (1000 * 60 * 60));
   const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
@@ -85,12 +100,18 @@ export const DiscountOfferBanner: React.FC<DiscountOfferBannerProps> = ({ settin
     return () => clearInterval(timer);
   }, []);
 
-  const effectivePrice = activeDeal.dealPrice || dealProduct.price;
   const originalPrice = dealProduct.originalPrice || Math.round(dealProduct.price * 1.5);
-  const discountPercent = Math.max(
-    0,
-    Math.round(((originalPrice - effectivePrice) / originalPrice) * 100)
-  );
+  let discountPercent = activeDeal.discountPercentage;
+  let effectivePrice = activeDeal.dealPrice;
+
+  if (discountPercent !== undefined && discountPercent > 0) {
+    effectivePrice = Math.round(originalPrice * (1 - discountPercent / 100));
+  } else if (effectivePrice && effectivePrice > 0) {
+    discountPercent = Math.max(0, Math.round(((originalPrice - effectivePrice) / originalPrice) * 100));
+  } else {
+    effectivePrice = dealProduct.price;
+    discountPercent = 0;
+  }
 
   const handleQuickAdd = () => {
     addItem(
